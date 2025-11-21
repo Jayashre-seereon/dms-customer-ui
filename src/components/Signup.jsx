@@ -32,7 +32,7 @@ export default function Signup() {
         </div>
 
         {/* Title */}
-        <h2 className="text-xl font-bold text-amber-700"> Create New Account</h2>
+        <h2 className="text-xl font-bold text-amber-700"> Create New Account hello</h2>
         <p className="text-amber-600 mb-6">
           Sign up to your new customer management account
         </p>
