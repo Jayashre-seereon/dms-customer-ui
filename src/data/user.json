@@ -1,0 +1,16 @@
+[
+  {
+    "id": 1,
+    "name": "Jayashree",
+    "email": "admin@example.com",
+    "password": "admin123",
+    "status": "approved"
+  },
+  {
+    "id": 2,
+    "name": "Pending User",
+    "email": "pending@example.com",
+    "password": "pending123",
+    "status": "pending"
+  }
+]
