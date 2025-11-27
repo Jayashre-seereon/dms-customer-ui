@@ -10,6 +10,8 @@ import {
   DatePicker,
   Row,
   Col,
+  Space,
+  Divider,
 } from "antd";
 import {
   SearchOutlined,
@@ -18,6 +20,7 @@ import {
   EyeOutlined,
   EditOutlined,
   FilterOutlined,
+  MinusCircleOutlined,
 } from "@ant-design/icons";
 import dayjs from "dayjs";
 
@@ -26,17 +29,22 @@ const salesContractJSON = {
     {
       key: 1,
       contractDate: "2025-10-01",
-      orderNo:"1",
+      startDate: "2025-10-05",
+      endDate: "2025-10-31",
+      orderNo: "1",
       companyName: "ABC Oils Ltd",
       customer: "Bhubaneswar Market",
-      qty: 2000,
+      // items is now an array (multiple items per contract)
+      items: [
+        { item: "Palm Oil", itemCode:"it23", qty: 2000, uom: "Ltrs", rate: 125, freeQty: 100 },
+      ],
+      // computed totals (you can recompute when saving)
+      totalQty: 2000,
       uom: "Ltrs",
       location: "Warehouse A",
       status: "Approved",
-      freeQty: 100,
-      totalQty: 2100,
-      rate: 125,
       totalAmt: 250000,
+      // other fields kept for approved view
       grossWt: 2100,
       type: "Retail",
       brokerName: "Broker 1",
@@ -44,7 +52,6 @@ const salesContractJSON = {
       discountAmt: 3354,
       deliveryDate: "2024-03-21",
       depoName: "Bhubaneswar Depo",
-      item: "Palm Oil",
       totalGrossWt: 1020,
       grossAmount: 67080,
       sgstPercent: 5,
@@ -55,20 +62,20 @@ const salesContractJSON = {
       igst: 9,
       totalGST: 6372,
       tcsAmt: 500,
-      itemCode:"code1",
-      itemGroup:"G1",
-      hsnCode:"hsn1",
-      netQty:2,
-      grossqty:4,
-      cust_phone:"4535467576",
-      cust_email:"jaay@.com",
-      deliveryAddress:"kdp",
-      cashDiscounrt:20,
-      roundOffAmount:340,
-      naarration:"narrrr"
-        },
+      itemCode: "code1",
+      itemGroup: "G1",
+      hsnCode: "hsn1",
+      netQty: 2,
+      grossqty: 4,
+      cust_phone: "4535467576",
+      cust_email: "jaay@.com",
+      deliveryAddress: "kdp",
+      cashDiscounrt: 20,
+      roundOffAmount: 340,
+      naarration: "narrrr",
+    },
   ],
-  itemOptions: ["Mustard Oil", "Sunflower Oil", "Coconut Oil", "Palm Oil",],
+  itemOptions: ["Mustard Oil", "Sunflower Oil", "Coconut Oil", "Palm Oil"],
   uomOptions: ["Ltrs", "Kg"],
   statusOptions: ["Approved", "Pending", "Rejected"],
   locationOptions: ["Warehouse A", "Warehouse B", "Warehouse C"],
@@ -92,9 +99,21 @@ export default function SalesContract() {
       item.contractNo?.toLowerCase().includes(searchText.toLowerCase()) ||
       item.companyName?.toLowerCase().includes(searchText.toLowerCase()) ||
       item.customer?.toLowerCase().includes(searchText.toLowerCase()) ||
-      item.item?.toLowerCase().includes(searchText.toLowerCase()) ||
+      // search items by name
+      (item.items || [])
+        .map((it) => it.item?.toLowerCase())
+        .join(" ")
+        .includes(searchText.toLowerCase()) ||
       item.status?.toLowerCase().includes(searchText.toLowerCase())
   );
+
+  const calculateTotals = (items) => {
+    if (!items || items.length === 0) return { totalQty: 0, uom: "" };
+    // If all items have same UOM, show that; otherwise blank
+    const uomSet = new Set(items.map((i) => i.uom));
+    const totalQty = items.reduce((s, it) => s + Number(it.qty || 0), 0);
+    return { totalQty, uom: uomSet.size === 1 ? items[0].uom : "" };
+  };
 
   const columns = [
     {
@@ -103,14 +122,18 @@ export default function SalesContract() {
       render: (text) => <span className="text-amber-800">{text}</span>,
     },
     {
-      title: <span className="text-amber-700 font-semibold">Date</span>,
+      title: <span className="text-amber-700 font-semibold">Contract Date</span>,
       dataIndex: "contractDate",
       render: (text) => <span className="text-amber-800">{text}</span>,
     },
     {
-      title: <span className="text-amber-700 font-semibold">Delivery Date</span>,
-      dataIndex: "deliveryDate",
-      render: (text) => <span className="text-amber-800">{text || "—"}</span>,
+      title: <span className="text-amber-700 font-semibold">Start - End</span>,
+      render: (_, r) => (
+        <span className="text-amber-800">
+          {r.startDate ? dayjs(r.startDate).format("DD-MM-YYYY") : "—"} {" - "}
+          {r.endDate ? dayjs(r.endDate).format("DD-MM-YYYY") : "—"}
+        </span>
+      ),
     },
     {
       title: <span className="text-amber-700 font-semibold">Location</span>,
@@ -123,17 +146,31 @@ export default function SalesContract() {
       render: (text) => <span className="text-amber-800">{text}</span>,
     },
     {
-      title: <span className="text-amber-700 font-semibold">Item</span>,
-      dataIndex: "item",
-      render: (text) => <span className="text-amber-800">{text}</span>,
+      title: <span className="text-amber-700 font-semibold">Items</span>,
+      render: (_, r) => {
+        const short = (r.items || [])
+          .slice(0, 2)
+          .map((it) => `${it.item} (${it.qty}${it.uom ? ` ${it.uom}` : ""})`)
+          .join(", ");
+        return (
+          <div className="text-amber-800">
+            {short}
+            {(r.items || []).length > 2 && <span>, ...</span>}
+            <div className="text-xs text-amber-600">{(r.items || []).length} item(s)</div>
+          </div>
+        );
+      },
     },
     {
-      title: <span className="text-amber-700 font-semibold">Qty</span>,
-      render: (_, r) => (
-        <span className="text-amber-800">
-          {r.qty} {r.uom}
-        </span>
-      ),
+      title: <span className="text-amber-700 font-semibold">Total Qty</span>,
+      render: (_, r) => {
+        const totals = calculateTotals(r.items);
+        return (
+          <span className="text-amber-800">
+            {totals.totalQty} {totals.uom}
+          </span>
+        );
+      },
     },
     {
       title: <span className="text-amber-700 font-semibold">Status</span>,
@@ -157,7 +194,9 @@ export default function SalesContract() {
               setSelectedRecord(record);
               viewForm.setFieldsValue({
                 ...record,
-                contractDate: dayjs(record.contractDate),
+                contractDate: record.contractDate ? dayjs(record.contractDate) : undefined,
+                startDate: record.startDate ? dayjs(record.startDate) : undefined,
+                endDate: record.endDate ? dayjs(record.endDate) : undefined,
                 deliveryDate: record.deliveryDate ? dayjs(record.deliveryDate) : null,
               });
               setIsViewModalOpen(true);
@@ -168,10 +207,14 @@ export default function SalesContract() {
               className="cursor-pointer! text-red-500!"
               onClick={() => {
                 setSelectedRecord(record);
+                // populate edit form (items need to be set directly)
                 editForm.setFieldsValue({
                   ...record,
-                  contractDate: dayjs(record.contractDate),
+                  contractDate: record.contractDate ? dayjs(record.contractDate) : undefined,
+                  startDate: record.startDate ? dayjs(record.startDate) : undefined,
+                  endDate: record.endDate ? dayjs(record.endDate) : undefined,
                   deliveryDate: record.deliveryDate ? dayjs(record.deliveryDate) : null,
+                  items: record.items || [],
                 });
                 setIsEditModalOpen(true);
               }}
@@ -183,15 +226,27 @@ export default function SalesContract() {
   ];
 
   const handleFormSubmit = (values, isEdit) => {
-    const finalValues = isEdit ? editForm.getFieldsValue() : values;
+    // If values is null in edit mode, get from editForm (we call validateFields then this handler)
+    const finalValues = values || (isEdit ? editForm.getFieldsValue() : addForm.getFieldsValue());
+    // make sure items exist
+    const items = finalValues.items && finalValues.items.length > 0 ? finalValues.items : [];
+
+    const totals = calculateTotals(items);
 
     const payload = {
       ...finalValues,
+      items,
+      totalQty: totals.totalQty,
+      uom: totals.uom,
       status: finalValues.status || "Pending",
       contractNo:
         selectedRecord?.contractNo ||
         `SC-2025-${String(data.length + 1).padStart(3, "0")}`,
-      contractDate: finalValues.contractDate.format("YYYY-MM-DD"),
+      contractDate: finalValues.contractDate
+        ? finalValues.contractDate.format("YYYY-MM-DD")
+        : undefined,
+      startDate: finalValues.startDate ? finalValues.startDate.format("YYYY-MM-DD") : undefined,
+      endDate: finalValues.endDate ? finalValues.endDate.format("YYYY-MM-DD") : undefined,
       deliveryDate: finalValues.deliveryDate
         ? finalValues.deliveryDate.format("YYYY-MM-DD")
         : undefined,
@@ -199,7 +254,9 @@ export default function SalesContract() {
 
     if (isEdit) {
       setData((prev) =>
-        prev.map((item) => (item.key === selectedRecord.key ? { ...payload, key: item.key } : item))
+        prev.map((item) =>
+          item.key === selectedRecord.key ? { ...item, ...payload, key: item.key } : item
+        )
       );
     } else {
       setData((prev) => [...prev, { ...payload, key: prev.length + 1 }]);
@@ -211,7 +268,7 @@ export default function SalesContract() {
   };
 
   const renderBasicFields = (formInstance, disabled = false) => (
-     <Row gutter={16}>
+    <Row gutter={16}>
       <Col span={8}>
         <Form.Item
           name="contractDate"
@@ -222,6 +279,7 @@ export default function SalesContract() {
             format="DD-MM-YYYY"
             style={{ width: "100%" }}
             disabled={true}
+            // contractDate is fixed / read-only as before
             disabledDate={() => true}
           />
         </Form.Item>
@@ -229,15 +287,30 @@ export default function SalesContract() {
 
       <Col span={8}>
         <Form.Item
-          label="Delivery Date"
-          name="deliveryDate"
+          name="startDate"
+          label="Start Date"
+          rules={[{ required: true, message: "Please select Start Date" }]}
+        >
+          <DatePicker
+            className="w-full"
+            disabled={disabled}
+            disabledDate={(current) => current && current.isBefore(dayjs().startOf("day"))}
+            format="DD-MM-YYYY"
+          />
+        </Form.Item>
+      </Col>
+
+      <Col span={8}>
+        <Form.Item
+          name="endDate"
+          label="End Date"
           rules={[
-            { required: true, message: "Please select Delivery Date" },
+            { required: true, message: "Please select End Date" },
             {
               validator(_, value) {
-                const today = dayjs().startOf("day");
-                if (value && value.isBefore(today)) {
-                  return Promise.reject(new Error("Delivery Date cannot be before today"));
+                const start = formInstance.getFieldValue("startDate");
+                if (start && value && value.isBefore(start, "day")) {
+                  return Promise.reject(new Error("End Date cannot be before Start Date"));
                 }
                 return Promise.resolve();
               },
@@ -248,12 +321,17 @@ export default function SalesContract() {
             className="w-full"
             disabled={disabled}
             disabledDate={(current) => current && current.isBefore(dayjs().startOf("day"))}
+            format="DD-MM-YYYY"
           />
         </Form.Item>
       </Col>
 
       <Col span={8}>
-        <Form.Item label="Company " name="companyName" rules={[{ required: true, message: "Please select Company" }]}>
+        <Form.Item
+          label="Company "
+          name="companyName"
+          rules={[{ required: true, message: "Please select Company" }]}
+        >
           <Select placeholder="Select Company" disabled={disabled}>
             {salesContractJSON.companyOptions.map((c) => (
               <Select.Option key={c} value={c}>
@@ -265,43 +343,21 @@ export default function SalesContract() {
       </Col>
 
       <Col span={8}>
-        <Form.Item label="Customer Name" name="customer" rules={[{ required: true, message: "Please enter Customer Name" }]}>
+        <Form.Item
+          label="Customer Name"
+          name="customer"
+          rules={[{ required: true, message: "Please enter Customer Name" }]}
+        >
           <Input placeholder="Enter Customer Name" disabled={disabled} />
         </Form.Item>
       </Col>
 
       <Col span={8}>
-        <Form.Item label="Item Name" name="item" rules={[{ required: true, message: "Please select Item" }]}>
-          <Select placeholder="Select Item" disabled={disabled}>
-            {salesContractJSON.itemOptions.map((item) => (
-              <Select.Option key={item} value={item}>
-                {item}
-              </Select.Option>
-            ))}
-          </Select>
-        </Form.Item>
-      </Col>
-
-      <Col span={8}>
-        <Form.Item label="Quantity" name="qty" rules={[{ required: true, message: "Please enter Quantity" }]}>
-          <Input className="w-full" disabled={disabled} min={0} placeholder="0" />
-        </Form.Item>
-      </Col>
-
-      <Col span={8}>
-        <Form.Item label="UOM" name="uom" rules={[{ required: true, message: "Please select UOM" }]}>
-          <Select placeholder="Select UOM" disabled={disabled}>
-            {salesContractJSON.uomOptions.map((u) => (
-              <Select.Option key={u} value={u}>
-                {u}
-              </Select.Option>
-            ))}
-          </Select>
-        </Form.Item>
-      </Col>
-
-      <Col span={8}>
-        <Form.Item label="Location" name="location" rules={[{ required: true, message: "Please select Location" }]}>
+        <Form.Item
+          label="Location"
+          name="location"
+          rules={[{ required: true, message: "Please select Location" }]}
+        >
           <Select placeholder="Select Location" disabled={disabled}>
             {salesContractJSON.locationOptions.map((loc) => (
               <Select.Option key={loc} value={loc}>
@@ -326,62 +382,167 @@ export default function SalesContract() {
     </Row>
   );
 
-const renderApprovedView = () => (
-  <div>
-    <h3 className="text-xl font-semibold text-amber-600 mb-4">Contract & Party Details</h3>
-    <Row gutter={16}>
-      <Col span={6}><Form.Item label="Contract Date"><Input value={selectedRecord?.contractDate} disabled /></Form.Item></Col>
-      <Col span={6}><Form.Item label="Delivery Date"><Input value={selectedRecord?.deliveryDate} disabled /></Form.Item></Col>
-      <Col span={6}><Form.Item label="Company"><Input value={selectedRecord?.companyName} disabled /></Form.Item></Col>
-      <Col span={6}><Form.Item label="Customer Name"><Input value={selectedRecord?.customer} disabled /></Form.Item></Col>
-       <Col span={6}><Form.Item label="Customer Phone"><Input value={selectedRecord?.cust_phone} disabled /></Form.Item></Col>
-      <Col span={6}><Form.Item label="Customer Email"><Input value={selectedRecord?.cust_email} disabled /></Form.Item></Col>
-      <Col span={6}><Form.Item label="Depo"><Input value={selectedRecord?.depoName} disabled /></Form.Item></Col>
-      <Col span={6}><Form.Item label="Location"><Input value={selectedRecord?.location} disabled /></Form.Item></Col>
-      <Col span={6}><Form.Item label="Broker"><Input value={selectedRecord?.brokerName} disabled /></Form.Item></Col>
-      <Col span={6}><Form.Item label="Type"><Input value={selectedRecord?.type} disabled /></Form.Item></Col>
-       <Col span={6}><Form.Item label="Delivery Address"><Input value={selectedRecord?.deliveryAddress} disabled /></Form.Item></Col>
-      <Col span={6}><Form.Item label="Status"><Input value={selectedRecord?.status} disabled /></Form.Item></Col>
-       <Col span={6}><Form.Item label="Naarration"><Input value={selectedRecord?.naarration} disabled /></Form.Item></Col>
-  
-    </Row>
-    <h3 className="text-xl font-semibold text-amber-600 my-4">Item & Quantity Details</h3>
-    <Row gutter={16}>
-      <Col span={6}><Form.Item label="Item Name"><Input value={selectedRecord?.item} disabled /></Form.Item></Col>
-      <Col span={6}><Form.Item label="Item Code"><Input value={selectedRecord?.itemCode} disabled /></Form.Item></Col>
-     <Col span={6}><Form.Item label="Item Group"><Input value={selectedRecord?.itemGroup} disabled /></Form.Item></Col>
-     <Col span={6}><Form.Item label="HSN Code"><Input value={selectedRecord?.hsnCode} disabled /></Form.Item></Col>
-      <Col span={6}><Form.Item label="Net Quantity"><Input value={selectedRecord?.netQty} disabled /></Form.Item></Col>
-     <Col span={6}><Form.Item label="Gross Quantity"><Input value={selectedRecord?.grossqty} disabled /></Form.Item></Col>
-      <Col span={6}><Form.Item label="Quantity"><Input value={selectedRecord?.qty} disabled /></Form.Item></Col>
-      <Col span={6}><Form.Item label="Free Qty"><Input value={selectedRecord?.freeQty} disabled /></Form.Item></Col>
-      <Col span={6}><Form.Item label="Total Qty"><Input value={selectedRecord?.totalQty} disabled /></Form.Item></Col>
-      <Col span={6}><Form.Item label="UOM"><Input value={selectedRecord?.uom} disabled /></Form.Item></Col>
-      <Col span={6}><Form.Item label="Total Gross Wt"><Input value={selectedRecord?.totalGrossWt} disabled /></Form.Item></Col>
-      <Col span={6}><Form.Item label="Gross Wt"><Input value={selectedRecord?.grossWt} disabled /></Form.Item></Col>
-      
-    </Row>
-    <h3 className="text-xl font-semibold text-amber-600 my-4">Pricing & Tax Details</h3>
-    <Row gutter={16}>
-      <Col span={6}><Form.Item label="Rate"><Input value={selectedRecord?.rate} disabled /></Form.Item></Col>
-       <Col span={6}><Form.Item label="Gross Amount"><Input value={selectedRecord?.grossAmount} disabled /></Form.Item></Col>
-      <Col span={6}><Form.Item label="Discount %"><Input value={selectedRecord?.discountPercent} disabled /></Form.Item></Col>
-      <Col span={6}><Form.Item label="Discount Amount"><Input value={selectedRecord?.discountAmt} disabled /></Form.Item></Col>
-      <Col span={6}><Form.Item label="SGST %"><Input value={selectedRecord?.sgstPercent} disabled /></Form.Item></Col>
-      <Col span={6}><Form.Item label="CGST %"><Input value={selectedRecord?.cgstPercent} disabled /></Form.Item></Col>
-      <Col span={6}><Form.Item label="IGST %"><Input value={selectedRecord?.igstPercent} disabled /></Form.Item></Col>
-      <Col span={6}><Form.Item label="SGST"><Input value={selectedRecord?.sgst} disabled /></Form.Item></Col>
-      <Col span={6}><Form.Item label="CGST"><Input value={selectedRecord?.cgst} disabled /></Form.Item></Col>
-      <Col span={6}><Form.Item label="IGST"><Input value={selectedRecord?.igst} disabled /></Form.Item></Col>
-      <Col span={6}><Form.Item label="Total GST"><Input value={selectedRecord?.totalGST} disabled /></Form.Item></Col>
-       <Col span={6}><Form.Item label="TCS Amount"><Input value={selectedRecord?.tcsAmt} disabled /></Form.Item></Col>
-      <Col span={6}><Form.Item label="Cash Disccount"><Input value={selectedRecord?.cashDiscounrt} disabled /></Form.Item></Col>
-      <Col span={6}><Form.Item label="Round Off Amount"><Input value={selectedRecord?.roundOffAmount} disabled /></Form.Item></Col>
-      <Col span={6}><Form.Item label="Total Amount"><Input value={selectedRecord?.totalAmt} disabled /></Form.Item></Col>
-    </Row>
-  </div>
-);
+  const renderApprovedView = () => (
+    <div>
+      <h3 className="text-xl font-semibold text-amber-600 mb-4">Contract & Party Details</h3>
+      <Row gutter={16}>
+        <Col span={6}>
+          <Form.Item label="Contract Date">
+            <Input value={selectedRecord?.contractDate} disabled />
+          </Form.Item>
+        </Col>
+        <Col span={6}>
+          <Form.Item label="Start Date">
+            <Input value={selectedRecord?.startDate} disabled />
+          </Form.Item>
+        </Col>
+        <Col span={6}>
+          <Form.Item label="End Date">
+            <Input value={selectedRecord?.endDate} disabled />
+          </Form.Item>
+        </Col>
+        <Col span={6}>
+          <Form.Item label="Delivery Date">
+            <Input value={selectedRecord?.deliveryDate} disabled />
+          </Form.Item>
+        </Col>
 
+        <Col span={6}>
+          <Form.Item label="Company">
+            <Input value={selectedRecord?.companyName} disabled />
+          </Form.Item>
+        </Col>
+        <Col span={6}>
+          <Form.Item label="Customer Name">
+            <Input value={selectedRecord?.customer} disabled />
+          </Form.Item>
+        </Col>
+        <Col span={6}>
+          <Form.Item label="Customer Phone">
+            <Input value={selectedRecord?.cust_phone} disabled />
+          </Form.Item>
+        </Col>
+        <Col span={6}>
+          <Form.Item label="Customer Email">
+            <Input value={selectedRecord?.cust_email} disabled />
+          </Form.Item>
+        </Col>
+        <Col span={6}>
+          <Form.Item label="Depo">
+            <Input value={selectedRecord?.depoName} disabled />
+          </Form.Item>
+        </Col>
+        <Col span={6}>
+          <Form.Item label="Location">
+            <Input value={selectedRecord?.location} disabled />
+          </Form.Item>
+        </Col>
+        <Col span={6}>
+          <Form.Item label="Broker">
+            <Input value={selectedRecord?.brokerName} disabled />
+          </Form.Item>
+        </Col>
+        <Col span={6}>
+          <Form.Item label="Type">
+            <Input value={selectedRecord?.type} disabled />
+          </Form.Item>
+        </Col>
+        <Col span={6}>
+          <Form.Item label="Delivery Address">
+            <Input value={selectedRecord?.deliveryAddress} disabled />
+          </Form.Item>
+        </Col>
+        <Col span={6}>
+          <Form.Item label="Status">
+            <Input value={selectedRecord?.status} disabled />
+          </Form.Item>
+        </Col>
+        <Col span={6}>
+          <Form.Item label="Naarration">
+            <Input value={selectedRecord?.naarration} disabled />
+          </Form.Item>
+        </Col>
+      </Row>
+
+      <Divider />
+
+      <h3 className="text-xl font-semibold text-amber-600 my-4">Item & Quantity Details</h3>
+
+      {(selectedRecord?.items || []).map((it, idx) => (
+        <Row gutter={16} key={idx}>
+          <Col span={6}>
+            <Form.Item label={`Item ${idx + 1}`}>
+              <Input value={it.item} disabled />
+            </Form.Item>
+          </Col>
+          <Col span={4}>
+            <Form.Item label={`Itemcode`}>
+              <Input value={it.itemcode} disabled />
+            </Form.Item>
+          </Col>
+           <Col span={4}>
+            <Form.Item label="Qty">
+              <Input value={it.qty} disabled />
+            </Form.Item>
+          </Col>
+          <Col span={4}>
+            <Form.Item label="UOM">
+              <Input value={it.uom} disabled />
+            </Form.Item>
+          </Col>
+          <Col span={4}>
+            <Form.Item label="Rate">
+              <Input value={it.rate} disabled />
+            </Form.Item>
+          </Col>
+          <Col span={4}>
+            <Form.Item label="Free Qty">
+              <Input value={it.freeQty} disabled />
+            </Form.Item>
+          </Col>
+        </Row>
+      ))}
+
+      <Row gutter={16} className="mt-2">
+        <Col span={6}>
+          <Form.Item label="Total Qty">
+            <Input value={selectedRecord?.totalQty} disabled />
+          </Form.Item>
+        </Col>
+        <Col span={6}>
+          <Form.Item label="UOM">
+            <Input value={selectedRecord?.uom} disabled />
+          </Form.Item>
+        </Col>
+      </Row>
+
+      <Divider />
+
+      <h3 className="text-xl font-semibold text-amber-600 my-4">Pricing & Tax Details</h3>
+      <Row gutter={16}>
+        <Col span={6}>
+          <Form.Item label="Gross Amount">
+            <Input value={selectedRecord?.grossAmount} disabled />
+          </Form.Item>
+        </Col>
+        <Col span={6}>
+          <Form.Item label="Discount %">
+            <Input value={selectedRecord?.discountPercent} disabled />
+          </Form.Item>
+        </Col>
+        <Col span={6}>
+          <Form.Item label="Discount Amount">
+            <Input value={selectedRecord?.discountAmt} disabled />
+          </Form.Item>
+        </Col>
+        <Col span={6}>
+          <Form.Item label="Total Amount">
+            <Input value={selectedRecord?.totalAmt} disabled />
+          </Form.Item>
+        </Col>
+      </Row>
+    </div>
+  );
 
   return (
     <div>
@@ -423,7 +584,13 @@ const renderApprovedView = () => (
             className="bg-amber-500! hover:bg-amber-600! border-none!"
             onClick={() => {
               addForm.resetFields();
-              addForm.setFieldsValue({ contractDate: dayjs(), status: "Pending" });
+              addForm.setFieldsValue({
+                contractDate: dayjs(),
+                startDate: dayjs(),
+                endDate: dayjs().add(7, "day"),
+                status: "Pending",
+                items: [{ item: undefined, qty: 0, uom: "Ltrs", rate: 0 }],
+              });
               setSelectedRecord(null);
               setIsAddModalOpen(true);
             }}
@@ -434,29 +601,110 @@ const renderApprovedView = () => (
       </div>
 
       <div className="border border-amber-300 rounded-lg p-4 shadow-md">
-        <Table
-          columns={columns}
-          dataSource={filteredData}
-          pagination={false}
-          scroll={{ y: 350 }}
-          rowKey="key"
-        />
+        <Table columns={columns} dataSource={filteredData} pagination={false} scroll={{ y: 350 }} rowKey="key" />
       </div>
+
+      {/* Add Modal */}
       <Modal
-        title={
-          <span className="text-amber-700 font-semibold">
-            Add Sales Contract
-          </span>
-        }
+        title={<span className="text-amber-700 font-semibold">Add Sales Contract</span>}
         open={isAddModalOpen}
         onCancel={() => {
           setIsAddModalOpen(false);
         }}
         footer={null}
-        width={800}
+        width={900}
       >
-        <Form layout="vertical" form={addForm} onFinish={(values) => handleFormSubmit(values, false)}>
+        <Form
+          layout="vertical"
+          form={addForm}
+          onFinish={(values) => handleFormSubmit(values, false)}
+        >
           {renderBasicFields(addForm, false)}
+
+          <Divider />
+
+          <h3 className="text-lg font-semibold text-amber-600 mb-2">Items</h3>
+
+          <Form.List name="items">
+            {(fields, { add, remove }) => (
+              <>
+                {fields.map((field) => (
+                  <Row gutter={12} key={field.key} align="middle" className="mb-2">
+                    <Col span={8}>
+                      <Form.Item
+                        {...field}
+                        name={[field.name, "item"]}
+                        fieldKey={[field.fieldKey, "item"]}
+                        rules={[{ required: true, message: "Please select item" }]}
+                      >
+                        <Select placeholder="Select Item">
+                          {salesContractJSON.itemOptions.map((it) => (
+                            <Select.Option key={it} value={it}>
+                              {it}
+                            </Select.Option>
+                          ))}
+                        </Select>
+                      </Form.Item>
+                    </Col>
+                    <Col span={4}>
+                      <Form.Item
+                        {...field}
+                        name={[field.name, "qty"]}
+                        fieldKey={[field.fieldKey, "qty"]}
+                        rules={[{ required: true, message: "Enter qty" }]}
+                      >
+                        <Input type="number" placeholder="Qty" />
+                      </Form.Item>
+                    </Col>
+                    <Col span={4}>
+                      <Form.Item
+                        {...field}
+                        name={[field.name, "uom"]}
+                        fieldKey={[field.fieldKey, "uom"]}
+                        rules={[{ required: true, message: "Select UOM" }]}
+                      >
+                        <Select>
+                          {salesContractJSON.uomOptions.map((u) => (
+                            <Select.Option key={u} value={u}>
+                              {u}
+                            </Select.Option>
+                          ))}
+                        </Select>
+                      </Form.Item>
+                    </Col>
+                    <Col span={4}>
+                      <Form.Item
+                        {...field}
+                        name={[field.name, "rate"]}
+                        fieldKey={[field.fieldKey, "rate"]}
+                      >
+                        <Input type="number" placeholder="Rate" />
+                      </Form.Item>
+                    </Col>
+                    {/* <Col span={3}>
+                      <Form.Item
+                        {...field}
+                        name={[field.name, "freeQty"]}
+                        fieldKey={[field.fieldKey, "freeQty"]}
+                      >
+                        <Input type="number" placeholder="Free" />
+                      </Form.Item>
+                    </Col> */}
+                    <Col span={1}>
+                      <MinusCircleOutlined onClick={() => remove(field.name)} />
+                    </Col>
+                  </Row>
+                ))}
+
+                <Form.Item>
+                  <Button type="dashed" onClick={() => add()} block icon={<PlusOutlined />}>
+                    Add Item
+                  </Button>
+                </Form.Item>
+              </>
+            )}
+          </Form.List>
+
           <div className="flex justify-end gap-2 mt-4">
             <Button
               onClick={() => {
@@ -466,33 +714,119 @@ const renderApprovedView = () => (
             >
               Cancel
             </Button>
-            <Button
-              type="primary"
-              htmlType="submit"
-              className="bg-amber-500! hover:bg-amber-600! border-none!"
-            >
+            <Button type="primary" htmlType="submit" className="bg-amber-500! hover:bg-amber-600! border-none!">
               Add
             </Button>
           </div>
         </Form>
       </Modal>
 
-      {/* 2. Edit Modal (Uses editForm) */}
+      {/* Edit Modal */}
       <Modal
-        title={
-          <span className="text-amber-700 font-semibold">
-            Edit Sales Contract
-          </span>
-        }
+        title={<span className="text-amber-700 font-semibold">Edit Sales Contract</span>}
         open={isEditModalOpen}
         onCancel={() => {
           setIsEditModalOpen(false);
         }}
         footer={null}
-        width={800}
-       >
-        <Form layout="vertical" form={editForm} onFinish={() => editForm.validateFields().then(() => handleFormSubmit(null, true))}>
+        width={900}
+      >
+        <Form
+          layout="vertical"
+          form={editForm}
+          onFinish={() =>
+            editForm
+              .validateFields()
+              .then(() => handleFormSubmit(null, true))
+              .catch(() => {})
+          }
+        >
           {renderBasicFields(editForm, false)}
+
+          <Divider />
+
+          <h3 className="text-lg font-semibold text-amber-600 mb-2">Items</h3>
+
+          <Form.List name="items">
+            {(fields, { add, remove }) => (
+              <>
+                {fields.map((field) => (
+                  <Row gutter={12} key={field.key} align="middle" className="mb-2">
+                    <Col span={8}>
+                      <Form.Item
+                        {...field}
+                        name={[field.name, "item"]}
+                        fieldKey={[field.fieldKey, "item"]}
+                        rules={[{ required: true, message: "Please select item" }]}
+                      >
+                        <Select placeholder="Select Item">
+                          {salesContractJSON.itemOptions.map((it) => (
+                            <Select.Option key={it} value={it}>
+                              {it}
+                            </Select.Option>
+                          ))}
+                        </Select>
+                      </Form.Item>
+                    </Col>
+                    <Col span={4}>
+                      <Form.Item
+                        {...field}
+                        name={[field.name, "qty"]}
+                        fieldKey={[field.fieldKey, "qty"]}
+                        rules={[{ required: true, message: "Enter qty" }]}
+                      >
+                        <Input type="number" placeholder="Qty" />
+                      </Form.Item>
+                    </Col>
+                    <Col span={4}>
+                      <Form.Item
+                        {...field}
+                        name={[field.name, "uom"]}
+                        fieldKey={[field.fieldKey, "uom"]}
+                        rules={[{ required: true, message: "Select UOM" }]}
+                      >
+                        <Select>
+                          {salesContractJSON.uomOptions.map((u) => (
+                            <Select.Option key={u} value={u}>
+                              {u}
+                            </Select.Option>
+                          ))}
+                        </Select>
+                      </Form.Item>
+                    </Col>
+                    <Col span={4}>
+                      <Form.Item
+                        {...field}
+                        name={[field.name, "rate"]}
+                        fieldKey={[field.fieldKey, "rate"]}
+                      >
+                        <Input type="number" placeholder="Rate" />
+                      </Form.Item>
+                    </Col>
+                    <Col span={3}>
+                      <Form.Item
+                        {...field}
+                        name={[field.name, "freeQty"]}
+                        fieldKey={[field.fieldKey, "freeQty"]}
+                      >
+                        <Input type="number" placeholder="Free" />
+                      </Form.Item>
+                    </Col>
+                    <Col span={1}>
+                      <MinusCircleOutlined onClick={() => remove(field.name)} />
+                    </Col>
+                  </Row>
+                ))}
+
+                <Form.Item>
+                  <Button type="dashed" onClick={() => add()} block icon={<PlusOutlined />}>
+                    Add Item
+                  </Button>
+                </Form.Item>
+              </>
+            )}
+          </Form.List>
+
           <div className="flex justify-end gap-2 mt-4">
             <Button
               onClick={() => {
@@ -502,19 +836,14 @@ const renderApprovedView = () => (
             >
               Cancel
             </Button>
-            <Button
-              type="primary"
-              htmlType="submit"
-              className="bg-amber-500! hover:bg-amber-600! border-none!"
-            >
+            <Button type="primary" htmlType="submit" className="bg-amber-500! hover:bg-amber-600! border-none!">
               Update
             </Button>
           </div>
         </Form>
       </Modal>
 
-
-      {/* 3. View Modal (Uses viewForm) */}
+      {/* View Modal */}
       <Modal
         title={<span className="text-amber-700 text-3xl font-semibold">View Contract</span>}
         open={isViewModalOpen}
@@ -524,13 +853,42 @@ const renderApprovedView = () => (
         footer={null}
         width={1000}
       >
-       
         <Form layout="vertical" form={viewForm}>
-          {selectedRecord?.status === "Approved"
-            ? renderApprovedView()
-            : renderBasicFields(viewForm, true)}
+          {selectedRecord?.status === "Approved" ? (
+            renderApprovedView()
+          ) : (
+            <>
+              {renderBasicFields(viewForm, true)}
+              <Divider />
+              <h3 className="text-lg font-semibold text-amber-600 mb-2">Items</h3>
+              {(selectedRecord?.items || []).map((it, idx) => (
+                <Row gutter={12} key={idx} className="mb-2">
+                  <Col span={10}>
+                    <Form.Item label={`Item ${idx + 1}`}>
+                      <Input value={it.item} disabled />
+                    </Form.Item>
+                  </Col>
+                  <Col span={4}>
+                    <Form.Item label="Qty">
+                      <Input value={it.qty} disabled />
+                    </Form.Item>
+                  </Col>
+                  <Col span={4}>
+                    <Form.Item label="UOM">
+                      <Input value={it.uom} disabled />
+                    </Form.Item>
+                  </Col>
+                  <Col span={4}>
+                    <Form.Item label="Rate">
+                      <Input value={it.rate} disabled />
+                    </Form.Item>
+                  </Col>
+                </Row>
+              ))}
+            </>
+          )}
         </Form>
       </Modal>
     </div>
   );
-} 
+}
