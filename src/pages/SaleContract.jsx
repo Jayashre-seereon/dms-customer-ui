@@ -548,8 +548,8 @@ export default function SalesContract() {
     <div>
       <div className="flex justify-between items-center mb-0">
         <div>
-          <h1 className="text-3xl font-bold text-amber-700">Sales Contract</h1>
-          <p className="text-amber-600">Manage your sales contracts easily</p>
+          <h1 className="text-3xl font-bold text-amber-700"> Contract</h1>
+          <p className="text-amber-600">Manage your contracts easily</p>
         </div>
       </div>
       <div className="flex justify-between items-center mb-2">
@@ -606,7 +606,11 @@ export default function SalesContract() {
 
       {/* Add Modal */}
       <Modal
-        title={<span className="text-amber-700 font-semibold">Add Sales Contract</span>}
+        title={
+          <span className="text-amber-700 font-semibold">
+            Add Sales Contract
+          </span>
+        }
         open={isAddModalOpen}
         onCancel={() => {
           setIsAddModalOpen(false);
@@ -723,7 +727,11 @@ export default function SalesContract() {
 
       {/* Edit Modal */}
       <Modal
-        title={<span className="text-amber-700 font-semibold">Edit Sales Contract</span>}
+        title={
+          <span className="text-amber-700 font-semibold">
+            Edit Sales Contract
+          </span>
+        }
         open={isEditModalOpen}
         onCancel={() => {
           setIsEditModalOpen(false);

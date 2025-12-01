@@ -1,4 +1,3 @@
-// SaleReturn.jsx
 import React, { useState, useEffect } from "react";
 import {
   Table,
@@ -10,6 +9,9 @@ import {
   Row,
   Col,
   DatePicker,
+  InputNumber,
+  Space,
+  notification,
 } from "antd";
 import {
   SearchOutlined,
@@ -18,55 +20,70 @@ import {
   EyeOutlined,
   EditOutlined,
   FilterOutlined,
+  DeleteOutlined,
+  MinusCircleOutlined,
+  RollbackOutlined,
 } from "@ant-design/icons";
 import dayjs from "dayjs";
 
-// 🔹 JSON Data
+// --- 🔹 Simplified JSON Data (Kept as provided) ---
 const saleReturnJSON = {
-  records: [
+  // Grouped by invoice/order to mimic source data
+  sourceInvoices: [
     {
-      key: 1,
       invoiceNo: "INV-001",
-      orderNo: 1,
-      item: "Sunflower Oil",
+      orderNo: "ORD-001",
       customer: "Ramesh",
-      quantity: 50,
-      freeQty: 10,
-      uom: "Ltr",
-      rate: 500,
-      totalAmount: 25000,
       returnDate: "2024-04-01",
-      returnReason: "Damaged Packaging",
       status: "Approved",
       companyName: "Odisha Edibles",
-      branchName: "Cuttack",
-      depo: "Cuttack Depot",
-      grossAmount: 25000,
-      discountPercent: 10,
-      discountAmount: 2500,
-      sgstPercent: 9,
-      cgstPercent: 1,
-      igstPercent: 9,
-      otherCharges: 7,
-      roundOffAmount: 8, 
-      grandTotal: 25000 - 2500 + 2250 + 250 + 7 + 8 + 500 - 20,  itemCode: "code1",
-      itemGroup: "G1",
-      orderNo: "n1",
-      hsnCode: "hsn1",
       plantName: "p1",
-      transporter: "Blue Transport",
-      vehicleNo: "OD-05-AB-1234",
-      driverName: "Rajesh Kumar",
-      waybillNo: "WB-001",
-      naarration: "narrrr",
-      netQty: 50, 
-      grossQty: 60, 
-      sgstAmount: 2250, 
-      cgstAmount: 250, 
-      igstAmount: 45,
-      totalGST: 2500, 
-      tcsAmt: 500,
-      cashDiscount: 20,
+      items: [
+        {
+          key: "item-1-1",
+          item: "Sunflower Oil",
+          quantity: 50, // This is the return quantity
+          uom: "Ltr",
+          rate: 500,
+          returnReason: "Damaged Packaging",
+          itemCode: "code1",
+          itemGroup: "G1",
+          hsnCode: "hsn1",
+        },
+      ],
+    },
+    {
+      invoiceNo: "INV-002",
+      orderNo: "ORD-002",
+      customer: "Suresh",
+      returnDate: "2024-04-15",
+      status: "Pending",
+      companyName: "Kalinga Oil Mills",
+      plantName: "p2",
+      items: [
+        {
+          key: "item-2-1",
+          item: "Rice Bran Oil",
+          quantity: 20,
+          uom: "Kg",
+          rate: 600,
+          returnReason: "Quality Issue",
+          itemCode: "code2",
+          itemGroup: "G2",
+          hsnCode: "hsn2",
+        },
+        {
+          key: "item-2-2",
+          item: "Mustard Oil", // Second item in the same invoice for a better demo
+          quantity: 10,
+          uom: "Ltr",
+          rate: 450,
+          returnReason: "Wrong Item",
+          itemCode: "code3",
+          itemGroup: "G3",
+          hsnCode: "hsn3",
+        },
+      ],
     },
   ],
   options: {
@@ -79,414 +96,564 @@ const saleReturnJSON = {
       "Wrong Item",
     ],
     companyOptions: ["Kalinga Oil Mills", "Odisha Edibles"],
-    branchOptions: ["Bhubaneswar", "Cuttack", "Puri"],
-    depoOptions: ["Bhubaneswar Depot", "Cuttack Depot", "Puri Depot"],
+    // Expanded item options for the Add modal item selection (Lookup data)
+    allItemOptions: [
+      {
+        item: "Sunflower Oil",
+        uom: "Ltr",
+        rate: 500,
+        itemCode: "code1",
+        itemGroup: "G1",
+        hsnCode: "hsn1",
+      },
+      {
+        item: "Rice Bran Oil",
+        uom: "Kg",
+        rate: 600,
+        itemCode: "code2",
+        itemGroup: "G2",
+        hsnCode: "hsn2",
+      },
+      {
+        item: "Mustard Oil",
+        uom: "Ltr",
+        rate: 450,
+        itemCode: "code3",
+        itemGroup: "G3",
+        hsnCode: "hsn3",
+      },
+      {
+        item: "Palm Oil",
+        uom: "Kg",
+        rate: 300,
+        itemCode: "code4",
+        itemGroup: "G4",
+        hsnCode: "hsn4",
+      },
+    ],
   },
 };
 
-export default function SaleReturn() {
-  const [records, setRecords] = useState(saleReturnJSON.records);
-  const [filteredData, setFilteredData] = useState([]);
-  const [searchText, setSearchText] = useState("");
-  const [selectedRecord, setSelectedRecord] = useState(null);
-  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [isViewModalOpen, setIsViewModalOpen] = useState(false);
-  const [isOtherReason, setIsOtherReason] = useState(false);
+// Flatten the data for the main table view
+const getFlatRecords = (data) =>
+  data.sourceInvoices.flatMap((invoice) =>
+    invoice.items.map((item) => ({
+      ...invoice,
+      ...item,
+      key: item.key || `${invoice.invoiceNo}-${item.itemCode}`, // Ensure a unique key
+      // Calculate totals for table
+      totalAmount: (item.quantity * item.rate).toFixed(2),
+      grandTotal: (item.quantity * item.rate).toFixed(2), // Simplifed grand total
+    }))
+  );
 
-  const [addForm] = Form.useForm();
+// --- LOGIC: Calculate Row Spans for Grouping ---
+const getMergedRecords = (flatRecords) => {
+  // 1. Group by invoiceNo to find the size of each group
+  const invoiceGroups = flatRecords.reduce((acc, curr) => {
+    const key = curr.invoiceNo;
+    if (!acc[key]) {
+      acc[key] = [];
+    }
+    acc[key].push(curr);
+    return acc;
+  }, {});
+
+  // 2. Create a final flat list with rowSpan info
+  return Object.values(invoiceGroups).flatMap((itemsInInvoice) => {
+    const invoiceLength = itemsInInvoice.length;
+    return itemsInInvoice.map((item, index) => {
+      // Only the first item in the group gets a rowSpan equal to the group size.
+      // All other items get a rowSpan of 0 (to hide them).
+      const rowSpan = index === 0 ? invoiceLength : 0;
+
+      return {
+        ...item,
+        invoiceRowSpan: rowSpan, // Property used in onCell
+      };
+    });
+  });
+};
+
+// 🔹 Simplified Calculation Logic (Per Item)
+const calculateTotals = (itemValues) => {
+  const qty = parseFloat(itemValues.quantity || 0);
+  const rate = parseFloat(itemValues.rate || 0);
+
+  const totalAmount = qty * rate;
+
+  return {
+    totalAmount: Number(totalAmount.toFixed(2)),
+    grandTotal: Number(totalAmount.toFixed(2)), // Simple for this demo
+  };
+};
+
+/**
+ * NEW COMPONENT: Focuses on allowing multiple invoices to be added at once.
+ */
+export default function MultiInvoiceSaleReturn() {
+  // Main state for all invoices (like the original component)
+  const [invoices, setInvoices] = useState(saleReturnJSON.sourceInvoices);
+  const [records, setRecords] = useState(() => getFlatRecords(saleReturnJSON));
+  const [filteredData, setFilteredData] = useState([]);
+  const [mergedData, setMergedData] = useState([]);
+
+  // Modals and Forms
+  const [searchText, setSearchText] = useState("");
+  const [selectedInvoice, setSelectedInvoice] = useState(null); // Used for View/Edit
+  const [isMultiAddModalOpen, setIsMultiAddModalOpen] = useState(false); // NEW: For multi-add
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false); // Kept for editing existing
+  const [isViewModalOpen, setIsViewModalOpen] = useState(false); // Kept for viewing existing
+
+  const [multiAddForm] = Form.useForm(); // NEW: Form for multi-add
   const [editForm] = Form.useForm();
   const [viewForm] = Form.useForm();
 
+  // Update records (flat list for filtering/searching) whenever invoices change
   useEffect(() => {
-    setFilteredData(records);
-  }, [records]);
+    setRecords(getFlatRecords({ sourceInvoices: invoices }));
+  }, [invoices]);
 
+  // Handle Search Filtering
   useEffect(() => {
     const val = searchText.toLowerCase();
-    setFilteredData(
-      records.filter((item) =>
-        Object.values(item).some((v) => String(v).toLowerCase().includes(val))
-      )
+    const result = records.filter((item) =>
+      Object.values(item).some((v) => String(v).toLowerCase().includes(val))
     );
+    setFilteredData(result);
   }, [searchText, records]);
 
-  // 🔹 Updated Calculation Logic
-  const calculateTotals = (values) => {
-    const qty = parseFloat(values.quantity || 0);
-    const freeQty = parseFloat(values.freeQty || 0);
-    const rate = parseFloat(values.rate || 0);
-    const discountPercent = parseFloat(values.discountPercent || 0);
-    const sgstPercent = parseFloat(values.sgstPercent || 0);
-    const cgstPercent = parseFloat(values.cgstPercent || 0);
-    const igstPercent = parseFloat(values.igstPercent || 0);
-    const otherCharges = parseFloat(values.otherCharges || 0);
-    const roundOffAmount = parseFloat(values.roundOffAmount || 0); 
-    const tcsAmt = parseFloat(values.tcsAmt || 0);
-    const cashDiscount = parseFloat(values.cashDiscount || 0); 
+  // Calculate Merged Data for Table Display
+  useEffect(() => {
+    setMergedData(getMergedRecords(filteredData));
+  }, [filteredData]);
 
-    const netQty = qty; 
-    const grossQty = qty + freeQty; 
+  // Handler for calculating totals & auto-filling fields
+  const handleItemValuesChange = (changedValues, allValues, targetForm) => {
+    // --- Existing Single Invoice Logic (Modified to accept a targetForm) ---
 
-    const grossAmount = qty * rate;
-    const discountAmount = (grossAmount * discountPercent) / 100;
-    const taxableAmount = grossAmount - discountAmount;
+    // Look for changes within the main 'invoices' Form.List
+    const invoicesPath = changedValues && Object.keys(changedValues)[0];
+    if (!invoicesPath || !invoicesPath.startsWith("invoices")) {
+        // Fallback for single item update in edit form, or initial load
+        // This is complex, but for the multi-form, we focus on the invoices path
+        // For the Edit form (non-multi), the original logic applies directly to the 'items' list
+        if (targetForm === editForm) {
+             const itemsPath = changedValues && Object.keys(changedValues)[0];
+             if (itemsPath && itemsPath.startsWith("items")) {
+                const itemIndex = parseInt(itemsPath.split(".")[1]);
+                const itemKey = itemsPath.split(".")[2];
+                const currentItems = allValues.items;
 
-    const sgstAmount = (taxableAmount * sgstPercent) / 100;
-    const cgstAmount = (taxableAmount * cgstPercent) / 100;
-    const igstAmount = (taxableAmount * igstPercent) / 100;
-    const totalTaxAmount = sgstAmount + cgstAmount + igstAmount; 
+                // Handle item selection/change to auto-fill derived fields
+                if (itemKey === 'item' && currentItems[itemIndex]?.item) {
+                    const selectedItem = saleReturnJSON.options.allItemOptions.find(
+                        (opt) => opt.item === currentItems[itemIndex].item
+                    );
+                    if (selectedItem) {
+                        const defaultQty = currentItems[itemIndex].quantity || 1;
+                        const totals = calculateTotals({ ...selectedItem, quantity: defaultQty });
 
-     const grandTotal =
-      taxableAmount +
-      totalTaxAmount +
-      otherCharges +
-      tcsAmt -
-      cashDiscount +
-      roundOffAmount;
+                        const updatedItems = currentItems.map((item, index) =>
+                            index === itemIndex
+                            ? {
+                                ...item,
+                                ...selectedItem,
+                                quantity: defaultQty,
+                                totalAmount: totals.totalAmount,
+                                grandTotal: totals.grandTotal,
+                                }
+                            : item
+                        );
+                        targetForm.setFieldsValue({ items: updatedItems });
+                        return;
+                    }
+                }
+                // Handle quantity/rate change (recalculate totals)
+                if (itemKey === "quantity" || itemKey === "rate") {
+                    const itemValues = currentItems[itemIndex];
+                    const totals = calculateTotals(itemValues);
 
-    return {
-      netQty: Number(netQty.toFixed(2)),
-      grossQty: Number(grossQty.toFixed(2)), 
-      totalQtyDisplay: Number(grossQty.toFixed(2)), 
-      grossAmount: Number(grossAmount.toFixed(2)),
-      discountAmount: Number(discountAmount.toFixed(2)),
-      sgstAmount: Number(sgstAmount.toFixed(2)), 
-      cgstAmount: Number(cgstAmount.toFixed(2)), 
-      igstAmount: Number(igstAmount.toFixed(2)), 
-      totalGST: Number(totalTaxAmount.toFixed(2)), 
-      taxableAmount: Number(taxableAmount.toFixed(2)), 
-      grandTotal: Number(grandTotal.toFixed(2)),
-    };
+                    targetForm.setFieldsValue({
+                    items: currentItems.map((item, index) =>
+                        index === itemIndex ? { ...item, totalAmount: totals.totalAmount, grandTotal: totals.grandTotal } : item
+                    ),
+                    });
+                }
+             }
+             return;
+        }
+        return; // Exit if not in the new multi-add flow
+    }
+
+    // --- NEW Multi-Add Logic ---
+
+    // Example path: "invoices[0].items[0].item"
+    const invoiceIndex = parseInt(invoicesPath.split("[")[1].split("]")[0]);
+    const remainingPath = invoicesPath.split("].")[1];
+    
+    // Check for item-level changes inside a specific invoice
+    if (remainingPath && remainingPath.startsWith("items")) {
+      const itemIndex = parseInt(remainingPath.split("[")[1].split("]")[0]);
+      const itemKey = remainingPath.split("].")[1];
+
+      const currentInvoices = allValues.invoices;
+      const currentItems = currentInvoices[invoiceIndex].items;
+
+      // Check if 'item' field was changed (i.e., item selection changed)
+      if (itemKey === 'item' && currentItems[itemIndex]?.item) {
+        const selectedItem = saleReturnJSON.options.allItemOptions.find(
+          (opt) => opt.item === currentItems[itemIndex].item
+        );
+        
+        if (selectedItem) {
+          const defaultQty = currentItems[itemIndex].quantity || 1;
+          const totals = calculateTotals({ ...selectedItem, quantity: defaultQty });
+
+          const updatedItems = currentItems.map((item, index) =>
+            index === itemIndex
+              ? {
+                  ...item,
+                  ...selectedItem, // <-- Fills Item Code, Group, HSN, UOM, Rate
+                  quantity: defaultQty,
+                  totalAmount: totals.totalAmount,
+                  grandTotal: totals.grandTotal,
+                }
+              : item
+          );
+          
+          // Must update the entire 'invoices' array field value
+          const updatedInvoices = currentInvoices.map((inv, idx) => 
+            idx === invoiceIndex ? { ...inv, items: updatedItems } : inv
+          );
+
+          targetForm.setFieldsValue({ invoices: updatedInvoices });
+          return;
+        }
+      }
+
+      // Handle quantity/rate change (recalculate totals)
+      if (itemKey === "quantity" || itemKey === "rate") {
+        const itemValues = currentItems[itemIndex];
+        const totals = calculateTotals(itemValues);
+
+        const updatedItems = currentItems.map((item, index) =>
+            index === itemIndex ? { ...item, totalAmount: totals.totalAmount, grandTotal: totals.grandTotal } : item
+        );
+        
+        const updatedInvoices = currentInvoices.map((inv, idx) => 
+            idx === invoiceIndex ? { ...inv, items: updatedItems } : inv
+        );
+
+        targetForm.setFieldsValue({ invoices: updatedInvoices });
+      }
+    }
   };
 
-  const handleValuesChange = (changedValues, allValues, targetForm) => {
-     if (
-      [
-        "quantity",
-        "freeQty",
-        "rate",
-        "discountPercent",
-        "sgstPercent",
-        "cgstPercent",
-        "igstPercent",
-        "otherCharges",
-        "roundOffAmount", 
-        "tcsAmt", 
-        "cashDiscount", 
-      ].some((key) => Object.prototype.hasOwnProperty.call(changedValues, key))
-    ) {
-      const totals = calculateTotals(allValues);
-      targetForm.setFieldsValue(totals);
-    }
-    if (Object.prototype.hasOwnProperty.call(changedValues, "returnReason")) {
-      setIsOtherReason(changedValues.returnReason === "Other");
-    }
-  };
+  // 1. Only fill Invoice & Party Details on Invoice No select
+  const onInvoiceSelectForAdd = (invoiceNo, invoiceIndex) => {
+    // Find the *first* matching record details (any item)
+    const sourceInvoice = records.find((r) => r.invoiceNo === invoiceNo);
+    if (!sourceInvoice) return;
 
-  const setFormValues = (record, targetForm, mode = "view") => {
-    const totals = calculateTotals(record);
+    const currentInvoices = multiAddForm.getFieldValue('invoices') || [];
 
-    const base = {
-      ...record,
-      ...totals, 
-      returnDate: record.returnDate ? dayjs(record.returnDate) : dayjs(),
-      roundOffAmount: record.roundOffAmount || record.roundOff || 0,
-      tcsAmt: record.tcsAmt || 0, 
-      cashDiscount: record.cashDiscount || 0, 
+    // Only set party/invoice-level details, NOT item details
+    const initialValues = {
+      ...currentInvoices[invoiceIndex],
+      invoiceNo: sourceInvoice.invoiceNo,
+      orderNo: sourceInvoice.orderNo,
+      plantName: sourceInvoice.plantName,
+      companyName: sourceInvoice.companyName,
+      customer: sourceInvoice.customer,
+      returnDate: dayjs(),
+      status: "Pending",
+      // Keep items list as is or initialize if not present
+      items: currentInvoices[invoiceIndex].items || [
+        {
+          quantity: 1,
+          rate: 0,
+          totalAmount: 0,
+          grandTotal: 0,
+        },
+      ],
     };
-
-    const isCustomReason = !saleReturnJSON.options.returnReasonOptions.includes(
-      record.returnReason
+    
+    const updatedInvoices = currentInvoices.map((inv, idx) => 
+        idx === invoiceIndex ? initialValues : inv
     );
-    const reasonValue = isCustomReason ? "Other" : record.returnReason;
-    const otherReasonText = isCustomReason ? record.returnReason : "";
-    setIsOtherReason(isCustomReason);
 
-    if (mode === "add") {
-      targetForm.setFieldsValue({
-        ...base,
-        status: "Pending",
-        returnDate: dayjs(),
-      });
-    } else {
-      targetForm.setFieldsValue({
-        ...base,
-        returnReason: reasonValue,
-        otherReasonText: otherReasonText,
-      });
-    }
+    multiAddForm.setFieldsValue({ invoices: updatedInvoices });
   };
 
-  const handleSubmit = (values, mode) => {
-    const record = {
-      ...values,
-      returnDate: values.returnDate
-        ? values.returnDate.format("YYYY-MM-DD")
-        : null,
+  // Pre-fill form values for Edit/View (used for the existing invoice records)
+  const setFormValues = (invoice, targetForm, mode = "view") => {
+    // ... (Your original setFormValues logic for single invoice) ...
+    const processedItems = invoice.items.map((item) => {
+        const isCustomReason = !saleReturnJSON.options.returnReasonOptions.includes(item.returnReason);
+        return {
+          ...item,
+          returnReason: isCustomReason ? "Other" : item.returnReason,
+          otherReasonText: isCustomReason ? item.returnReason : "",
+          totalAmount: calculateTotals(item).totalAmount,
+          grandTotal: calculateTotals(item).grandTotal,
+        };
+      });
+  
+      const base = {
+        ...invoice,
+        returnDate: invoice.returnDate ? dayjs(invoice.returnDate) : dayjs(),
+        items: processedItems,
+      };
+  
+      if (mode === "add") { // Not used for multi-add but kept for consistency
+        targetForm.setFieldsValue({
+          ...base,
+          status: "Pending",
+          returnDate: dayjs(),
+          items: [],
+        });
+      } else {
+        targetForm.setFieldsValue(base);
+      }
+  };
+
+  // Global Submit Handler for the Multi-Add Form
+  const handleMultiSubmit = (values) => {
+    if (!values.invoices || values.invoices.length === 0) {
+        notification.error({ message: "Error", description: "Please add at least one invoice." });
+        return;
+    }
+
+    const newInvoices = values.invoices.map((invoice) => {
+        // Generate a new unique Invoice No for each new entry
+        const newInvoiceNo = `INV-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
+        
+        // 1. Process items: Replace 'Other' selection with actual 'otherReasonText'
+        const finalItems = invoice.items.map((item) => {
+            const processedItem = { ...item }; 
+            
+            if (processedItem.returnReason === "Other") {
+                processedItem.returnReason = processedItem.otherReasonText || "Other";
+            }
+            
+            delete processedItem.otherReasonText;
+            const totals = calculateTotals(processedItem);
+            processedItem.totalAmount = totals.totalAmount; 
+            processedItem.grandTotal = totals.grandTotal;
+            
+            return processedItem;
+        }).filter(item => item.item && item.quantity > 0); // Filter out empty or zero-qty items
+
+        if (finalItems.length === 0) {
+            // Optional: Handle invoices with no items, maybe log or skip
+            return null; 
+        }
+
+        return {
+            ...invoice,
+            invoiceNo: newInvoiceNo, // Use the generated number
+            returnDate: invoice.returnDate.format("YYYY-MM-DD"),
+            items: finalItems,
+        };
+    }).filter(Boolean); // Remove null entries (invoices with no valid items)
+
+    if (newInvoices.length === 0) {
+        notification.warning({ message: "Warning", description: "No valid invoices with items were submitted." });
+        return;
+    }
+
+    // Add all new invoices to the state
+    setInvoices((prev) => [...prev, ...newInvoices]);
+    notification.success({ message: "Success", description: `${newInvoices.length} Sale Returns added successfully!` });
+    
+    setIsMultiAddModalOpen(false);
+    multiAddForm.resetFields();
+  };
+
+
+  // Submission logic for the Edit Modal (Kept from original)
+  const handleEditSubmit = (values) => {
+    // ... (Your original handleSubmit logic for 'edit' mode) ...
+    const finalItems = values.items.map((item) => {
+        const processedItem = { ...item }; 
+        
+        if (processedItem.returnReason === "Other") {
+          processedItem.returnReason = processedItem.otherReasonText || "Other";
+        }
+        
+        delete processedItem.otherReasonText;
+        const totals = calculateTotals(processedItem);
+        processedItem.totalAmount = totals.totalAmount; 
+        processedItem.grandTotal = totals.grandTotal;
+        
+        return processedItem;
+    });
+
+    const newInvoice = {
+        invoiceNo: values.invoiceNo, 
+        orderNo: values.orderNo,
+        customer: values.customer,
+        returnDate: values.returnDate.format("YYYY-MM-DD"),
+        status: values.status,
+        companyName: values.companyName,
+        plantName: values.plantName,
+        items: finalItems,
     };
 
-    if (record.returnReason === "Other") {
-      record.returnReason = record.otherReasonText || "Other";
-    }
-    delete record.otherReasonText;
-    delete record.totalQtyDisplay; 
-    delete record.taxableAmount; 
-
-    if (mode === "edit") {
-      setRecords((prev) =>
-        prev.map((item) =>
-          item.key === selectedRecord.key ? { ...item, ...record } : item
+    setInvoices((prev) =>
+        prev.map((inv) =>
+            inv.invoiceNo === selectedInvoice.invoiceNo
+                ? { ...inv, ...newInvoice, items: finalItems }
+                : inv
         )
-      );
-      setIsEditModalOpen(false);
-      editForm.resetFields();
-    } else if (mode === "add") {
-      setRecords((prev) => [...prev, { ...record, key: prev.length + 1 }]);
-      setIsAddModalOpen(false);
-      addForm.resetFields();
-    }
+    );
+    setIsEditModalOpen(false);
+    editForm.resetFields();
   };
 
   const handleAddClick = () => {
-    addForm.resetFields();
-    addForm.setFieldsValue({
-      status: "Pending",
-      returnDate: dayjs(),
-      quantity: 0,
-      freeQty: 0,
-      rate: 0,
-      discountPercent: 0,
-      sgstPercent: 0,
-      cgstPercent: 0,
-      igstPercent: 0,
-      otherCharges: 0,
-      roundOffAmount: 0,
-      tcsAmt: 0,
-      cashDiscount: 0,
+    multiAddForm.resetFields();
+    multiAddForm.setFieldsValue({
+      // Initialize with one empty invoice
+      invoices: [
+        {
+          status: "Pending",
+          returnDate: dayjs(),
+          items: [
+            {
+              quantity: 1,
+              rate: 0,
+              totalAmount: 0,
+              grandTotal: 0,
+            },
+          ],
+        },
+      ], 
     });
-    setIsOtherReason(false);
-    setIsAddModalOpen(true);
+    setIsMultiAddModalOpen(true);
   };
 
-  const onInvoiceSelectForAdd = (invoiceNo) => {
-    const source = records.find((r) => r.invoiceNo === invoiceNo);
-    if (!source) return;
+  // Helper to find an invoice record by its key (invoiceNo)
+  const getInvoiceByKey = (key) =>
+    invoices.find((inv) => inv.invoiceNo === key);
 
-    const initialValues = {
-      ...source,
-      returnDate: dayjs(),
-      status: "Pending",
-      quantity: source.quantity,
-      freeQty: source.freeQty,
-      rate: source.rate,
-      discountPercent: source.discountPercent,
-      sgstPercent: source.sgstPercent,
-      cgstPercent: source.cgstPercent,
-      igstPercent: source.igstPercent,
-      otherCharges: source.otherCharges,
-      roundOffAmount: source.roundOffAmount || source.roundOff || 0, // 🆕
-      tcsAmt: source.tcsAmt || 0, // 🆕
-      cashDiscount: source.cashDiscount || 0, // 🆕
-    };
-
-    const totals = calculateTotals(initialValues);
-
-    addForm.setFieldsValue({ ...initialValues, ...totals });
-  };
-  const renderFormFields = (mode = "view") => {
-    const isView = mode === "view";
-    const isAdd = mode === "add";
-    const isEdit = mode === "edit";
-
-    const disabledFor = (field) => {
-      if (isView) return true;
-       if (isAdd || isEdit) return !["invoiceNo", "quantity", "returnReason"].includes(field);
-      return true;
-    };
-
+  // --- Reusable Item Form Fields (Used in both Edit and Multi-Add) ---
+  const renderItemFields = (name, fieldKey, restField, isView, targetForm) => {
     return (
-      <>
-        <h6 className="text-amber-500">Invoice & Party Details</h6>
+      <div
+        key={fieldKey}
+        className="p-3 mb-4 border border-gray-200 rounded-md relative"
+      >
         <Row gutter={16}>
           <Col span={6}>
-            <Form.Item label="Invoice No" name="invoiceNo" rules={[{ required: true }]}>
-              <Select
-                onChange={(val) => isAdd && onInvoiceSelectForAdd(val)} 
-                disabled={disabledFor("invoiceNo")}
-              >
-                {[...new Set(records.map((r) => r.invoiceNo))].map(
-                  (invoiceNo) => {
-                    const record = records.find(
-                      (r) => r.invoiceNo === invoiceNo
-                    );
-                    return (
-                      <Select.Option key={invoiceNo} value={invoiceNo}>
-                        {invoiceNo} - {record?.item}
-                      </Select.Option>
-                    );
-                  }
-                )}
-              </Select>
-            </Form.Item>
-          </Col>
-          <Col span={6}>
-            <Form.Item label="Order No" name="orderNo">
-              <Input disabled />
-            </Form.Item>
-          </Col>
-          <Col span={6}>
-            <Form.Item label="Plant Name" name="plantName">
-              <Input disabled />
-            </Form.Item>
-          </Col>
-          <Col span={6}>
-            <Form.Item label="Company" name="companyName">
-              <Input disabled />
-            </Form.Item>
-          </Col>
-
-          <Col span={6}>
-            <Form.Item label="Customer Name" name="customer">
-              <Input disabled />
-            </Form.Item>
-          </Col>
-
-          <Col span={6}>
             <Form.Item
-              label="Return Date"
-              name="returnDate"
-              rules={[{ required: true }]}
+              {...restField}
+              name={[name, "item"]}
+              fieldKey={[fieldKey, "item"]}
+              label="Item Name"
+              rules={[{ required: true, message: "Missing item" }]}
             >
-              <DatePicker
-                className="w-full"
-                disabledDate={(current) => current && current > dayjs().endOf("day")}
-                disabled={disabledFor("returnDate")}
-              />
-            </Form.Item>
-          </Col>
-
-          <Col span={6}>
-            <Form.Item label="Branch Name" name="branchName">
-              <Input disabled />
-            </Form.Item>
-          </Col>
-
-          <Col span={6}>
-            <Form.Item label="Depo Name" name="depo">
-              <Input disabled />
-            </Form.Item>
-          </Col>
-          <Col span={6}>
-            <Form.Item label="Transporter" name="transporter">
-              <Input disabled />
-            </Form.Item>
-          </Col>
-          <Col span={6}>
-            <Form.Item label="Way billNo" name="waybillNo">
-              <Input disabled />
-            </Form.Item>
-          </Col>
-          <Col span={6}>
-            <Form.Item label="Vehicle No" name="vehicleNo">
-              <Input disabled />
-            </Form.Item>
-          </Col>
-          <Col span={6}>
-            <Form.Item label="Driver Name" name="driverName">
-              <Input disabled />
-            </Form.Item>
-          </Col>
-          <Col span={6}>
-            <Form.Item label="Naarration" name="naarration">
-              <Input disabled />
-            </Form.Item>
-          </Col>
-          <Col span={6}>
-            <Form.Item label="Status" name="status">
-              <Select disabled={disabledFor("status")}>
-                {saleReturnJSON.options.statusOptions.map((v) => (
-                  <Select.Option key={v}>{v}</Select.Option>
+              {/* Item Select: Editable in Add/Edit, Readonly in View */}
+              <Select disabled={isView} showSearch optionFilterProp="children">
+                {saleReturnJSON.options.allItemOptions.map((opt) => (
+                  <Select.Option key={opt.item} value={opt.item}>
+                    {opt.item}
+                  </Select.Option>
                 ))}
               </Select>
             </Form.Item>
           </Col>
-        </Row>
-        <h6 className="text-amber-500">Item & Return Details</h6>
-        <Row gutter={16}>
-          <Col span={6}>
-            <Form.Item label="Item Name" name="item" rules={[{ required: true }]}>
-              <Input disabled />
-            </Form.Item>
-          </Col>
-          <Col span={6}>
-            <Form.Item label="Item Code" name="itemCode" rules={[{ required: true }]}>
-              <Input disabled />
-            </Form.Item>
-          </Col>
-
-          <Col span={6}>
-            <Form.Item label="Item Group" name="itemGroup" rules={[{ required: true }]}>
-              <Input disabled />
-            </Form.Item>
-          </Col>
-
-          <Col span={6}>
-            <Form.Item label="HSN code" name="hsnCode" rules={[{ required: true }]}>
-              <Input disabled />
-            </Form.Item>
-          </Col>
-
-          <Col span={6}>
-            <Form.Item label="UOM" name="uom" rules={[{ required: true }]}>
-              <Input disabled />
-            </Form.Item>
-          </Col>
-
-          <Col span={6}>
-            <Form.Item label="Net Quantity" name="netQty">
-              <Input className="w-full" disabled />
-            </Form.Item>
-          </Col>
-          <Col span={6}>
-            <Form.Item label="Free Quantity" name="freeQty">
-              <Input className="w-full" disabled />
-            </Form.Item>
-          </Col>
-          <Col span={6}>
-            <Form.Item label="Return Quantity" name="quantity" rules={[{ required: true }]}>
-              <Input className="w-full" disabled={disabledFor("quantity")} min={1} />
-            </Form.Item>
-          </Col>
-        </Row>
-
-        <Row gutter={16}>
-          
-          <Col span={6}>
-            <Form.Item label="Total (Net + Free) Quantity" name="grossQty">
-              <Input className="w-full" disabled />
-            </Form.Item>
-          </Col>
-
-          <Col span={6}>
-            <Form.Item label="Rate" name="rate">
-              <Input className="w-full" disabled />
-            </Form.Item>
-          </Col>
-
-          <Col span={6}>
-            <Form.Item label="Gross Amount" name="grossAmount">
-              <Input className="w-full" disabled />
-            </Form.Item>
-          </Col>
-
           <Col span={6}>
             <Form.Item
-              label="Return Reason"
-              name="returnReason"
-              rules={[{ required: true }]}
+              {...restField}
+              name={[name, "itemCode"]}
+              fieldKey={[fieldKey, "itemCode"]}
+              label="Item Code"
             >
-              <Select disabled={disabledFor("returnReason")}>
+              <Input disabled />
+            </Form.Item>
+          </Col>
+          <Col span={6}>
+            <Form.Item
+              {...restField}
+              name={[name, "itemGroup"]}
+              fieldKey={[fieldKey, "itemGroup"]}
+              label="Item Group"
+            >
+              <Input disabled />
+            </Form.Item>
+          </Col>
+          <Col span={6}>
+            <Form.Item
+              {...restField}
+              name={[name, "hsnCode"]}
+              fieldKey={[fieldKey, "hsnCode"]}
+              label="HSN code"
+            >
+              <Input disabled />
+            </Form.Item>
+          </Col>
+        </Row>
+        <Row gutter={16}>
+          <Col span={6}>
+            <Form.Item
+              {...restField}
+              name={[name, "uom"]}
+              fieldKey={[fieldKey, "uom"]}
+              label="UOM"
+            >
+              <Input disabled />
+            </Form.Item>
+          </Col>
+          <Col span={6}>
+            <Form.Item
+              {...restField}
+              name={[name, "quantity"]}
+              fieldKey={[fieldKey, "quantity"]}
+              label="Return Quantity"
+              rules={[{ required: true, type: "number", min: 1, message: "Min Qty: 1" }]}
+              initialValue={1}
+            >
+              <InputNumber
+                className="w-full"
+                disabled={isView}
+                min={1}
+              />
+            </Form.Item>
+          </Col>
+          <Col span={6}>
+            <Form.Item
+              {...restField}
+              name={[name, "rate"]}
+              fieldKey={[fieldKey, "rate"]}
+              label="Rate"
+            >
+              <InputNumber className="w-full" disabled />
+            </Form.Item>
+          </Col>
+          <Col span={6}>
+            <Form.Item
+              {...restField}
+              name={[name, "totalAmount"]}
+              fieldKey={[fieldKey, "totalAmount"]}
+              label="Total Amount (Gross)"
+              initialValue={0}
+            >
+              <InputNumber className="w-full" disabled />
+            </Form.Item>
+          </Col>
+        </Row>
+        <Row gutter={16}>
+          <Col span={6}>
+            <Form.Item
+              {...restField}
+              name={[name, "returnReason"]}
+              fieldKey={[fieldKey, "returnReason"]}
+              label="Return Reason"
+              rules={[{ required: true, message: "Select a reason" }]}
+            >
+              <Select disabled={isView}>
                 {saleReturnJSON.options.returnReasonOptions.map((v) => (
                   <Select.Option key={v} value={v}>
                     {v}
@@ -497,182 +664,318 @@ export default function SaleReturn() {
                 </Select.Option>
               </Select>
             </Form.Item>
+            {/* Conditional rendering for 'Specify Other Reason' */}
+            <Form.Item
+              noStyle
+              shouldUpdate={(prevValues, currentValues) => {
+                // Determine if we are in the multi-add form or single edit form
+                const isMulti = currentValues.invoices !== undefined;
+                if (isMulti) {
+                    // Logic for multi-add: Check the current invoice and item
+                    const currentInvoice = currentValues.invoices?.[fieldKey]?._name;
+                    const prevInvoice = prevValues.invoices?.[fieldKey]?._name;
+                    return (
+                        currentValues.invoices?.[currentInvoice]?.items?.[name]?.returnReason !== 
+                        prevValues.invoices?.[prevInvoice]?.items?.[name]?.returnReason
+                    );
+                } else {
+                    // Logic for single edit: Check the item directly
+                    return (
+                        prevValues.items?.[name]?.returnReason !==
+                        currentValues.items?.[name]?.returnReason
+                    );
+                }
+              }}
+            >
+              {({ getFieldValue }) => {
+                const isMulti = getFieldValue("invoices") !== undefined;
+                const reasonPath = isMulti ? ["invoices", fieldKey, "items", name, "returnReason"] : ["items", name, "returnReason"];
+                
+                if (getFieldValue(reasonPath) === "Other") {
+                    return (
+                        <Form.Item
+                            {...restField}
+                            name={[name, "otherReasonText"]}
+                            fieldKey={[fieldKey, "otherReasonText"]}
+                            rules={[
+                                { required: true, message: "Please enter a reason" },
+                            ]}
+                        >
+                            <Input.TextArea
+                                rows={2}
+                                placeholder="Specify Other Reason"
+                                disabled={isView}
+                            />
+                        </Form.Item>
+                    );
+                }
+                return null;
+              }}
+            </Form.Item>
+          </Col>
+          <Col span={6}>
+            <Form.Item
+              {...restField}
+              name={[name, "grandTotal"]}
+              fieldKey={[fieldKey, "grandTotal"]}
+              label="Grand Total"
+              initialValue={0}
+            >
+              <InputNumber className="w-full" disabled />
+            </Form.Item>
+          </Col>
+        </Row>
 
-            {isOtherReason && (
-              <Form.Item
-                label="Specify Other Reason"
-                name="otherReasonText"
-                rules={[{ required: true, message: "Please enter a reason" }]}
+        {/* Delete Button for Item */}
+        {!isView && (
+          <DeleteOutlined
+            className="absolute top-2 right-2 text-red-500 cursor-pointer text-lg"
+            onClick={() => targetForm.getFieldValue(["invoices"]) ? 
+                targetForm.getFieldsValue().invoices[fieldKey].items.length > 1 && 
+                targetForm.setFieldsValue({
+                    invoices: targetForm.getFieldsValue().invoices.map((inv, idx) => 
+                        idx === fieldKey ? { ...inv, items: inv.items.filter((_, i) => i !== name) } : inv
+                    )
+                })
+                : targetForm.getFieldsValue().items.length > 1 && targetForm.setFieldsValue({ items: targetForm.getFieldsValue().items.filter((_, i) => i !== name) })
+            }
+          />
+        )}
+      </div>
+    );
+  };
+    
+  // --- NEW: Render Form for a Single Invoice within the Multi-Add Modal ---
+  const renderSingleInvoiceForm = (invoiceName, invoiceFieldKey, removeInvoice, isView, targetForm) => {
+    return (
+      <div 
+        key={invoiceFieldKey} 
+        className="p-4 mb-6 border border-amber-300 rounded-lg shadow-inner relative bg-amber-50/50"
+      >
+        <h6 className="text-xl font-bold text-amber-600 mb-3">
+          Invoice #{invoiceFieldKey + 1}
+        </h6>
+        {/* Remove Invoice Button (Only in Add mode) */}
+        {!isView && (
+            <MinusCircleOutlined
+                className="absolute top-4 right-4 text-red-600 cursor-pointer text-xl"
+                onClick={() => removeInvoice(invoiceName)}
+            />
+        )}
+
+        <Row gutter={16}>
+          <Col span={6}>
+            <Form.Item
+              label="Invoice No"
+              name={[invoiceName, "invoiceNo"]}
+              fieldKey={[invoiceFieldKey, "invoiceNo"]}
+              rules={[{ required: true, message: "Select Invoice" }]}
+            >
+              <Select
+                onChange={(val) => onInvoiceSelectForAdd(val, invoiceFieldKey)}
+                disabled={isView}
+                showSearch
+                optionFilterProp="children"
               >
-                <Input.TextArea
-                  rows={3}
-                  placeholder="Please describe the reason for return"
-                  disabled={isView}
-                />
-              </Form.Item>
-            )}
-          </Col>
-        </Row>
-
-        <h6 className="text-amber-500">Tax & Amount Details</h6>
-        <Row gutter={16}>
-          <Col span={6}>
-            <Form.Item label="Discount %" name="discountPercent">
-              <Input className="w-full" disabled />
-            </Form.Item>
-          </Col>
-
-          <Col span={6}>
-            <Form.Item label="Discount Amount" name="discountAmount">
-              <Input className="w-full" disabled />
-            </Form.Item>
-          </Col>
-
-          <Col span={6}>
-            <Form.Item label="Taxable Amount" name="taxableAmount">
-              <Input className="w-full" disabled />
+                {[...new Set(records.map((r) => r.invoiceNo))].map(
+                  (invoiceNo) => (
+                    <Select.Option key={invoiceNo} value={invoiceNo}>
+                      {invoiceNo}
+                    </Select.Option>
+                  )
+                )}
+              </Select>
             </Form.Item>
           </Col>
           <Col span={6}>
-            <Form.Item label="SGST %" name="sgstPercent">
-              <Input className="w-full" disabled />
-            </Form.Item>
-          </Col>
-        </Row>
-
-        <Row gutter={16}>
-          <Col span={6}>
-            <Form.Item label="SGST Amount" name="sgstAmount">
-              <Input className="w-full" disabled />
+            <Form.Item label="Order No" name={[invoiceName, "orderNo"]}>
+              <Input disabled />
             </Form.Item>
           </Col>
           <Col span={6}>
-            <Form.Item label="CGST %" name="cgstPercent">
-              <Input className="w-full" disabled />
+            <Form.Item label="Plant Name" name={[invoiceName, "plantName"]}>
+              <Input disabled />
             </Form.Item>
           </Col>
           <Col span={6}>
-            <Form.Item label="CGST Amount" name="cgstAmount">
-              <Input className="w-full" disabled />
+            <Form.Item label="Company" name={[invoiceName, "companyName"]}>
+              <Input disabled />
             </Form.Item>
           </Col>
           <Col span={6}>
-            <Form.Item label="IGST %" name="igstPercent">
-              <Input className="w-full" disabled />
+            <Form.Item label="Customer Name" name={[invoiceName, "customer"]}>
+              <Input disabled />
+            </Form.Item>
+          </Col>
+          <Col span={6}>
+            <Form.Item
+              label="Return Date"
+              name={[invoiceName, "returnDate"]}
+              rules={[{ required: true }]}
+            >
+              <DatePicker
+                className="w-full"
+                disabledDate={(current) => current && current > dayjs().endOf("day")}
+                disabled={isView}
+              />
+            </Form.Item>
+          </Col>
+          <Col span={6}>
+            <Form.Item label="Status" name={[invoiceName, "status"]}>
+              <Select disabled={isView}>
+                {saleReturnJSON.options.statusOptions.map((v) => (
+                  <Select.Option key={v}>{v}</Select.Option>
+                ))}
+              </Select>
             </Form.Item>
           </Col>
         </Row>
 
-        <Row gutter={16}>
-          <Col span={6}>
-            <Form.Item label="IGST Amount" name="igstAmount">
-              <Input className="w-full" disabled />
-            </Form.Item>
-          </Col>
-          <Col span={6}>
-            <Form.Item label="Total GST" name="totalGST">
-              <Input className="w-full" disabled />
-            </Form.Item>
-          </Col>
+        <h6 className="text-amber-500 mt-4 mb-2">Items to Return for Invoice #{invoiceFieldKey + 1}</h6>
+        {/* --- Nested Form.List for Multiple Items in THIS Invoice --- */}
+        <Form.List name={[invoiceName, "items"]}>
+          {(fields, { add, remove }) => (
+            <>
+              {fields.map(({ key: itemKey, name: itemName, fieldKey: itemFieldKey, ...restField }) => (
+                // Passing the parent form fields (invoiceFieldKey) to resolve dynamic names
+                renderItemFields(itemName, invoiceFieldKey, restField, isView, targetForm)
+              ))}
+              {/* Add Item Button */}
+              {!isView && (
+                <Form.Item>
+                  <Button
+                    type="dashed"
+                    onClick={() => add({ quantity: 1, rate: 0, totalAmount: 0, grandTotal: 0 })}
+                    block
+                    icon={<PlusOutlined />}
+                    className="border-amber-400! text-amber-700! hover:bg-amber-100!"
+                  >
+                    Add Another Item to Return for Invoice #{invoiceFieldKey + 1}
+                  </Button>
+                </Form.Item>
+              )}
+            </>
+          )}
+        </Form.List>
+      </div>
+    );
+  };
 
-          <Col span={6}>
-            <Form.Item label="TCS Amount" name="tcsAmt">
-              <Input className="w-full" disabled />
-            </Form.Item>
-          </Col>
+  // --- Main Render Section (Same as your original component's outer structure) ---
+  const renderOriginalInvoiceFormFields = (mode = "view", targetForm) => {
+    // This is the original, single-invoice form structure, adjusted to accept a form prop
+    const isView = mode === "view";
+    const isAdd = mode === "add"; // This is now 'edit' or 'view' context in this function
 
-          <Col span={6}>
-            <Form.Item label="Cash Discount" name="cashDiscount">
-              <Input className="w-full" disabled />
-            </Form.Item>
-          </Col>
-        </Row>
-        <Row gutter={16}>
-          <Col span={6}>
-            <Form.Item label="Other Charges" name="otherCharges">
-              <Input className="w-full" disabled />
-            </Form.Item>
-          </Col>
-
-          <Col span={6}>
-            <Form.Item label="Round Off Amount" name="roundOffAmount">
-              <Input className="w-full" disabled />
-            </Form.Item>
-          </Col>
-
-          <Col span={6}>
-            <Form.Item label="Grand Total (Total Amount)" name="grandTotal">
-              <Input className="w-full" disabled />
-            </Form.Item>
-          </Col>
-        </Row>
+    return (
+      <>
+        {/* Only include top-level fields for Edit/View as they use a flat form structure */}
+        {mode !== "multi-add" && (
+            <>
+                <h6 className="text-amber-500">Invoice & Party Details</h6>
+                <Row gutter={16}>
+                    <Col span={6}>
+                        <Form.Item label="Invoice No" name="invoiceNo" rules={[{ required: true }]}>
+                            {/* Disabled as it's an existing invoice */}
+                            <Input disabled /> 
+                        </Form.Item>
+                    </Col>
+                    <Col span={6}>
+                        <Form.Item label="Order No" name="orderNo"><Input disabled /></Form.Item>
+                    </Col>
+                    <Col span={6}>
+                        <Form.Item label="Plant Name" name="plantName"><Input disabled /></Form.Item>
+                    </Col>
+                    <Col span={6}>
+                        <Form.Item label="Company" name="companyName"><Input disabled /></Form.Item>
+                    </Col>
+                    <Col span={6}>
+                        <Form.Item label="Customer Name" name="customer"><Input disabled /></Form.Item>
+                    </Col>
+                    <Col span={6}>
+                        <Form.Item label="Return Date" name="returnDate" rules={[{ required: true }]}>
+                            <DatePicker className="w-full" disabled={isView} />
+                        </Form.Item>
+                    </Col>
+                    <Col span={6}>
+                        <Form.Item label="Status" name="status">
+                            <Select disabled={isView}>
+                                {saleReturnJSON.options.statusOptions.map((v) => (<Select.Option key={v}>{v}</Select.Option>))}
+                            </Select>
+                        </Form.Item>
+                    </Col>
+                </Row>
+            </>
+        )}
+        
+        <h6 className="text-amber-500 mt-4">Items to Return</h6>
+        
+        {/* --- Form.List for Multiple Items --- */}
+        <Form.List name="items">
+          {(fields, { add, remove }) => (
+            <>
+              {fields.map(({ key, name, fieldKey, ...restField }) => (
+                 // Use the reusable item fields renderer (key will be the item's index)
+                renderItemFields(name, key, restField, isView, targetForm)
+              ))}
+              
+              {/* Add Item Button */}
+              {!isView && (
+                <Form.Item>
+                  <Button
+                    type="dashed"
+                    onClick={() => add({ quantity: 1, rate: 0, totalAmount: 0, grandTotal: 0 })}
+                    block
+                    icon={<PlusOutlined />}
+                    className="border-amber-400! text-amber-700! hover:bg-amber-100!"
+                  >
+                    Add Another Item to Return
+                  </Button>
+                </Form.Item>
+              )}
+            </>
+          )}
+        </Form.List>
       </>
     );
   };
 
-  const columns = [
-    {
-      title: <span className="text-amber-700 font-semibold">Invoice No</span>,
-      dataIndex: "invoiceNo",
-      width: 100,
-      render: (t) => <span className="text-amber-800">{t}</span>,
-    },
-    {
-      title: <span className="text-amber-700 font-semibold">Item Name</span>,
-      dataIndex: "item",
-      width: 100,
-      render: (t) => <span className="text-amber-800">{t}</span>,
-    },
-    {
-      title: <span className="text-amber-700 font-semibold">Total Qty</span>,
-      width: 100,
-      render: (_, record) => (
-        <span className="text-amber-800">
-          {(record.quantity || 0) + (record.freeQty || 0)} {record.uom}
-        </span>
-      ),
-    },
-    {
-      title: <span className="text-amber-700 font-semibold">Total Amt</span>,
-      dataIndex: "grandTotal",
-      width: 100,
-      render: (t) => <span className="text-amber-800">{t}</span>,
-    },
-    {
-      title: <span className="text-amber-700 font-semibold">Return Date</span>,
-      dataIndex: "returnDate",
-      width: 100,
-      render: (t) => <span className="text-amber-800">{t}</span>,
-    },
-    {
-      title: <span className="text-amber-700 font-semibold">Reason</span>,
-      dataIndex: "returnReason",
-      width: 100,
-      render: (t) => <span className="text-amber-800">{t}</span>,
-    },
-    {
-      title: <span className="text-amber-700 font-semibold">Status</span>,
-      dataIndex: "status",
-      width: 100,
+
+  // Columns definition (same as your original)
+  const mergedInvoiceColumnsKeys = ["invoiceNo", "orderNo", "returnDate", "status", "action"];
+
+  const baseColumns = [
+    { title: <span className="text-amber-700 font-semibold">Invoice No</span>, dataIndex: "invoiceNo", key: "invoiceNo", width: 120, render: (t) => <span className="text-amber-800">{t}</span>, },
+    { title: <span className="text-amber-700 font-semibold">Order No</span>, dataIndex: "orderNo", key: "orderNo", width: 120, render: (t) => <span className="text-amber-800">{t}</span>, },
+    { title: <span className="text-amber-700 font-semibold">Item Name</span>, dataIndex: "item", key: "item", width: 150, render: (t) => <span className="text-amber-800">{t}</span>, },
+    { title: <span className="text-amber-700 font-semibold">Return Qty</span>, dataIndex: "quantity", key: "quantity", width: 120, render: (t, record) => (<span className="text-amber-800">{t} {record.uom}</span>), },
+    { title: <span className="text-amber-700 font-semibold">Total Amt</span>, dataIndex: "grandTotal", key: "grandTotal", width: 120, render: (t) => <span className="text-amber-800">₹{t}</span>, },
+    { title: <span className="text-amber-700 font-semibold">Return Date</span>, dataIndex: "returnDate", key: "returnDate", width: 120, render: (t) => <span className="text-amber-800">{t}</span>, },
+    { title: <span className="text-amber-700 font-semibold">Reason</span>, dataIndex: "returnReason", key: "returnReason", width: 150, render: (t) => <span className="text-amber-800">{t}</span>, },
+    { 
+      title: <span className="text-amber-700 font-semibold">Status</span>, 
+      dataIndex: "status", 
+      key: "status", 
+      width: 100, 
       render: (status) => {
         const base = "px-3 py-1 rounded-full text-sm font-semibold";
-        if (status === "Approved")
-          return <span className={`${base} bg-green-100 text-green-700`}>{status}</span>;
-        if (status === "Pending")
-          return <span className={`${base} bg-yellow-100 text-yellow-700`}>{status}</span>;
+        if (status === "Approved") return (<span className={`${base} bg-green-100 text-green-700`}>{status}</span>);
+        if (status === "Pending") return (<span className={`${base} bg-yellow-100 text-yellow-700`}>{status}</span>);
         return <span className={`${base} bg-red-100 text-red-700`}>{status}</span>;
       },
     },
     {
       title: <span className="text-amber-700 font-semibold">Action</span>,
+      key: "action",
       width: 80,
       render: (record) => (
         <div className="flex gap-3">
           <EyeOutlined
             className="cursor-pointer! text-blue-500!"
             onClick={() => {
-              setSelectedRecord(record);
-              setFormValues(record, viewForm, "view");
+              const invoiceRecord = getInvoiceByKey(record.invoiceNo);
+              setSelectedInvoice(invoiceRecord);
+              setFormValues(invoiceRecord, viewForm, "view");
               setIsViewModalOpen(true);
             }}
           />
@@ -680,8 +983,9 @@ export default function SaleReturn() {
             <EditOutlined
               className="cursor-pointer! text-red-500!"
               onClick={() => {
-                setSelectedRecord(record);
-                setFormValues(record, editForm, "edit");
+                const invoiceRecord = getInvoiceByKey(record.invoiceNo);
+                setSelectedInvoice(invoiceRecord);
+                setFormValues(invoiceRecord, editForm, "edit");
                 setIsEditModalOpen(true);
               }}
             />
@@ -690,16 +994,29 @@ export default function SaleReturn() {
       ),
     },
   ];
-
+  
+  const columns = baseColumns.map(col => {
+    if (mergedInvoiceColumnsKeys.includes(col.key)) {
+      return {
+        ...col,
+        onCell: (record) => {
+          return { rowSpan: record.invoiceRowSpan };
+        },
+      };
+    }
+    return col;
+  });
+  
   return (
     <div>
       <div className="flex justify-between items-center mb-0">
         <div>
-          <h1 className="text-3xl font-bold text-amber-700">Sales Return</h1>
-          <p className="text-amber-600">Manage your sales Return easily</p>
+          <h1 className="text-3xl font-bold text-amber-700">Sale Return </h1>
+          <p className="text-amber-600">Manage your Sales Return transactions easily</p>
         </div>
       </div>
-
+      
+      {/* Search and Action Bar */}
       <div className="flex justify-between items-center mb-2">
         <div className="flex gap-2">
           <Input
@@ -718,7 +1035,6 @@ export default function SaleReturn() {
             Reset Search
           </Button>
         </div>
-
         <div className="flex gap-2">
           <Button
             icon={<DownloadOutlined />}
@@ -730,22 +1046,28 @@ export default function SaleReturn() {
             type="primary"
             icon={<PlusOutlined />}
             className="bg-amber-500! hover:bg-amber-600! border-none!"
-            onClick={handleAddClick}
+            onClick={handleAddClick} // Opens the NEW Multi-Add Modal
           >
-            Add New
+            Add New Return(s)
           </Button>
         </div>
       </div>
-
+      
+      {/* Main Data Table */}
       <div className="border border-amber-300 rounded-lg p-4 shadow-md">
-        <Table columns={columns} dataSource={filteredData} pagination={false} />
+        <Table 
+            columns={columns} 
+            dataSource={mergedData} 
+            pagination={{ pageSize: 10 }} 
+            scroll={{ x: 1000 }} // Ensure horizontal scroll for many columns
+        />
       </div>
 
-      {/* Edit Modal */}
+      {/* --- Edit Modal (Existing Invoice) --- */}
       <Modal
         title={
           <span className="text-amber-700 text-2xl font-semibold">
-            Edit Sale Return
+            Edit Return (Invoice: {selectedInvoice?.invoiceNo})
           </span>
         }
         open={isEditModalOpen}
@@ -754,18 +1076,17 @@ export default function SaleReturn() {
           editForm.resetFields();
         }}
         footer={null}
-        width={1000}
+        width={1200}
       >
         <Form
           form={editForm}
           layout="vertical"
           onValuesChange={(changedValues, allValues) =>
-            handleValuesChange(changedValues, allValues, editForm)
+            handleItemValuesChange(changedValues, allValues, editForm)
           }
-          onFinish={(values) => handleSubmit(values, "edit")}
+          onFinish={handleEditSubmit}
         >
-          {renderFormFields("edit", editForm)}
-
+          {renderOriginalInvoiceFormFields("edit", editForm)}
           <div className="flex justify-end gap-2 mt-6">
             <Button
               onClick={() => {
@@ -776,77 +1097,113 @@ export default function SaleReturn() {
             >
               Cancel
             </Button>
-
             <Button
               type="primary"
               htmlType="submit"
               className="bg-amber-500! hover:bg-amber-600! border-none!"
             >
-              Update
+              Update Return
             </Button>
           </div>
         </Form>
       </Modal>
 
-      {/* Add Modal */}
+      {/* --- View Modal (Existing Invoice) --- */}
       <Modal
         title={
           <span className="text-amber-700 text-2xl font-semibold">
-            Add New Sale Return
+            View Return (Invoice: {selectedInvoice?.invoiceNo})
           </span>
         }
-        open={isAddModalOpen}
+        open={isViewModalOpen}
+        onCancel={() => setIsViewModalOpen(false)}
+        footer={
+            <Button 
+                onClick={() => setIsViewModalOpen(false)}
+                icon={<RollbackOutlined />}
+                className="border-amber-400! text-amber-700! hover:bg-amber-100!"
+            >
+                Close
+            </Button>
+        }
+        width={1200}
+      >
+        <Form form={viewForm} layout="vertical">
+          {renderOriginalInvoiceFormFields("view", viewForm)}
+        </Form>
+      </Modal>
+
+      {/* --- ⭐ NEW Multi-Add Modal (The main requirement) ⭐ --- */}
+      <Modal
+        title={
+          <span className="text-amber-700 text-2xl font-semibold">
+            Add Multiple Sale Returns
+          </span>
+        }
+        open={isMultiAddModalOpen}
         onCancel={() => {
-          setIsAddModalOpen(false);
-          addForm.resetFields();
+          setIsMultiAddModalOpen(false);
+          multiAddForm.resetFields();
         }}
         footer={null}
-        width={1000}
+        width={1400} // Wider modal to accommodate multiple invoices
+        style={{ top: 20 }}
       >
         <Form
-          form={addForm}
+          form={multiAddForm}
           layout="vertical"
           onValuesChange={(changedValues, allValues) =>
-            handleValuesChange(changedValues, allValues, addForm)
+            handleItemValuesChange(changedValues, allValues, multiAddForm)
           }
-          onFinish={(values) => handleSubmit(values, "add")}
+          onFinish={handleMultiSubmit}
         >
-          {renderFormFields("add", addForm)}
+          {/* --- Outer Form.List for Multiple Invoices --- */}
+          <Form.List name="invoices">
+            {(fields, { add, remove }) => (
+              <>
+                {fields.map(({ key: invoiceKey, name: invoiceName, fieldKey: invoiceFieldKey, ...restField }) => (
+                    // Render the full form structure for each invoice
+                    renderSingleInvoiceForm(invoiceName, invoiceFieldKey, remove, false, multiAddForm)
+                ))}
+                
+                {/* Add New Invoice Button */}
+                <Form.Item>
+                  <Button
+                    type="dashed"
+                    onClick={() => add({ 
+                        status: "Pending", 
+                        returnDate: dayjs(), 
+                        items: [{ quantity: 1, rate: 0, totalAmount: 0, grandTotal: 0 }] 
+                    })}
+                    block
+                    icon={<PlusOutlined />}
+                    className="border-green-400! text-green-700! hover:bg-green-100! mt-4"
+                  >
+                    Add Another Sale Return (New Invoice)
+                  </Button>
+                </Form.Item>
+              </>
+            )}
+          </Form.List>
 
-          <div className="flex justify-end gap-2 mt-6">
+          <div className="flex justify-end gap-2 mt-6 border-t pt-4">
             <Button
               onClick={() => {
-                setIsAddModalOpen(false);
-                addForm.resetFields();
+                setIsMultiAddModalOpen(false);
+                multiAddForm.resetFields();
               }}
               className="border-amber-400! text-amber-700! hover:bg-amber-100!"
             >
               Cancel
             </Button>
-
             <Button
               type="primary"
               htmlType="submit"
-              className="bg-amber-500! hover:bg-amber-600! border-none!"
+              className="bg-green-500! hover:bg-green-600! border-none!"
             >
-              Add
+              Submit All Returns
             </Button>
           </div>
-        </Form>
-      </Modal>
-
-      <Modal
-        title={<span className="text-amber-700 text-2xl font-semibold">View Return</span>}
-        open={isViewModalOpen}
-        onCancel={() => {
-          setIsViewModalOpen(false);
-          viewForm.resetFields();
-        }}
-        footer={null}
-        width={1000}
-      >
-        <Form form={viewForm} layout="vertical">
-          {renderFormFields("view", viewForm)}
         </Form>
       </Modal>
     </div>

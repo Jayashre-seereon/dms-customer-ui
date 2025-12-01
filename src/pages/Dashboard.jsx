@@ -55,33 +55,33 @@ const dashboardData = {
   ],
   quickActions: [
     {
-      title: "Sale Contract",
-      description: "Manage sales contracts",
+      title: "Contract",
+      description: "Manage contracts",
       count: 42,
       change: "+18%",
       icon: <FileTextOutlined />,
       color: "amber",
-      route: "/sale-contract",
+      route: "contract",
       bg: "bg-amber-100",
     },
     {
-      title: "Sale Order",
-      description: "Process sales orders",
+      title: "Order",
+      description: "Process orders",
       count: 35,
       change: "+15%",
       icon: <ShoppingCartOutlined />,
       color: "amber",
-      route: "/sale-order",
+      route: "order",
       bg: "bg-amber-100",
     },
       {
-      title: "Sale Return",
+      title: "Return",
       description: "Handle returns",
       count: 4,
       change: "-8%",
       icon: <ReloadOutlined />,
       color: "amber",
-      route: "/sale-return",
+      route: "return",
       bg: "bg-amber-100",
     },
     {
@@ -207,10 +207,10 @@ export default function Dashboard() {
 
       {/* CHARTS */}
       <div className="grid grid-cols-1 pt-4 md:grid-cols-2 gap-6">
-             {/* Product Sales Distribution */}
+             {/* Product Distribution */}
         <Card className="rounded-xl!">
           <h3 className="font-semibold mb-2 text-amber-700">
-            Product Sales Distribution
+            Product Distribution
           </h3>
           <p className="text-sm text-amber-600 mb-4">
             Ruchi Soya edible oils performance
