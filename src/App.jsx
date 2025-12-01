@@ -8,11 +8,10 @@ import ProfileSettings from "./pages/ProfileSettings";
 import Layout from "./pages/Layout";
 import SaleContract from"./pages/SaleContract";
 import SaleOrder from "./pages/SaleOrder"
-import SalReturn from "./pages/SaleReturn"
+import RaiseDispute from "./pages/RaiseDispute"
 import DeliveryStatus from "./pages/DelivereyStatus"
 import Reports from "./pages/Reports"
 import Transactions from "./pages/Transactions"
-import RiseDispute from "./pages/RiseDispute"
 export default function App() {
   return (
     <AuthProvider>
@@ -30,11 +29,10 @@ export default function App() {
             }
           >
             <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/sale-contract" element={<SaleContract />} />
-            <Route path="/sale-order"element={<SaleOrder/>}/> 
-            <Route path="/sale-return" element={<SalReturn />} />
+            <Route path="/purchase-contract" element={<SaleContract />} />
+            <Route path="/purchase-order"element={<SaleOrder/>}/> 
+            <Route path="/rise-dispute" element={<RaiseDispute />} />
             <Route path="/deliverey-status" element={<DeliveryStatus/>} />
-            <Route path="/rise-dispute" element={<RiseDispute/>}/>
             <Route path="/profile-settings"element={<ProfileSettings/>}/>  
             <Route path="/reports" element={<Reports />} />
             <Route path="/transactions"element={<Transactions/>}/>
