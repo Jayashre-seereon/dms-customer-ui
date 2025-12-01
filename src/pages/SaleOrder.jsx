@@ -623,8 +623,8 @@ export default function SalesOrder() {
     <div>
       <div className="flex justify-between items-center mb-0">
         <div>
-          <h1 className="text-3xl font-bold text-amber-700">Sales Order</h1>
-          <p className="text-amber-600">Manage your sales Order easily</p>
+          <h1 className="text-3xl font-bold text-amber-700">Purchase Order</h1>
+          <p className="text-amber-600">Manage your purchase Order easily</p>
         </div>
       </div>
 
@@ -670,7 +670,7 @@ export default function SalesOrder() {
       </div>
 
       {/* Add modal: Order Group header + contracts (repeatable) + items (repeatable per contract) */}
-      <Modal title={<span className="text-amber-700 font-semibold">Add Sales Order (Order Group)</span>} open={isAddModalOpen} onCancel={() => setIsAddModalOpen(false)} footer={null} width={1100} destroyOnClose>
+      <Modal title={<span className="text-amber-700 font-semibold">Add Purchase Order (Order Group)</span>} open={isAddModalOpen} onCancel={() => setIsAddModalOpen(false)} footer={null} width={1100} destroyOnClose>
         <Form layout="vertical" form={addForm} onFinish={handleAddOrderGroupSubmit} initialValues={{ ...initialOrderGroup }}>
           {/* Shared header fields */}
           <Row gutter={16}>
@@ -722,7 +722,7 @@ export default function SalesOrder() {
       </Modal>
 
       {/* Edit modal (unchanged single-row edit) */}
-      <Modal title={<span className="text-amber-700 font-semibold">Edit Sales Order</span>} open={isEditModalOpen} onCancel={() => setIsEditModalOpen(false)} footer={null} width={800} destroyOnClose>
+      <Modal title={<span className="text-amber-700 font-semibold">Edit Purchase Order</span>} open={isEditModalOpen} onCancel={() => setIsEditModalOpen(false)} footer={null} width={800} destroyOnClose>
         <Form layout="vertical" form={editForm} onFinish={(values) => {
           const contractData = salesContractJSON.contractOptions.find((c) => c.contractNo === values.contractNo);
           const payload = {
@@ -748,7 +748,7 @@ export default function SalesOrder() {
       </Modal>
 
       {/* View modal */}
-      <Modal title={<span className="text-amber-700 text-2xl font-semibold">View Sales Order</span>} open={isViewModalOpen} onCancel={() => setIsViewModalOpen(false)} footer={null} width={900} destroyOnClose>
+      <Modal title={<span className="text-amber-700 text-2xl font-semibold">View Purchase Order</span>} open={isViewModalOpen} onCancel={() => setIsViewModalOpen(false)} footer={null} width={900} destroyOnClose>
         <Form layout="vertical" form={viewForm}>
           {selectedRecord?.status === "Approved" ? renderApprovedView() : renderBasicFields(true)}
         </Form>

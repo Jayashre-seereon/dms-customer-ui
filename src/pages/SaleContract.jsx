@@ -548,8 +548,8 @@ export default function SalesContract() {
     <div>
       <div className="flex justify-between items-center mb-0">
         <div>
-          <h1 className="text-3xl font-bold text-amber-700">Sales Contract</h1>
-          <p className="text-amber-600">Manage your sales contracts easily</p>
+          <h1 className="text-3xl font-bold text-amber-700">Purchase Contract</h1>
+          <p className="text-amber-600">Manage your Purchase contracts easily</p>
         </div>
       </div>
       <div className="flex justify-between items-center mb-2">
@@ -606,7 +606,7 @@ export default function SalesContract() {
 
       {/* Add Modal */}
       <Modal
-        title={<span className="text-amber-700 font-semibold">Add Sales Contract</span>}
+        title={<span className="text-amber-700 font-semibold">Add purchase Contract</span>}
         open={isAddModalOpen}
         onCancel={() => {
           setIsAddModalOpen(false);
@@ -631,6 +631,7 @@ export default function SalesContract() {
                 {fields.map((field) => (
                   <Row gutter={12} key={field.key} align="middle" className="mb-2">
                     <Col span={8}>
+                    <label htmlFor="">Item Name</label>
                       <Form.Item
                         {...field}
                         name={[field.name, "item"]}
@@ -647,6 +648,8 @@ export default function SalesContract() {
                       </Form.Item>
                     </Col>
                     <Col span={4}>
+                    <label htmlFor="">Quantity</label>
+
                       <Form.Item
                         {...field}
                         name={[field.name, "qty"]}
@@ -657,6 +660,8 @@ export default function SalesContract() {
                       </Form.Item>
                     </Col>
                     <Col span={4}>
+                    <label htmlFor="">UOM</label>
+
                       <Form.Item
                         {...field}
                         name={[field.name, "uom"]}
@@ -673,6 +678,7 @@ export default function SalesContract() {
                       </Form.Item>
                     </Col>
                     <Col span={4}>
+                    <label htmlFor="">Rate</label>
                       <Form.Item
                         {...field}
                         name={[field.name, "rate"]}
