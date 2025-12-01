@@ -850,7 +850,7 @@ export default function MultiInvoiceSaleReturn() {
                     icon={<PlusOutlined />}
                     className="border-amber-400! text-amber-700! hover:bg-amber-100!"
                   >
-                    Add Another Item to Return for Invoice #{invoiceFieldKey + 1}
+                    Add Another Items to Return for Invoice #{invoiceFieldKey + 1}
                   </Button>
                 </Form.Item>
               )}
