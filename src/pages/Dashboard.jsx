@@ -61,7 +61,7 @@ const dashboardData = {
       change: "+18%",
       icon: <FileTextOutlined />,
       color: "amber",
-      route: "contract",
+      route: "/purchase-contract",
       bg: "bg-amber-100",
     },
     {
@@ -71,29 +71,20 @@ const dashboardData = {
       change: "+15%",
       icon: <ShoppingCartOutlined />,
       color: "amber",
-      route: "order",
+      route: "/purchase-order",
       bg: "bg-amber-100",
     },
       {
-      title: "Return",
+      title: "Rise Dispute",
       description: "Handle returns",
       count: 4,
       change: "-8%",
       icon: <ReloadOutlined />,
       color: "amber",
-      route: "return",
-      bg: "bg-amber-100",
-    },
-    {
-      title: "Rise Dispute",
-      description: "Handle Dispute Rise",
-      count: 4,
-      change: "-8%",
-      icon: <RiseOutlined />,
-      color: "amber",
       route: "/rise-dispute",
       bg: "bg-amber-100",
     },
+   
     {
       title: "Delivery",
       description: "Track deliveries",
@@ -173,7 +164,7 @@ export default function Dashboard() {
         <h2 className="text-base font-semibold text-amber-700">
           Quick Actions
         </h2>
-        <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           {dashboardData.quickActions.map((action, index) => (
             <Card
               key={index}

@@ -6,8 +6,8 @@ import Signup from "./components/Signup";
 import Dashboard from "./pages/Dashboard";
 import ProfileSettings from "./pages/ProfileSettings";
 import Layout from "./pages/Layout";
-import SaleContract from"./pages/SaleContract";
-import SaleOrder from "./pages/SaleOrder"
+import PurchaseContract from"./pages/PurchaseContract";
+import PurchaseOrder from "./pages/PurchaseOrder"
 import RaiseDispute from "./pages/RaiseDispute"
 import DeliveryStatus from "./pages/DelivereyStatus"
 import Reports from "./pages/Reports"
@@ -29,8 +29,8 @@ export default function App() {
             }
           >
             <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/purchase-contract" element={<SaleContract />} />
-            <Route path="/purchase-order"element={<SaleOrder/>}/> 
+            <Route path="/purchase-contract" element={<PurchaseContract />} />
+            <Route path="/purchase-order"element={<PurchaseOrder/>}/> 
             <Route path="/rise-dispute" element={<RaiseDispute />} />
             <Route path="/deliverey-status" element={<DeliveryStatus/>} />
             <Route path="/profile-settings"element={<ProfileSettings/>}/>  

@@ -15,7 +15,7 @@ import {
   SearchOutlined,
   DownloadOutlined,
   EyeOutlined,
-  RollbackOutlined,
+  ReloadOutlined,
   FilterOutlined,
 } from "@ant-design/icons";
 import dayjs from "dayjs";
@@ -219,14 +219,14 @@ export default function RaiseDispute() {
           return (
             <div className="flex gap-3">
               <EyeOutlined className="cursor-pointer! text-blue-500!" onClick={() => openView(record)} />
-              <RollbackOutlined className="cursor-pointer! text-red-500!" onClick={() => openReturnModal(record, true)} />
+              <ReloadOutlined className="cursor-pointer! text-red-500!" onClick={() => openReturnModal(record, true)} />
             </div>
           );
         } else {
           return (
             <div className="flex gap-3">
               <EyeOutlined className="cursor-pointer! text-blue-500!" onClick={() => openView(record)} />
-              <RollbackOutlined className="cursor-pointer! text-red-500!" onClick={() => openReturnModal(record)} />
+              <ReloadOutlined className="cursor-pointer! text-red-500!" onClick={() => openReturnModal(record)} />
             </div>
           );
         }
