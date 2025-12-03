@@ -34,17 +34,17 @@ const salesContractJSON = {
       orderNo: "1",
       companyName: "ABC Oils Ltd",
       customer: "Bhubaneswar Market",
-      // items is now an array (multiple items per contract)
+     
       items: [
         { item: "Palm Oil", itemCode:"it23", qty: 2000, uom: "Ltrs", rate: 125, freeQty: 100 },
       ],
-      // computed totals (you can recompute when saving)
+      
       totalQty: 2000,
       uom: "Ltrs",
       location: "Warehouse A",
       status: "Approved",
       totalAmt: 250000,
-      // other fields kept for approved view
+      
       grossWt: 2100,
       type: "Retail",
       brokerName: "Broker 1",
@@ -109,8 +109,7 @@ export default function SalesContract() {
 
   const calculateTotals = (items) => {
     if (!items || items.length === 0) return { totalQty: 0, uom: "" };
-    // If all items have same UOM, show that; otherwise blank
-    const uomSet = new Set(items.map((i) => i.uom));
+     const uomSet = new Set(items.map((i) => i.uom));
     const totalQty = items.reduce((s, it) => s + Number(it.qty || 0), 0);
     return { totalQty, uom: uomSet.size === 1 ? items[0].uom : "" };
   };
@@ -226,10 +225,8 @@ export default function SalesContract() {
   ];
 
   const handleFormSubmit = (values, isEdit) => {
-    // If values is null in edit mode, get from editForm (we call validateFields then this handler)
-    const finalValues = values || (isEdit ? editForm.getFieldsValue() : addForm.getFieldsValue());
-    // make sure items exist
-    const items = finalValues.items && finalValues.items.length > 0 ? finalValues.items : [];
+     const finalValues = values || (isEdit ? editForm.getFieldsValue() : addForm.getFieldsValue());
+     const items = finalValues.items && finalValues.items.length > 0 ? finalValues.items : [];
 
     const totals = calculateTotals(items);
 
@@ -279,8 +276,7 @@ export default function SalesContract() {
             format="DD-MM-YYYY"
             style={{ width: "100%" }}
             disabled={true}
-            // contractDate is fixed / read-only as before
-            disabledDate={() => true}
+              disabledDate={() => true}
           />
         </Form.Item>
       </Col>
