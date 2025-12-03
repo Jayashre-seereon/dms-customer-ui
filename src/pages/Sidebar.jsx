@@ -4,11 +4,10 @@ import {
   DashboardOutlined,
   FileTextOutlined,
   ShoppingCartOutlined,
-  ReloadOutlined,
   UserOutlined,
   BarChartOutlined,
   RiseOutlined,
-  WalletOutlined,
+
   
 } from "@ant-design/icons";
 import { NavLink, useLocation } from "react-router-dom";
@@ -20,11 +19,10 @@ export default function Sidebar() {
      
   const menuItems = [
     { key: "/dashboard", label: "Dashboard", icon: <DashboardOutlined /> },
-    { key: "/sale-contract", label: "Purchase Contract", icon: <FileTextOutlined /> },
-    { key: "/sale-order", label: "Purchase Order", icon: <ShoppingCartOutlined /> },
-    { key: "/sale-return", label: "Purchase Return", icon: <ReloadOutlined /> },
-    {key: "/rise-dispute",label:"Raise Dispute",icon: <RiseOutlined/>},
-    { key: "/deliverey-status", label: "Deliverey Status", icon: <FileTextOutlined /> },
+    { key: "/purchase-contract", label: "Purchase Contract", icon: <FileTextOutlined /> },
+    { key: "/purchase-order", label: "Purchase Order", icon: <ShoppingCartOutlined /> },
+    { key: "/rise-dispute", label: "Rise Dispute", icon: <RiseOutlined /> },
+  { key: "/deliverey-status", label: "Deliverey Status", icon: <FileTextOutlined /> },
     { key: "/profile-settings", label: "Profile Settings", icon: <UserOutlined /> },
     { key: "/reports", label: "Reports", icon: <BarChartOutlined /> },
     { key: "/transactions", label: "Transactions", icon: <FileTextOutlined /> },

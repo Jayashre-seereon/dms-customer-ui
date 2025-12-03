@@ -34,17 +34,14 @@ const salesContractJSON = {
       orderNo: "1",
       companyName: "ABC Oils Ltd",
       customer: "Bhubaneswar Market",
-     
       items: [
         { item: "Palm Oil", itemCode:"it23", qty: 2000, uom: "Ltrs", rate: 125, freeQty: 100 },
       ],
-      
       totalQty: 2000,
       uom: "Ltrs",
       location: "Warehouse A",
       status: "Approved",
       totalAmt: 250000,
-      
       grossWt: 2100,
       type: "Retail",
       brokerName: "Broker 1",
@@ -82,7 +79,7 @@ const salesContractJSON = {
   companyOptions: ["ABC Oils Ltd", "XYZ Refineries", "PQR Traders"],
 };
 
-export default function SalesContract() {
+export default function PurchaseContract() {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
@@ -99,7 +96,6 @@ export default function SalesContract() {
       item.contractNo?.toLowerCase().includes(searchText.toLowerCase()) ||
       item.companyName?.toLowerCase().includes(searchText.toLowerCase()) ||
       item.customer?.toLowerCase().includes(searchText.toLowerCase()) ||
-      // search items by name
       (item.items || [])
         .map((it) => it.item?.toLowerCase())
         .join(" ")
@@ -109,7 +105,7 @@ export default function SalesContract() {
 
   const calculateTotals = (items) => {
     if (!items || items.length === 0) return { totalQty: 0, uom: "" };
-     const uomSet = new Set(items.map((i) => i.uom));
+    const uomSet = new Set(items.map((i) => i.uom));
     const totalQty = items.reduce((s, it) => s + Number(it.qty || 0), 0);
     return { totalQty, uom: uomSet.size === 1 ? items[0].uom : "" };
   };
@@ -206,7 +202,6 @@ export default function SalesContract() {
               className="cursor-pointer! text-red-500!"
               onClick={() => {
                 setSelectedRecord(record);
-                // populate edit form (items need to be set directly)
                 editForm.setFieldsValue({
                   ...record,
                   contractDate: record.contractDate ? dayjs(record.contractDate) : undefined,
@@ -225,8 +220,8 @@ export default function SalesContract() {
   ];
 
   const handleFormSubmit = (values, isEdit) => {
-     const finalValues = values || (isEdit ? editForm.getFieldsValue() : addForm.getFieldsValue());
-     const items = finalValues.items && finalValues.items.length > 0 ? finalValues.items : [];
+    const finalValues = values || (isEdit ? editForm.getFieldsValue() : addForm.getFieldsValue());
+    const items = finalValues.items && finalValues.items.length > 0 ? finalValues.items : [];
 
     const totals = calculateTotals(items);
 
@@ -265,7 +260,8 @@ export default function SalesContract() {
   };
 
   const renderBasicFields = (formInstance, disabled = false) => (
-    <Row gutter={16}>
+   <div className="border! p-2! rounded! mb-2! border-amber-300! relative!">
+ <Row gutter={16}>
       <Col span={8}>
         <Form.Item
           name="contractDate"
@@ -276,7 +272,7 @@ export default function SalesContract() {
             format="DD-MM-YYYY"
             style={{ width: "100%" }}
             disabled={true}
-              disabledDate={() => true}
+            disabledDate={() => true}
           />
         </Form.Item>
       </Col>
@@ -376,11 +372,14 @@ export default function SalesContract() {
         </Form.Item>
       </Col>
     </Row>
+   </div>
+  
   );
 
   const renderApprovedView = () => (
-    <div>
+    <div >
       <h3 className="text-xl font-semibold text-amber-600 mb-4">Contract & Party Details</h3>
+       <div className="border! p-2! rounded! mb-2! border-amber-300! relative!">
       <Row gutter={16}>
         <Col span={6}>
           <Form.Item label="Contract Date">
@@ -459,11 +458,13 @@ export default function SalesContract() {
           </Form.Item>
         </Col>
       </Row>
+     </div>
+     
 
-      <Divider />
+     
 
       <h3 className="text-xl font-semibold text-amber-600 my-4">Item & Quantity Details</h3>
-
+       <div className="border! p-2! rounded! mb-2! border-amber-300! relative!">
       {(selectedRecord?.items || []).map((it, idx) => (
         <Row gutter={16} key={idx}>
           <Col span={6}>
@@ -498,8 +499,7 @@ export default function SalesContract() {
           </Col>
         </Row>
       ))}
-
-      <Row gutter={16} className="mt-2">
+       <Row gutter={16} className="mt-2">
         <Col span={6}>
           <Form.Item label="Total Qty">
             <Input value={selectedRecord?.totalQty} disabled />
@@ -511,11 +511,12 @@ export default function SalesContract() {
           </Form.Item>
         </Col>
       </Row>
-
-      <Divider />
+    </div>
+  
 
       <h3 className="text-xl font-semibold text-amber-600 my-4">Pricing & Tax Details</h3>
-      <Row gutter={16}>
+        <div className="border! p-2! rounded! mb-2! border-amber-300! relative!">
+     <Row gutter={16}>
         <Col span={6}>
           <Form.Item label="Gross Amount">
             <Input value={selectedRecord?.grossAmount} disabled />
@@ -537,6 +538,8 @@ export default function SalesContract() {
           </Form.Item>
         </Col>
       </Row>
+    
+    </div>
     </div>
   );
 
@@ -617,11 +620,9 @@ export default function SalesContract() {
         >
           {renderBasicFields(addForm, false)}
 
-          <Divider />
-
           <h3 className="text-lg font-semibold text-amber-600 mb-2">Items</h3>
-
-          <Form.List name="items">
+<div className="border! p-2! rounded! mb-2! border-amber-300! relative!">
+  <Form.List name="items">
             {(fields, { add, remove }) => (
               <>
                 {fields.map((field) => (
@@ -683,15 +684,7 @@ export default function SalesContract() {
                         <Input type="number" placeholder="Rate" />
                       </Form.Item>
                     </Col>
-                    {/* <Col span={3}>
-                      <Form.Item
-                        {...field}
-                        name={[field.name, "freeQty"]}
-                        fieldKey={[field.fieldKey, "freeQty"]}
-                      >
-                        <Input type="number" placeholder="Free" />
-                      </Form.Item>
-                    </Col> */}
+                   
                     <Col span={1}>
                       <MinusCircleOutlined onClick={() => remove(field.name)} />
                     </Col>
@@ -706,6 +699,8 @@ export default function SalesContract() {
               </>
             )}
           </Form.List>
+  </div>
+         
 
           <div className="flex justify-end gap-2 mt-4">
             <Button
@@ -749,11 +744,9 @@ export default function SalesContract() {
         >
           {renderBasicFields(editForm, false)}
 
-          <Divider />
-
           <h3 className="text-lg font-semibold text-amber-600 mb-2">Items</h3>
-
-          <Form.List name="items">
+            <div className="border! p-2! rounded! mb-2! border-amber-300! relative!">
+              <Form.List name="items">
             {(fields, { add, remove }) => (
               <>
                 {fields.map((field) => (
@@ -833,6 +826,8 @@ export default function SalesContract() {
             )}
           </Form.List>
 
+   </div>
+          
           <div className="flex justify-end gap-2 mt-4">
             <Button
               onClick={() => {
@@ -865,8 +860,7 @@ export default function SalesContract() {
           ) : (
             <>
               {renderBasicFields(viewForm, true)}
-              <Divider />
-              <h3 className="text-lg font-semibold text-amber-600 mb-2">Items</h3>
+  <h3 className="text-lg font-semibold text-amber-600 mb-2">Items</h3>
               {(selectedRecord?.items || []).map((it, idx) => (
                 <Row gutter={12} key={idx} className="mb-2">
                   <Col span={10}>
