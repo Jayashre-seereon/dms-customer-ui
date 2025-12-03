@@ -43,7 +43,7 @@ export default function DeliveryStatus() {
       item.orderNo?.toLowerCase().includes(searchText.toLowerCase()) ||
       item.companyName?.toLowerCase().includes(searchText.toLowerCase()) ||
       item.customer?.toLowerCase().includes(searchText.toLowerCase()) ||
-      item.itemName?.toLowerCase().includes(searchText.toLowerCase()) || // 🆕
+      item.itemName?.toLowerCase().includes(searchText.toLowerCase()) || 
       item.status?.toLowerCase().includes(searchText.toLowerCase()) ||
       item.route?.toLowerCase().includes(searchText.toLowerCase())
   );
