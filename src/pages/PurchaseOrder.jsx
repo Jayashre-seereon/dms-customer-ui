@@ -222,6 +222,7 @@ export default function SalesOrder() {
       d.contracts.some(c => c.contractNo.toLowerCase().includes(searchText.toLowerCase()) || c.companyName.toLowerCase().includes(searchText.toLowerCase()))
   );
 
+  
   // --- Actions ---
 
   const openEditModal = (record) => {
@@ -642,97 +643,137 @@ export default function SalesOrder() {
 
 
     // RENDER FOR EDIT MODAL
-    const renderEditItemsList = useCallback((contractIndex, fields, { add, remove }) =>
-        fields.map((f) => {
-            return (
-                <div key={f.key} className="border! p-2! rounded! mb-2! relative! border-amber-300!">
-                    <Form.Item name={[f.name, "key"]} fieldKey={[f.fieldKey, "key"]} hidden /> 
-                    <Form.Item name={[f.name, "uom"]} fieldKey={[f.fieldKey, "uom"]} hidden /> 
-                    <Form.Item name={[f.name, "rate"]} fieldKey={[f.fieldKey, "rate"]} hidden /> 
-                    
-                    <Row gutter={12}>
-                        <Col span={8}>
-                            <Form.Item name={[f.name, "item"]} fieldKey={[f.fieldKey, "item"]} label="Item">
-                                <Input disabled className="font-semibold text-amber-800" />
-                            </Form.Item>
-                        </Col>
+   // ==== EDIT MODAL UI (Same as Add Modal UI but with edit logic) =====
 
-                        <Col span={6}>
-                            <Form.Item
-                                name={[f.name, "qty"]}
-                                fieldKey={[f.fieldKey, "qty"]}
-                                label="Qty"
-                                rules={[
-                                    { required: true, message: "Enter qty" },
-                                    {
-                                        validator: (_, value) => {
-                                            if (!value || Number(value) <= 0) return Promise.reject(new Error("Qty must be > 0"));
-                                            return Promise.resolve();
-                                        },
-                                    },
-                                ]}
-                            >
-                                <InputNumber min={1} style={{ width: "100%" }} />
-                            </Form.Item>
-                        </Col>
+const renderEditItemsList = useCallback((contractIndex, fields, { add, remove }) =>
+  fields.map((f) => (
+    <div key={f.key} className="border! p-2! rounded! mb-2! border-amber-300! relative!">
+      <Row gutter={12}>
+        <Col span={8}>
+          <Form.Item
+            name={[f.name, "item"]}
+            fieldKey={[f.fieldKey, "item"]}
+            label="Item"
+            rules={[{ required: true, message: "Select item" }]}
+          >
+            <Select
+              placeholder="Select item"
+              onChange={(val) => handleSelectItemInContract(val, contractIndex, f.name)}
+            >
+              {(contractItemsMap[contractIndex] || []).map((it) => (
+                <Select.Option key={it.item} value={it.item}>
+                  {it.item} — available: {it.restQty} {it.uom}
+                </Select.Option>
+              ))}
+            </Select>
+          </Form.Item>
+        </Col>
 
-                        <Col span={4}>
-                            <Form.Item label="UOM">
-                                {/* Using getFieldValue to show disabled value */}
-                                <Input disabled value={editForm.getFieldValue(["contracts", contractIndex, "items", f.name, "uom"])}/>
-                            </Form.Item>
-                        </Col>
+        <Col span={6}>
+          <Form.Item
+            name={[f.name, "qty"]}
+            fieldKey={[f.fieldKey, "qty"]}
+            label="Qty"
+            rules={[
+              { required: true, message: "Enter qty" },
+              ({ getFieldValue }) => ({
+                validator(_, value) {
+                  const max = selectedItemMaxMap[`${contractIndex}-${f.name}`] || 99999;
+                  if (!value || value <= 0) return Promise.reject("Qty must be > 0");
+                  if (value > max) return Promise.reject(`Max allowed: ${max}`);
+                  return Promise.resolve();
+                },
+              }),
+            ]}
+          >
+            <InputNumber min={1} style={{ width: "100%" }} />
+          </Form.Item>
+        </Col>
 
-                        <Col span={4}>
-                            <Form.Item label="Rate">
-                                {/* Using getFieldValue to show disabled value */}
-                                <InputNumber style={{ width: "100%" }} disabled value={editForm.getFieldValue(["contracts", contractIndex, "items", f.name, "rate"])}/>
-                            </Form.Item>
-                        </Col>
-                        
-                        <Col span={2}>
-                            <Button type="text" disabled icon={<DeleteOutlined />} />
-                        </Col>
-                    </Row>
-                </div>
-            )
-        }), [editForm]);
+        <Col span={4}>
+          <Form.Item name={[f.name, "uom"]} label="UOM">
+            <Input disabled />
+          </Form.Item>
+        </Col>
+
+        <Col span={4}>
+          <Form.Item name={[f.name, "rate"]} label="Rate">
+            <InputNumber disabled style={{ width: "100%" }} />
+          </Form.Item>
+        </Col>
+
+        <Col span={2}>
+          <Button type="text" danger icon={<MinusCircleOutlined />} onClick={() => remove(f.name)} />
+        </Col>
+      </Row>
+    </div>
+  )),
+[contractItemsMap, selectedItemMaxMap, handleSelectItemInContract]);
+
 
     // RENDER FOR EDIT MODAL (Contract details - read-only)
-    const renderEditContractsList = useCallback((fields) =>
-        fields.map((field) => {
-            const contractDetails = editForm.getFieldValue(["contracts", field.name]);
-            return (
-                <div key={field.key} className="p-4 border border-amber-500 rounded-lg mb-4 relative">
-                    <h3 className="text-amber-700 font-semibold mb-2">Contract Details (Read Only)</h3>
-                    <Row gutter={12}>
-                        <Col span={12}>
-                            <Form.Item name={[field.name, "contractNo"]} fieldKey={[field.fieldKey, "contractNo"]} label="Contract No">
-                                {/* FIX: Ensure disabled field shows prefilled value */}
-                                <Input disabled className="font-semibold" value={contractDetails?.contractNo}/> 
-                            </Form.Item>
-                        </Col>
-                        <Col span={12}>
-                            <Form.Item name={[field.name, "companyName"]} fieldKey={[field.fieldKey, "companyName"]} label="Company" >
-                                {/* FIX: Ensure disabled field shows prefilled value */}
-                                <Input disabled value={contractDetails?.companyName}/>
-                            </Form.Item>
-                        </Col>
-                    </Row>
-                    <Divider className="my-2"/>
-                    <h4 className="text-amber-600 font-medium mb-2">Items (Quantity is Editable)</h4>
+   const renderEditContractList = useCallback((fields, { add, remove }) =>
+  fields.map((field) => {
+    const contractDetails = editForm.getFieldValue(["contracts", field.name]);
 
-                    <Form.List name={[field.name, "items"]}>
-                        {(itemsFields, itemsOps) => (
-                            <>
-                                {renderEditItemsList(field.name, itemsFields, itemsOps)}
-                            </>
-                        )}
-                    </Form.List>
-                </div>
-            )
-        }), [renderEditItemsList, editForm]);
-    
+    return (
+      <div key={field.key} className="p-4 border border-amber-500 rounded-lg mb-4 relative">
+        <h3 className="text-amber-700 font-semibold mb-2">Contract Details</h3>
+
+        <Row gutter={12}>
+          <Col span={8}>
+            <Form.Item
+              name={[field.name, "contractNo"]}
+              label="Contract No"
+              rules={[{ required: true }]}
+            >
+              <Select onChange={(val) => handleSelectContract(val, field.name)}>
+                {salesContractJSON.contractOptions.map((c) => (
+                  <Select.Option key={c.contractNo} value={c.contractNo}>
+                    {c.contractNo} — {c.companyName}
+                  </Select.Option>
+                ))}
+              </Select>
+            </Form.Item>
+          </Col>
+
+          <Col span={8}>
+            <Form.Item name={[field.name, "companyName"]} label="Company">
+              <Input disabled value={contractDetails?.companyName} />
+            </Form.Item>
+          </Col>
+
+          <Col span={8}>
+            <Form.Item name={[field.name, "customer"]} label="Customer">
+              <Input disabled value={contractDetails?.customer} />
+            </Form.Item>
+          </Col>
+        </Row>
+
+        <Divider />
+
+        <Form.List name={[field.name, "items"]}>
+          {(itemsFields, itemsOps) => (
+            <>
+              {renderEditItemsList(field.name, itemsFields, itemsOps)}
+              <Button type="dashed" icon={<PlusOutlined />} onClick={() => itemsOps.add()}>
+                Add Item
+              </Button>
+            </>
+          )}
+        </Form.List>
+
+        {fields.length > 1 && (
+          <Button danger type="text" icon={<DeleteOutlined />} className="absolute top-2 right-2"
+            onClick={() => remove(field.name)}>
+            Remove Contract
+          </Button>
+        )}
+      </div>
+    );
+  }),
+[handleSelectContract, renderEditItemsList, editForm]);
+
     // VIEW Modal Content (Unchanged)
     function renderOrderGroupView(groupData) {
         if (!groupData) return null;
@@ -955,59 +996,53 @@ export default function SalesOrder() {
             </Modal>
 
             {/* Edit modal (Grouped Edit) */}
-            <Modal title={<span className="text-amber-700 font-semibold">Edit Purchase Order Group: {selectedOrderGroup?.orderGroupId}</span>} open={isEditModalOpen} onCancel={() => setIsEditModalOpen(false)} footer={null} width={1100} destroyOnClose>
-                <Form layout="vertical" form={editForm} onFinish={handleEditOrderGroupSubmit}>
-                    <Form.Item name="orderGroupId" hidden />
-                    <Form.Item name="orderDate" hidden /> 
-                    
-                    <h3 className="text-amber-700 font-bold mb-3">Order Group Header Details (Fully Editable)</h3>
-                    <Row gutter={16}>
-                        {/* ALL HEADER FIELDS ARE EDITABLE AND PREFILLED */}
-                        <Col span={6}>
-                            <Form.Item label="Customer" name="customer" rules={[{ required: true }]}>
-                                <Input placeholder="Customer for entire order" />
-                            </Form.Item>
-                        </Col>
-                        <Col span={6}>
-                            <Form.Item label="Location" name="location" rules={[{ required: true }]}>
-                                <Select placeholder="Select Location">
-                                    {salesContractJSON.locationOptions.map((loc) => (
-                                        <Select.Option key={loc} value={loc}>
-                                            {loc}
-                                        </Select.Option>
-                                    ))}
-                                </Select>
-                            </Form.Item>
-                        </Col>
-                        <Col span={6}>
-                            <Form.Item label="Delivery Date" name="deliveryDate" rules={[{ required: true }]}>
-                                <DatePicker className="w-full" disabledDate={disablePastDates} />
-                            </Form.Item>
-                        </Col>
-                        <Col span={6}>
-                            <Form.Item label="Delivery Address" name="deliveryAddress" rules={[{ required: true }]}>
-                                <Input placeholder="Delivery address (applies to all contracts/items)" />
-                            </Form.Item>
-                        </Col>
-                    </Row>
+         <Modal
+  title="Edit Order Group"
+  open={isEditModalOpen}
+  onCancel={() => setIsEditModalOpen(false)}
+  width={900}
+  footer={[
+    <Button onClick={() => setIsEditModalOpen(false)}>Cancel</Button>,
+    <Button type="primary" onClick={() => editForm.submit()} className="bg-amber-600! border-none!">
+      Update
+    </Button>,
+  ]}
+>
+  <Form form={editForm} layout="vertical" onFinish={handleEditOrderGroupSubmit}>
+    <Row gutter={12}>
+      <Col span={8}>
+        <Form.Item name="customer" label="Customer" rules={[{ required: true }]}>
+          <Input />
+        </Form.Item>
+      </Col>
 
-                    <Divider className="my-3"/>
-                    
-                    <Form.List name="contracts">
-                        {(fields, ops) => (
-                            <>
-                                {renderEditContractsList(fields, ops)}
-                                <div className="flex justify-end mt-3">
-                                    <Button onClick={() => setIsEditModalOpen(false)} className="border-amber-400! text-amber-700! hover:bg-amber-100!">Cancel</Button>
-                                    <Button type="primary" htmlType="submit" className="bg-amber-500! hover:bg-amber-600! border-none! ml-2">
-                                        Update Order Group
-                                    </Button>
-                                </div>
-                            </>
-                        )}
-                    </Form.List>
-                </Form>
-            </Modal>
+      <Col span={8}>
+        <Form.Item name="location" label="Location" rules={[{ required: true }]}>
+          <Select>
+            {salesContractJSON.locationOptions.map((l) => (
+              <Select.Option key={l} value={l}>{l}</Select.Option>
+            ))}
+          </Select>
+        </Form.Item>
+      </Col>
+
+      <Col span={8}>
+        <Form.Item name="deliveryDate" label="Delivery Date" rules={[{ required: true }]}>
+          <DatePicker style={{ width: "100%" }} disabledDate={disablePastDates} />
+        </Form.Item>
+      </Col>
+    </Row>
+
+    <Form.Item name="deliveryAddress" label="Delivery Address" rules={[{ required: true }]}>
+      <Input.TextArea />
+    </Form.Item>
+
+    <Divider className="my-3" />
+
+    <Form.List name="contracts">{renderEditContractList}</Form.List>
+  </Form>
+</Modal>
+
 
             {/* View modal (Grouped View) */}
             <Modal title={<span className="text-amber-700 text-2xl font-semibold">View Purchase Order Group</span>} open={isViewModalOpen} onCancel={() => setIsViewModalOpen(false)} footer={null} width={900} destroyOnClose>
