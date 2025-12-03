@@ -55,45 +55,36 @@ const dashboardData = {
   ],
   quickActions: [
     {
-      title: "Sale Contract",
-      description: "Manage sales contracts",
+      title: "Contract",
+      description: "Manage contracts",
       count: 42,
       change: "+18%",
       icon: <FileTextOutlined />,
       color: "amber",
-      route: "/sale-contract",
+      route: "/purchase-contract",
       bg: "bg-amber-100",
     },
     {
-      title: "Sale Order",
-      description: "Process sales orders",
+      title: "Order",
+      description: "Process orders",
       count: 35,
       change: "+15%",
       icon: <ShoppingCartOutlined />,
       color: "amber",
-      route: "/sale-order",
+      route: "/purchase-order",
       bg: "bg-amber-100",
     },
       {
-      title: "Sale Return",
+      title: "Rise Dispute",
       description: "Handle returns",
       count: 4,
       change: "-8%",
       icon: <ReloadOutlined />,
       color: "amber",
-      route: "/sale-return",
-      bg: "bg-amber-100",
-    },
-    {
-      title: "Rise Dispute",
-      description: "Handle Dispute Rise",
-      count: 4,
-      change: "-8%",
-      icon: <RiseOutlined />,
-      color: "amber",
       route: "/rise-dispute",
       bg: "bg-amber-100",
     },
+   
     {
       title: "Delivery",
       description: "Track deliveries",
@@ -173,7 +164,7 @@ export default function Dashboard() {
         <h2 className="text-base font-semibold text-amber-700">
           Quick Actions
         </h2>
-        <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           {dashboardData.quickActions.map((action, index) => (
             <Card
               key={index}
@@ -207,10 +198,10 @@ export default function Dashboard() {
 
       {/* CHARTS */}
       <div className="grid grid-cols-1 pt-4 md:grid-cols-2 gap-6">
-             {/* Product Sales Distribution */}
+             {/* Product Distribution */}
         <Card className="rounded-xl!">
           <h3 className="font-semibold mb-2 text-amber-700">
-            Product Sales Distribution
+            Product Distribution
           </h3>
           <p className="text-sm text-amber-600 mb-4">
             Ruchi Soya edible oils performance

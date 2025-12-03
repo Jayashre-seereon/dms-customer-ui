@@ -98,7 +98,7 @@ const disputeJSON = {
   },
 };
 
-export default function DisputeRaise() {
+export default function PurchaseReturn() {
   const [records, setRecords] = useState(disputeJSON.records);
   const [filtered, setFiltered] = useState(records);
   const [searchText, setSearchText] = useState("");
