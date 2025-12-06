@@ -391,13 +391,19 @@ export default function SalesOrder() {
   return (
     <div>
       <div className="flex justify-between items-center mb-0">
-        <div><h1 className="text-3xl font-bold text-amber-700">Sales Order Management</h1><p className="text-amber-600">Manage your Purchase orders easily</p></div>
+        <div><h1 className="text-3xl font-bold text-amber-700"> Orders</h1><p className="text-amber-600">Manage your orders easily</p></div>
       </div>
       <div className="flex justify-between items-center mb-2">
         <div className="flex gap-2">
-          <Input placeholder="Search" className="w-64! border-amber-300! focus:border-amber-500!" prefix={<SearchOutlined className="text-amber-600!" />} value={searchText} onChange={e => setSearchText(e.target.value)} allowClear size="large" />
-          <Button className="border-amber-400! text-amber-700! hover:bg-amber-100!" icon={<FilterOutlined />}>Filter</Button>
-        </div>
+          <Input placeholder="Search" className="border-amber-300! w-64! focus:border-amber-500!"
+          prefix={<SearchOutlined className="text-amber-600!" />} value={searchText} onChange={e => setSearchText(e.target.value)} />
+           <Button
+                      icon={<FilterOutlined />}
+                      onClick={() => setSearchText("")}
+                      className="border-amber-400! text-amber-700! hover:bg-amber-100!"
+                    >
+                      Reset
+                    </Button>    </div>
         <div className="flex gap-2">
           <Button className="border-amber-400! text-amber-700! hover:bg-amber-100!" onClick={() => setWalletOpen(true)}>Open Wallet</Button>
           <Button type="primary" icon={<PlusOutlined />} onClick={() => { addForm.setFieldsValue(initialOrderGroup); setContractItemsMap({}); setSelectedItemMaxMap({}); setIsAddModalOpen(true); }} className="bg-amber-500! hover:bg-amber-600! border-none!">Add New Order</Button>
@@ -451,7 +457,7 @@ export default function SalesOrder() {
         {renderOrderGroupView(selectedOrderGroup)}
       </Modal>
 
-      <Modal title={<span className="text-2xl font-bold text-green-700">Wallet</span>} open={walletOpen} onCancel={() => setWalletOpen(false)} footer={null} width={1200}>
+      <Modal  open={walletOpen} onCancel={() => setWalletOpen(false)} footer={null} width={1200}>
         <Wallet />
       </Modal>
     </div>

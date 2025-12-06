@@ -1,7 +1,7 @@
 
 // Dashboard.jsx
 import React from "react";
-import { Card  } from "antd";
+import { Card } from "antd";
 import {
   RiseOutlined,
   ShoppingCartOutlined,
@@ -9,6 +9,8 @@ import {
   ReloadOutlined,
   DeliveredProcedureOutlined,
   BarChartOutlined,
+  ClockCircleOutlined,
+  TruckOutlined,
 } from "@ant-design/icons";
 import {
   LineChart,
@@ -27,32 +29,7 @@ import { useNavigate } from "react-router-dom";
 
 // ================== JSON DATA ==================
 const dashboardData = {
-  kpiCards: [
-    {
-      title: "Total Revenue",
-      value: "₹18,45,280",
-      change: "+24.1% from last month",
-      icon: <RiseOutlined />,
-      color: "amber",
-      border: "amber-300",
-    },
-    {
-      title: "Active Orders",
-      value: 167,
-      change: "+28.5% from last month",
-      icon: <ShoppingCartOutlined />,
-      color: "amber",
-      border: "amber-300",
-    },
-    {
-      title: "Growth Rate",
-      value: "+18.2%",
-      change: "+12% from last month",
-      icon: <BarChartOutlined />,
-      color: "amber",
-      border: "amber-300",
-    },
-  ],
+
   quickActions: [
     {
       title: "Contract",
@@ -74,19 +51,19 @@ const dashboardData = {
       route: "/purchase-order",
       bg: "bg-amber-100",
     },
-      {
+    {
       title: "Rise Dispute",
       description: "Handle returns",
       count: 4,
       change: "-8%",
-      icon: <ReloadOutlined />,
+      icon: <RiseOutlined />,
       color: "amber",
       route: "/rise-dispute",
       bg: "bg-amber-100",
     },
-   
+
     {
-      title: "Delivery",
+      title: "Delivery Status",
       description: "Track deliveries",
       count: 28,
       change: "+22%",
@@ -95,7 +72,29 @@ const dashboardData = {
       route: "/deliverey-status",
       bg: "bg-amber-100",
     },
-  
+
+    {
+      title: "Pending Transaction",
+      description: "Track pending transactions",
+      count: 28,
+      change: "+22%",
+      icon: <ClockCircleOutlined />,
+      color: "amber",
+      route: "/pending-transaction",
+      bg: "bg-amber-100",
+    },
+    {
+      title: "In-Transit Deliveries",
+      description: "Track deliveries in transit",
+      count: 28,
+      change: "+22%",
+      icon: <TruckOutlined />,
+      color: "amber",
+      route: "/in-transit-deliveries",
+      bg: "bg-amber-100",
+    },
+   
+
   ],
   revenueTrend: [
     { month: "Apr", revenue: 12 },
@@ -136,35 +135,13 @@ export default function Dashboard() {
 
   return (
     <div className="p-0 space-y-4 text-amber-800">
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        {dashboardData.kpiCards.map((card, index) => (
-          <Card
-  key={index}
-  className={"border! rounded-lg! shadow-sm! border-amber-400!"}
->
-  <div className="flex justify-between items-center">
-    <div>
-      <p className="text-amber-600! text-xs!">{card.title}</p>
-      <h2 className="text-lg! font-bold! text-amber-800!">{card.value}</h2>
-      <p className={`text-amber-600! text-xs!`}>
-        {card.change}
-      </p>
-    </div>
-    {React.cloneElement(card.icon, {
-      className: `text-lg! text-amber-600!`,
-    })}
-  </div>
-</Card>
-
-        ))}
-      </div>
 
       {/* QUICK ACTIONS */}
       <div>
-        <h2 className="text-base font-semibold text-amber-700">
+        <h2 className="text-xl  font-bold text-amber-700">
           Quick Actions
         </h2>
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {dashboardData.quickActions.map((action, index) => (
             <Card
               key={index}
@@ -178,19 +155,18 @@ export default function Dashboard() {
                 {action.title}
               </h3>
               <p className="text-amber-600 text-xs">{action.description}</p>
-             <div className="flex justify-between items-center w-full">
-  <span className="text-lg font-bold text-amber-700">{action.count}</span>
-  <span
-    className={`text-xs ${
-      action.change.includes("-") ? "text-red-500" : "text-green-600"
-    }`}
-  >
-    {action.change}
-  </span>
-</div>
+              <div className="flex justify-between items-center w-full">
+                <span className="text-lg font-bold text-amber-700">{action.count}</span>
+                <span
+                  className={`text-xs ${action.change.includes("-") ? "text-red-500" : "text-green-600"
+                    }`}
+                >
+                  {action.change}
+                </span>
+              </div>
 
 
-             
+
             </Card>
           ))}
         </div>
@@ -198,7 +174,7 @@ export default function Dashboard() {
 
       {/* CHARTS */}
       <div className="grid grid-cols-1 pt-4 md:grid-cols-2 gap-6">
-             {/* Product Distribution */}
+        {/* Product Distribution */}
         <Card className="rounded-xl!">
           <h3 className="font-semibold mb-2 text-amber-700">
             Product Distribution
@@ -226,7 +202,7 @@ export default function Dashboard() {
                 ))}
               </Pie>
               <Tooltip />
-             
+
             </PieChart>
           </ResponsiveContainer>
         </Card>
@@ -254,14 +230,14 @@ export default function Dashboard() {
             ))}
           </div>
         </Card>
-      
 
-   
+
+
       </div>
 
-     
+
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {/* Revenue Trend */}
+        {/* Revenue Trend */}
         <Card className="rounded-xl! ">
           <h3 className="font-semibold mb-2 text-amber-700">Revenue Trend</h3>
           <p className="text-sm text-amber-600 mb-4">
@@ -278,7 +254,7 @@ export default function Dashboard() {
                 stroke="#b45309"
                 fill="#f59e0b"
               />
-              
+
             </LineChart>
           </ResponsiveContainer>
         </Card>
@@ -301,8 +277,8 @@ export default function Dashboard() {
           </ResponsiveContainer>
         </Card>
 
-        
-        
+
+
       </div>
     </div>
   );

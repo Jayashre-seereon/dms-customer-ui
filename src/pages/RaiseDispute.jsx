@@ -322,7 +322,7 @@ export default function RaiseDispute() {
     <div>
       <div className="flex justify-between items-center mb-0">
         <div>
-          <h1 className="text-3xl font-bold text-amber-700">Dispute</h1>
+          <h1 className="text-3xl font-bold text-amber-700"> Rise Dispute</h1>
           <p className="text-amber-600">Manage your Dispute easily</p>
         </div>
       </div>
@@ -334,15 +334,14 @@ export default function RaiseDispute() {
             prefix={<SearchOutlined className="text-amber-600!" />}
             value={searchText}
             onChange={(e) => setSearchText(e.target.value)}
-            style={{ width: 300 }}
-            className="border-amber-300! focus:border-amber-500!"
+            className="border-amber-300! w-64! focus:border-amber-500!"
           />
           <Button
             icon={<FilterOutlined />}
             onClick={() => setSearchText("")}
             className="border-amber-400! text-amber-700! hover:bg-amber-100!"
           >
-            Reset Search
+            Reset
           </Button>
         </div>
 

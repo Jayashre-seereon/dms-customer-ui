@@ -11,7 +11,9 @@ import PurchaseOrder from "./pages/PurchaseOrder"
 import RaiseDispute from "./pages/RaiseDispute"
 import DeliveryStatus from "./pages/DelivereyStatus"
 import Reports from "./pages/Reports"
-import Transactions from "./pages/Transactions"
+import Wallet from "./pages/Wallet"
+import PendingTransaction from "./pages/PendingTransactions";
+import InTransitDeliveries from "./pages/InTransitDeliveries";
 export default function App() {
   return (
     <AuthProvider>
@@ -35,8 +37,9 @@ export default function App() {
             <Route path="/deliverey-status" element={<DeliveryStatus/>} />
             <Route path="/profile-settings"element={<ProfileSettings/>}/>  
             <Route path="/reports" element={<Reports />} />
-            <Route path="/transactions"element={<Transactions/>}/>
-            
+            <Route path="/wallet"element={<Wallet/>}/>
+            <Route path="/pending-transaction" element={<PendingTransaction />} />
+            <Route path="/in-transit-deliveries" element={<InTransitDeliveries />} />
              </Route>
         </Routes>
       </Router>
