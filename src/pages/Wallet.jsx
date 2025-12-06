@@ -5,11 +5,7 @@ import {
   Input,
   Select,
   Button,
-  Modal,
-  Form,
-  InputNumber,
-  Row,
-  Col
+ 
 } from "antd";
 import {
   SearchOutlined,
@@ -23,7 +19,6 @@ const amber = {
   dark: "#b45309",
 };
 
-// ⭐ Updated Wallet Data with Qty + UOM
 const walletData = [
   {
     id: 1,
@@ -49,16 +44,13 @@ const walletData = [
     date: "2025-01-20",
     status: "Applied",
   },
-  
+
 ];
 
 const WalletPage = () => {
   const [search, setSearch] = useState("");
   const [filterType, setFilterType] = useState("");
   const [filterRef, setFilterRef] = useState("");
-  const [viewModalOpen, setViewModalOpen] = useState(false);
-  const [selectedRow, setSelectedRow] = useState(null);
-  const [form] = Form.useForm();
 
   const filterData = walletData.filter((row) => {
     return (
@@ -69,25 +61,26 @@ const WalletPage = () => {
   });
 
   const columns = [
-    {  title: <span className="text-amber-700! font-semibold!">Note No</span>,
-      dataIndex: "noteNo" ,
-        render: (text) => <span className="text-amber-800">{text}</span>,
+    {
+      title: <span className="text-amber-700! font-semibold!">Note No</span>,
+      dataIndex: "noteNo",
+      render: (text) => <span className="text-amber-800">{text}</span>,
 
     },
 
-      
+
 
     {
       title: <span className="text-amber-700 font-semibold">Reference</span>,
       dataIndex: "refType",
-        render: (text) => <span className="text-amber-800">{text}</span>,
+      render: (text) => <span className="text-amber-800">{text}</span>,
 
     },
 
     {
       title: <span className="text-amber-700 font-semibold">Type</span>,
       dataIndex: "type",
-      
+
       render: (type) => {
         const base = "px-3 py-1 rounded-full text-sm font-semibold";
         if (type === "Credit")
@@ -96,38 +89,40 @@ const WalletPage = () => {
       },
     },
 
-    {  title: <span className="text-amber-700! font-semibold!">Order/Dispute No</span>,
-      dataIndex: "refId" 
-    ,  render: (text) => <span className="text-amber-800">{text}</span>,
-},
-      
+    {
+      title: <span className="text-amber-700! font-semibold!">Order/Dispute No</span>,
+      dataIndex: "refId"
+      , render: (text) => <span className="text-amber-800">{text}</span>,
+    },
 
-   {
-  title: <span className="text-amber-700! font-semibold!">Qty</span>,
-     
-  dataIndex: "qty",
-  render: (_,text) => <span className="text-amber-800">{text.qty}{text.uom}</span>,
-
-},
 
     {
-       title: <span className="text-amber-700! font-semibold!">Amount</span>,
-     
-      dataIndex: "amount",
-        render: (text) => <span className="text-amber-800"> {text}</span>,
+      title: <span className="text-amber-700! font-semibold!">Qty</span>,
+
+      dataIndex: "qty",
+      render: (_, text) => <span className="text-amber-800">{text.qty}{text.uom}</span>,
 
     },
 
-    {  title: <span className="text-amber-700! font-semibold!">Date</span>,
-     dataIndex: "date" 
-     ,  render: (text) => <span className="text-amber-800">{text}</span>,
+    {
+      title: <span className="text-amber-700! font-semibold!">Amount</span>,
+
+      dataIndex: "amount",
+      render: (text) => <span className="text-amber-800"> {text}</span>,
+
+    },
+
+    {
+      title: <span className="text-amber-700! font-semibold!">Date</span>,
+      dataIndex: "date"
+      , render: (text) => <span className="text-amber-800">{text}</span>,
 
     },
 
     {
       title: <span className="text-amber-700! font-semibold!">Status</span>,
       dataIndex: "status",
-      width:150,
+      width: 150,
       render: (status) => {
         const base = "px-3 py-1 rounded-full text-sm font-semibold";
         if (status === "Applied")
@@ -138,28 +133,16 @@ const WalletPage = () => {
       },
     },
 
-    {
-      title: <span className="text-amber-700! font-semibold!">Action</span>,
-      render: (_, record) => (
-        <div className="flex gap-3">
-          <EyeOutlined
-            className="cursor-pointer! text-blue-500! hover:text-blue-700!"
-            onClick={() => {
-              setSelectedRow(record);
-              form.setFieldsValue(record);
-              setViewModalOpen(true);
-            }}
-          />
-        </div>
-      ),
-    },
+   
   ];
 
   return (
     <div>
-      {/* Header */}
-      <div className="mb-0">
-         <p className="text-amber-600">View all Credit and Debit Notes</p>
+      <div className="flex justify-between items-center mb-0">
+        <div>
+          <h1 className="text-3xl font-bold text-amber-700">Wallet</h1>
+          <p className="text-amber-600">Manage your Wallet easily</p>
+        </div>
       </div>
 
       {/* Search */}
@@ -172,25 +155,18 @@ const WalletPage = () => {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
-           <Select
-          className="w-52! border-amber-300!"
-          placeholder="Filter by Type"
-          allowClear
-          onChange={(v) => setFilterType(v)}
-        >
-          <Select.Option value="Credit">Credit</Select.Option>
-          <Select.Option value="Debit">Debit</Select.Option>
-        </Select>
 
-        <Select
-          className="w-52! border-amber-300!"
-          placeholder="Filter by Reference"
-          allowClear
-          onChange={(v) => setFilterRef(v)}
-        >
-          <Select.Option value="Order">Order</Select.Option>
-          <Select.Option value="Dispute">Dispute</Select.Option>
-        </Select>
+          <Select
+            placeholder="Filter by Type"
+            allowClear
+            onChange={(v) => setFilterType(v)}
+            className="border-amber-400! text-amber-700! hover:bg-amber-100!"
+          >
+            <Select.Option value="Credit">Credit</Select.Option>
+            <Select.Option value="Debit">Debit</Select.Option>
+          </Select>
+
+
           <Button
             icon={<ReloadOutlined />}
             onClick={() => {
@@ -216,85 +192,6 @@ const WalletPage = () => {
         />
       </div>
 
-      {/* View Modal */}
-      <Modal
-        title={
-          <span className="text-amber-700 text-2xl font-semibold">View Note</span>
-        }
-        open={viewModalOpen}
-        onCancel={() => setViewModalOpen(false)}
-        footer={null}
-        width={600}
-      >
-    <Form layout="vertical" form={form}>
-  <Row gutter={16}>
-    <Col span={12}>
-      <Form.Item label="Note Type" name="type">
-        <Input disabled />
-      </Form.Item>
-    </Col>
-
-    <Col span={12}>
-      <Form.Item label="Note Number" name="noteNo">
-        <Input disabled />
-      </Form.Item>
-    </Col>
-  </Row>
-
-  <Row gutter={16}>
-    <Col span={12}>
-      <Form.Item label="Reference Type" name="refType">
-        <Input disabled />
-      </Form.Item>
-    </Col>
-
-    <Col span={12}>
-      <Form.Item label="Reference ID" name="refId">
-        <Input disabled />
-      </Form.Item>
-    </Col>
-  </Row>
-
-  <Row gutter={16}>
-    <Col span={12}>
-      <Form.Item label="Quantity" name="qty">
-        <InputNumber className="w-full!" disabled />
-      </Form.Item>
-    </Col>
-
-    <Col span={12}>
-      <Form.Item label="UOM" name="uom">
-        <Input disabled />
-      </Form.Item>
-    </Col>
-  </Row>
-
-  <Row gutter={16}>
-    <Col span={12}>
-      <Form.Item label="Amount" name="amount">
-        <InputNumber className="w-full!" disabled />
-      </Form.Item>
-    </Col>
-
-    <Col span={12}>
-      <Form.Item label="Date" name="date">
-        <Input disabled />
-      </Form.Item>
-    </Col>
-  </Row>
-
-  <Row gutter={16}>
-    <Col span={12}>
-      <Form.Item label="Status" name="status">
-        <Input disabled />
-      </Form.Item>
-    </Col>
-
-     </Row>
-</Form>
-
-
-      </Modal>
     </div>
   );
 };

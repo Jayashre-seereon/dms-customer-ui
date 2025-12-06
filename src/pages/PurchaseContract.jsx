@@ -547,8 +547,8 @@ export default function PurchaseContract() {
     <div>
       <div className="flex justify-between items-center mb-0">
         <div>
-          <h1 className="text-3xl font-bold text-amber-700">Purchase Contract</h1>
-          <p className="text-amber-600">Manage your Purchase contracts easily</p>
+          <h1 className="text-3xl font-bold text-amber-700">Contracts</h1>
+          <p className="text-amber-600">Manage your contracts easily</p>
         </div>
       </div>
       <div className="flex justify-between items-center mb-2">

@@ -4,9 +4,9 @@ import {
   DashboardOutlined,
   FileTextOutlined,
   ShoppingCartOutlined,
-  UserOutlined,
   BarChartOutlined,
   RiseOutlined,
+  WalletOutlined,
 
   
 } from "@ant-design/icons";
@@ -22,11 +22,10 @@ export default function Sidebar() {
     { key: "/purchase-contract", label: "Purchase Contract", icon: <FileTextOutlined /> },
     { key: "/purchase-order", label: "Purchase Order", icon: <ShoppingCartOutlined /> },
     { key: "/rise-dispute", label: "Rise Dispute", icon: <RiseOutlined /> },
-  { key: "/deliverey-status", label: "Deliverey Status", icon: <FileTextOutlined /> },
-    { key: "/profile-settings", label: "Profile Settings", icon: <UserOutlined /> },
-    { key: "/reports", label: "Reports", icon: <BarChartOutlined /> },
-    { key: "/transactions", label: "Transactions", icon: <FileTextOutlined /> },
-  ];
+   { key: "/deliverey-status", label: "Deliverey Status", icon: <FileTextOutlined /> },
+     { key: "/wallet", label: "Wallet", icon: <WalletOutlined /> },
+   { key: "/reports", label: "Reports", icon: <BarChartOutlined /> },
+     ];
 
   return (
     <Sider

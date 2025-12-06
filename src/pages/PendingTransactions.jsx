@@ -1,4 +1,4 @@
-// DeliveryStatus.jsx
+// PendingTransactions.jsx
 import React, { useState } from "react";
 import { Table, Input, Button, Modal, Form, Row, Col } from "antd";
 import { SearchOutlined, DownloadOutlined, EyeOutlined, FilterOutlined } from "@ant-design/icons";
@@ -7,27 +7,10 @@ import dayjs from "dayjs";
 // 🔹 Sample Data
 const deliveryDataJSON = {
   initialData: [
+   
     {
       key: 1,
       orderNo: "SC-001",
-      companyName: "ABC Oils Ltd",
-      itemName: "Sunflower Oil",
-      transporter: "Blue Transport",
-      vehicleNo: "OD-02-1234",
-      driverName: "Ramesh Kumar",
-      contactNo: "9876543210",
-      dispatchDate: "2025-10-10",
-      deliveryDate: "2025-10-12",
-      deliveredDate: "2025-10-12",
-      status: "Delivered",
-      route: "Cuttack → Bhubaneswar",
-      totalQty: 2100,
-      uom: "Ltrs",
-      totalAmount: 420000,
-    },
-    {
-      key: 2,
-      orderNo: "SC-002",
       companyName: "XYZ Oils Ltd",
       itemName: "Mustard Oil",
       transporter: "Red Transport",
@@ -37,7 +20,7 @@ const deliveryDataJSON = {
       dispatchDate: "2025-10-10",
       deliveryDate: "2025-10-12",
       deliveredDate: "2025-10-12",
-      status: "In Transit",
+      status: "Pending",
       route: "Cuttack → Bhubaneswar",
       totalQty: 2100,
       uom: "Ltrs",
@@ -47,7 +30,7 @@ const deliveryDataJSON = {
   ],
 };
 
-export default function DeliveryStatus() {
+export default function PendingTransactions() {
   const [data] = useState(deliveryDataJSON.initialData);
   const [searchText, setSearchText] = useState("");
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
@@ -96,15 +79,10 @@ export default function DeliveryStatus() {
       width: 120,
       render: (status) => {
         const base = "px-3 py-1 rounded-full text-sm font-semibold";
-        switch (status) {
-          case "Delivered": return <span className={`${base} bg-green-100 text-green-700`}>{status}</span>;
-          case "In Transit": return <span className={`${base} bg-yellow-100 text-yellow-700`}>{status}</span>;
-          case "Pending": return <span className={`${base} bg-gray-100 text-gray-700`}>{status}</span>;
-          case "Delayed": return <span className={`${base} bg-red-100 text-red-700`}>{status}</span>;
-          default: return <span className={`${base} bg-amber-100 text-amber-700`}>{status}</span>;
+         return <span className={`${base} bg-amber-100 text-amber-700`}>{status}</span>;
         }
       },
-    },
+    
     {
       title: <span className="text-amber-700 font-semibold">Actions</span>,
       width: 80,
@@ -223,8 +201,8 @@ export default function DeliveryStatus() {
     <div>
       <div className="flex justify-between items-center mb-0">
         <div>
-          <h1 className="text-3xl font-bold text-amber-700">Delivery Status</h1>
-          <p className="text-amber-600">Track your sales delivery progress</p>
+          <h1 className="text-3xl font-bold text-amber-700">Pending Orders</h1>
+          <p className="text-amber-600">Track your pending transactions</p>
         </div>
       </div>
 
@@ -266,7 +244,7 @@ export default function DeliveryStatus() {
 
       {/* View Modal */}
       <Modal
-        title={<span className="text-amber-700  text-2xl font-semibold">View Delivery Details</span>}
+        title={<span className="text-amber-700  text-2xl font-semibold">View Pending Details</span>}
         open={isViewModalOpen}
         onCancel={() => setIsViewModalOpen(false)}
         footer={null}
