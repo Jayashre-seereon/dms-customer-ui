@@ -38,7 +38,7 @@ const dashboardData = {
       change: "+18%",
       icon: <FileTextOutlined />,
       color: "amber",
-      route: "/purchase-contract",
+      route: "/contract",
       bg: "bg-amber-100",
     },
     {
@@ -48,7 +48,7 @@ const dashboardData = {
       change: "+15%",
       icon: <ShoppingCartOutlined />,
       color: "amber",
-      route: "/purchase-order",
+      route: "/order",
       bg: "bg-amber-100",
     },
     {

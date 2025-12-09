@@ -24,6 +24,7 @@ const walletData = [
     id: 1,
     type: "Credit",
     noteNo: "CN-1001",
+    item: "Item A",
     amount: 4500,
     qty: 10,
     uom: "PCS",
@@ -36,6 +37,7 @@ const walletData = [
     id: 2,
     type: "Debit",
     noteNo: "CN-1002",
+    item: "Item B",
     amount: 3000,
     qty: 5,
     uom: "BOX",
@@ -95,7 +97,11 @@ const WalletPage = () => {
       , render: (text) => <span className="text-amber-800">{text}</span>,
     },
 
-
+{
+      title: <span className="text-amber-700! font-semibold!">Item</span>,
+      dataIndex: "item",
+      render: (text) => <span className="text-amber-800">{text}</span>,           
+},
     {
       title: <span className="text-amber-700! font-semibold!">Qty</span>,
 
@@ -130,7 +136,7 @@ const WalletPage = () => {
         return (
           <span className={`${base} bg-green-100 text-green-700`}>Not Applied</span>
         );
-      },
+      }
     },
 
    
