@@ -19,8 +19,8 @@ export default function Sidebar() {
      
   const menuItems = [
     { key: "/dashboard", label: "Dashboard", icon: <DashboardOutlined /> },
-    { key: "/purchase-contract", label: "Purchase Contract", icon: <FileTextOutlined /> },
-    { key: "/purchase-order", label: "Purchase Order", icon: <ShoppingCartOutlined /> },
+    { key: "/contract", label: "Contract", icon: <FileTextOutlined /> },
+    { key: "/order", label: "Order", icon: <ShoppingCartOutlined /> },
     { key: "/rise-dispute", label: "Rise Dispute", icon: <RiseOutlined /> },
    { key: "/deliverey-status", label: "Deliverey Status", icon: <FileTextOutlined /> },
      { key: "/wallet", label: "Wallet", icon: <WalletOutlined /> },

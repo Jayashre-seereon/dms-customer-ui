@@ -94,6 +94,34 @@ const reportsData = {
     },
   ],
 
+  ordersReports: [
+    {
+      title: "Monthly Orders Report - January 2024",
+      subtitle: "Orders • 200 records • Generated 2024-02-01",
+      size: "3.0 MB",
+      icon: <ShoppingOutlined className="text-amber-500! text-xl! mr-2! mt-3!" />,
+    },
+   
+    {
+      title: "Weekly Order Trends",
+      subtitle: "Trends • 150 records • Generated 2024-01-22",
+      size: "2.0 MB",
+      icon: <LineChartOutlined className="text-amber-500! text-xl! mr-2! mt-3!" />,
+    },
+    {
+      title: "Order Cancellation Report",
+      subtitle: "Cancellations • 50 records • Generated 2024-01-25",
+      size: "1.2 MB",
+      icon: <FileTextOutlined className="text-amber-500! text-xl! mr-2! mt-3!" />,
+    },
+    {
+      title: "Pending Orders Summary",
+      subtitle: "Pending • 30 records • Generated 2024-01-28",
+      size: "900 KB",
+      icon: <SolutionOutlined className="text-amber-500! text-xl! mr-2! mt-3!" />,
+    },
+  ],
+
   analyticsTable: {
     columns: [
       { title: "Period", dataIndex: "period", key: "period" },
@@ -113,33 +141,9 @@ const reportsData = {
       },
     ],
     data: [
-      {
-        key: "1",
-        period: "January 2024",
-        revenue: "₹8,45,280",
-        orders: 167,
-        contracts: 42,
-        returns: 12,
-        growth: "+12%",
-      },
-      {
-        key: "2",
-        period: "February 2024",
-        revenue: "₹10,00,500",
-        orders: 192,
-        contracts: 47,
-        returns: 15,
-        growth: "+18%",
-      },
-      {
-        key: "3",
-        period: "March 2024",
-        revenue: "₹9,72,340",
-        orders: 175,
-        contracts: 44,
-        returns: 10,
-        growth: "+9%",
-      },
+      { key: "1", period: "January 2024", revenue: "₹8,45,280", orders: 167, contracts: 42, returns: 12, growth: "+12%" },
+      { key: "2", period: "February 2024", revenue: "₹10,00,500", orders: 192, contracts: 47, returns: 15, growth: "+18%" },
+      { key: "3", period: "March 2024", revenue: "₹9,72,340", orders: 175, contracts: 44, returns: 10, growth: "+9%" },
     ],
   },
 };
@@ -152,20 +156,17 @@ export default function Reports() {
       <div className="flex justify-between items-center mb-0">
         <div>
           <h1 className="text-3xl font-bold text-amber-700">Reports</h1>
-          <p className="text-amber-500">
-            View and download business reports and analytics
-          </p>
+          <p className="text-amber-500">View and download business reports and analytics</p>
         </div>
-        <div className="flex! items-center! space-x-3! ">
-          <Select
-            defaultValue="This Month"
-            className="w-40! border-amber-400! focus:border-amber-500! focus:ring-amber-300! text-amber-700!"
-          >
+
+        <div className="flex items-center space-x-3">
+          <Select defaultValue="This Month" className="w-40 border border-amber-400! text-amber-700!">
             <Option value="thisMonth">This Month</Option>
             <Option value="lastMonth">Last Month</Option>
             <Option value="quarter">This Quarter</Option>
           </Select>
-          <Button className="bg-amber-500! border-amber-500! hover:bg-amber-600! text-white!">
+
+          <Button className="bg-amber-500! text-white! hover:bg-amber-600!">
             Generate Report
           </Button>
         </div>
@@ -174,10 +175,7 @@ export default function Reports() {
       {/* KPI Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
         {reportsData.kpiCards.map((card, index) => (
-          <Card
-            key={index}
-            className={`border-2! ${card.borderColor}! rounded-lg! h-36! shadow-sm!`}
-          >
+          <Card key={index} className={`border-2 ${card.borderColor} rounded-lg shadow-sm`}>
             <div className="flex justify-between items-center">
               <div>
                 <p className="text-amber-700">{card.title}</p>
@@ -190,92 +188,20 @@ export default function Reports() {
         ))}
       </div>
 
-      {/* Tabs Section */}
-      <Tabs
-        defaultActiveKey="1"
-        className="text-amber-700"
-        tabBarGutter={10}
-        tabBarStyle={{ color: "#b45309" }}
-      >
+      {/* Tabs */}
+      <Tabs defaultActiveKey="1">
         {/* Available Reports */}
         <TabPane tab={<span className="text-amber-700 font-semibold">Available Reports</span>} key="1">
+
           {/* Sales Reports */}
-          <div className="mb-6">
-            <h2 className="font-semibold text-base text-amber-700 mb-1">Sales Reports</h2>
-            <p className="text-amber-600 text-sm">
-              Download and view sales performance reports
-            </p>
-
-            <div className="space-y-2">
-              {reportsData.salesReports.map((report, index) => (
-                <div
-                  key={index}
-                  className="flex justify-between items-center bg-white pt-2 rounded-md "
-                >
-                  <div className="flex items-start pl-3">
-                    {report.icon}
-                    <div>
-                      <h3 className="font-medium text-sm text-amber-700 pl-2">{report.title}</h3>
-                      <p className="text-amber-600 text-xs pl-2">{report.subtitle}</p>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center space-x-3 pr-3">
-                    <span className="text-green-600 bg-green-100 rounded-full px-2 py-0.5 text-xs font-medium">
-                      Completed
-                    </span>
-                    <span className="text-amber-700 text-xs">{report.size}</span>
-                    <Button
-                      size="small"
-                      icon={<DownloadOutlined />}
-                      className="flex items-center! bg-amber-500! border-amber-500! hover:bg-amber-600! text-white!"
-                    >
-                      Download
-                    </Button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
+          <Section title="Sales Reports" subtitle="Download and view sales performance reports" data={reportsData.salesReports} />
 
           {/* Contract Reports */}
-          <div>
-            <h2 className="font-semibold text-base text-amber-700 mb-1">Contract Reports</h2>
-            <p className="text-amber-600 text-sm mb-3">
-              Contract analysis and management reports
-            </p>
+          <Section title="Contract Reports" subtitle="Contract analysis and management reports" data={reportsData.contractReports} />
 
-            <div className="space-y-2">
-              {reportsData.contractReports.map((report, index) => (
-                <div
-                  key={index}
-                  className="flex justify-between items-center bg-white pt-2 rounded-md "
-                >
-                  <div className="flex items-start pl-3">
-                    {report.icon}
-                    <div>
-                      <h3 className="font-medium text-sm text-amber-700 pl-2">{report.title}</h3>
-                      <p className="text-amber-600 text-xs pl-2">{report.subtitle}</p>
-                    </div>
-                  </div>
+          {/* Orders Reports */}
+          <Section title="Orders Reports" subtitle="Comprehensive order reports for analysis" data={reportsData.ordersReports} />
 
-                  <div className="flex items-center space-x-3 pr-3">
-                    <span className="text-green-600 bg-green-100 rounded-full px-2 py-0.5 text-xs font-medium">
-                      Completed
-                    </span>
-                    <span className="text-amber-700 text-xs">{report.size}</span>
-                    <Button
-                      size="small"
-                      icon={<DownloadOutlined  />}
-                      className="flex items-center! bg-amber-500! border-amber-500! hover:bg-amber-600! text-white!"
-                    >
-                      Download
-                    </Button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
         </TabPane>
 
         {/* Analytics Overview */}
@@ -284,26 +210,52 @@ export default function Reports() {
             <h2 className="font-semibold text-base flex items-center gap-2 mb-1 text-amber-700">
               <LineChartOutlined /> Financial Overview
             </h2>
-            <p className="text-amber-600 text-sm mb-3">
-              Monthly performance metrics and trends
-            </p>
+            <p className="text-amber-600 text-sm mb-3">Monthly performance metrics and trends</p>
+
             <Table
               columns={reportsData.analyticsTable.columns.map((col) => ({
                 ...col,
                 title: <span className="text-amber-700">{col.title}</span>,
-                render: col.render
-                  ? col.render
-                  : (text) => <span className="text-amber-700">{text}</span>,
+                render: col.render || ((text) => <span className="text-amber-700">{text}</span>),
               }))}
               dataSource={reportsData.analyticsTable.data}
               pagination={false}
-              bordered={false}
-              size="small"
-              className="text-amber-700"
             />
           </Card>
         </TabPane>
       </Tabs>
+    </div>
+  );
+}
+
+// ========= Reusable Component for Reports =========
+function Section({ title, subtitle, data }) {
+  return (
+    <div className="mb-6">
+      <h2 className="font-semibold! text-base text-amber-700 mb-1">{title}</h2>
+      <p className="text-amber-600 text-sm">{subtitle}</p>
+
+      <div className="space-y-2 mt-2">
+        {data.map((report, index) => (
+          <div key={index} className="flex justify-between items-center bg-white p-2 rounded-md shadow-sm border border-amber-100">
+            <div className="flex items-start">
+              {report.icon}
+              <div className="pl-2">
+                <h3 className="font-medium text-sm text-amber-700">{report.title}</h3>
+                <p className="text-amber-600 text-xs">{report.subtitle}</p>
+              </div>
+            </div>
+
+            <div className="flex items-center space-x-3">
+              <span className="text-green-600 bg-green-100 rounded-full px-2 py-0.5 text-xs font-medium">Completed</span>
+              <span className="text-amber-700 text-xs">{report.size}</span>
+              <Button size="small" icon={<DownloadOutlined />} className="bg-amber-500! text-white! hover:bg-amber-600!">
+                Download
+              </Button>
+            </div>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
