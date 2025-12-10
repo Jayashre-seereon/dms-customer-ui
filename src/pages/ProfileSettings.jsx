@@ -19,7 +19,6 @@ const profileData = {
     broker_associate: "N/A",
     position: "System Administrator",
     department: "IT Department",
-    bio: "Experienced system administrator with 5+ years in ERP systems management.",
     avatarInitials: "RK",
   },
   company: {
@@ -157,9 +156,6 @@ export default function ProfileSettings() {
                 </Col>
               </Row>
 
-              <Form.Item name="bio" label="Bio">
-                <Input.TextArea rows={3} />
-              </Form.Item>
 
               <Button
                 type="primary"
