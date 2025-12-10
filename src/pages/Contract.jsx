@@ -471,100 +471,126 @@ export default function Contract() {
     const itemOptions = getItemOptionsForCompany(selectedCompany);
 
     return (
-      <Row gutter={12} key={field.key} align="middle" className="mb-2 border-b border-dashed pb-2">
+     <Row 
+  gutter={24} 
+  key={field.key} 
+  align="middle" 
+  className="mb-2 border-b border-dashed pb-2"
+>
 
-        <Col span={6}>
-          <label htmlFor="">Company</label>
-          <Form.Item
-            {...field}
-            name={[field.name, "companyName"]}
-            fieldKey={[field.fieldKey, "companyName"]}
-            rules={[{ required: true, message: "Select company" }]}
-          >
-            <Select
-              placeholder="Select Company"
-              disabled={disabled}
-              // 3. Call the new handler on change
-              onChange={(companyName) => handleCompanyChange(formInstance, companyName, field.name, isEditModalOpen)}
-            >
-              {contractJSON.companyOptions.map((c) => (
-                <Select.Option key={c} value={c}>
-                  {c}
-                </Select.Option>
-              ))}
-            </Select>
-          </Form.Item>
-        </Col>
+  {/* Company */}
+  <Col span={6}>
+    <label>Company</label>
+    <Form.Item
+      {...field}
+      name={[field.name, "companyName"]}
+      fieldKey={[field.fieldKey, "companyName"]}
+      rules={[{ required: true, message: "Select company" }]}
+    >
+      <Select
+        placeholder="Select Company"
+        disabled={disabled}
+        onChange={(companyName) =>
+          handleCompanyChange(formInstance, companyName, field.name, isEditModalOpen)
+        }
+      >
+        {contractJSON.companyOptions.map((c) => (
+          <Select.Option key={c} value={c}>{c}</Select.Option>
+        ))}
+      </Select>
+    </Form.Item>
+  </Col>
 
-        <Col span={6}>
-          <label htmlFor="">Item Name</label>
-          <Form.Item
-            {...field}
-            name={[field.name, "item"]}
-            fieldKey={[field.fieldKey, "item"]}
-            rules={[{ required: true, message: "Select item" }]}
-          >
-            <Select
-              placeholder="Select Item"
-              disabled={disabled || !selectedCompany}
-              onChange={(value) => handleItemSelect(formInstance, selectedCompany, value, field.name, field.fieldKey)}
-            >
-              {itemOptions.map((it) => (
-                <Select.Option key={it} value={it}>
-                  {it}
-                </Select.Option>
-              ))}
-            </Select>
-          </Form.Item>
-        </Col>
+  {/* Item Name */}
+  <Col span={6}>
+    <label>Item Name</label>
+    <Form.Item
+      {...field}
+      name={[field.name, "item"]}
+      fieldKey={[field.fieldKey, "item"]}
+      rules={[{ required: true, message: "Select item" }]}
+    >
+      <Select
+        placeholder="Select Item"
+        disabled={disabled || !selectedCompany}
+        onChange={(value) =>
+          handleItemSelect(
+            formInstance,
+            selectedCompany,
+            value,
+            field.name,
+            field.fieldKey
+          )
+        }
+      >
+        {itemOptions.map((it) => (
+          <Select.Option key={it} value={it}>{it}</Select.Option>
+        ))}
+      </Select>
+    </Form.Item>
+  </Col>
 
-        <Col span={4}>
-          <label htmlFor="">Item Code</label>
-          <Form.Item
-            {...field}
-            name={[field.name, "itemCode"]}
-            fieldKey={[field.fieldKey, "itemCode"]}
-          >
-            <Input placeholder="Code" disabled={true} />
-          </Form.Item>
-        </Col>
+  {/* Item Code */}
+  <Col span={6}>
+    <label>Item Code</label>
+    <Form.Item
+      {...field}
+      name={[field.name, "itemCode"]}
+      fieldKey={[field.fieldKey, "itemCode"]}
+    >
+      <Input placeholder="Code" disabled />
+    </Form.Item>
+  </Col>
 
-        <Col span={3}>
-          <label htmlFor="">Rate</label>
-          <Form.Item
-            {...field}
-            name={[field.name, "rate"]}
-            fieldKey={[field.fieldKey, "rate"]}
-            rules={[{ required: true, message: "Enter rate" }]}
-          >
-            <Input type="number" placeholder="Rate" disabled={true} />
-          </Form.Item>
-        </Col>
-        <Form.Item
-          {...field}
-          name={[field.name, "uom"]}
-          fieldKey={[field.fieldKey, "uom"]}
-        >
-          <Input placeholder="UOM" disabled />
-        </Form.Item>
+  {/* Rate */}
+  <Col span={6}>
+    <label>Rate</label>
+    <Form.Item
+      {...field}
+      name={[field.name, "rate"]}
+      fieldKey={[field.fieldKey, "rate"]}
+      rules={[{ required: true, message: "Enter rate" }]}
+    >
+      <Input type="number" placeholder="Rate" disabled />
+    </Form.Item>
+  </Col>
 
-        <Col span={3}>
-          <label htmlFor="">Quantity</label>
-          <Form.Item
-            {...field}
-            name={[field.name, "qty"]}
-            fieldKey={[field.fieldKey, "qty"]}
-            rules={[{ required: true, message: "Enter qty" }]}
-          >
-            <Input type="number" placeholder="Qty" disabled={disabled} />
-          </Form.Item>
-        </Col>
+  {/* UOM */}
+  <Col span={6}>
+    <label>UOM</label>
+    <Form.Item
+      {...field}
+      name={[field.name, "uom"]}
+      fieldKey={[field.fieldKey, "uom"]}
+    >
+      <Input placeholder="UOM" disabled />
+    </Form.Item>
+  </Col>
 
-        <Col span={1} className="!pt-6">
-          {!disabled && <MinusCircleOutlined onClick={() => remove(field.name)} />}
-        </Col>
+  {/* Quantity */}
+  <Col span={6}>
+    <label>Quantity</label>
+    <Form.Item
+      {...field}
+      name={[field.name, "qty"]}
+      fieldKey={[field.fieldKey, "qty"]}
+      rules={[
+        { required: true, message: "Enter qty" },
+        { type: "number", min: 1, message: "Minimum qty is 1" }
+      ]}
+    >
+      <Input type="number" placeholder="Qty" disabled={disabled} min={1} />
+    </Form.Item>
+  </Col>
 
-      </Row>
+  {/* Remove Button */}
+  <Col span={1}>
+    {!disabled && (
+      <MinusCircleOutlined onClick={() => remove(field.name)} />
+    )}
+  </Col>
+</Row>
+
     );
   };
 
