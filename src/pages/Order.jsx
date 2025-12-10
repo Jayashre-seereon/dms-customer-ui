@@ -133,35 +133,35 @@ export default function Order() {
   // Table columns 
   const columns = [
     { title: <span className="text-amber-700 font-semibold">Order No</span>, dataIndex: "orderGroupId", key: "orderGroupId", width: 120, render: t => <span className="text-amber-800 ">{t}</span> },
-     {
-  title: <span className="text-amber-700 font-semibold">Contract,Items & Company</span>,
-  key: "contract_items",
-  width: 120,
-  render: (_, record) => (
-    <div className="space-y-2 text-amber-800">
-      {(record.contracts || []).map((contract) => (
-        <div >      
-            {contract.contractNo} — {contract.companyName}        
-            {(contract.items || []).map((item) => (
-              <li>{item.item}</li>
-            ))}
+    {
+      title: <span className="text-amber-700 font-semibold">Contract,Items & Company</span>,
+      key: "contract_items",
+      width: 120,
+      render: (_, record) => (
+        <div className="space-y-2 text-amber-800">
+          {(record.contracts || []).map((contract) => (
+            <div >
+              {contract.contractNo} — {contract.companyName}
+              {(contract.items || []).map((item) => (
+                <li>{item.item}</li>
+              ))}
+            </div>
+          ))}
         </div>
-      ))}
-    </div>
-  )
-}
-,
-   {
-  title: <span className="text-amber-700 font-semibold">Total Qty</span>,
-  key: "totalAmount",
-  width: 90,
-  render: (_, record) => (
-    <span className="text-amber-800">
-      {record.totalAmount.toLocaleString()} 
-    </span>
-  )
-}
-,   {
+      )
+    }
+    ,
+    {
+      title: <span className="text-amber-700 font-semibold">Total Qty</span>,
+      key: "totalAmount",
+      width: 90,
+      render: (_, record) => (
+        <span className="text-amber-800">
+          {record.totalAmount.toLocaleString()}
+        </span>
+      )
+    }
+    , {
       title: <span className="text-amber-700 font-semibold">Status</span>, dataIndex: "status", key: "status", width: 100, render: status => {
         const base = "px-3 py-1 rounded-full text-sm font-semibold";
         if (status === "Approved") return <span className={`${base} bg-green-100 text-green-700`}>Approved</span>;
@@ -297,7 +297,7 @@ export default function Order() {
                 <Select placeholder="Select item" onChange={val => handleSelectItem(val, contractIndex, f.name)} disabled={!isNewItem}>
                   {(contractItemsMap[contractIndex] || []).map(it => (
                     <Select.Option key={it.item} value={it.item}>
-                      {it.item} — available: {it.restQty} {it.uom} {it.item_code}
+                      {it.item}
                     </Select.Option>
                   ))}
                 </Select>
@@ -309,13 +309,18 @@ export default function Order() {
                 {
                   validator: (_, value) => {
                     if (!value || Number(value) <= 0) return Promise.reject(new Error("Qty must be > 0"));
-                    if (maxQty !== undefined && Number(value) > maxQty) return Promise.reject(new Error(`Max allowed: ${maxQty}`));
+                    if (maxQty !== undefined && Number(value) > maxQty) return Promise.reject(new Error(`Max allowed: ${maxQty} ${itemDetails?.uom || ''}`));
                     return Promise.resolve();
                   }
                 }
               ]}>
                 <InputNumber min={1} style={{ width: "100%" }} />
               </Form.Item>
+              {maxQty !== undefined && maxQty !== 0 && (
+                <div className="text-xs text-red-500 mt-[-10px]">
+                  Max Available: {maxQty} {itemDetails?.uom}
+                </div>
+              )}
             </Col>
             <Col span={4}><Form.Item name={[f.name, "uom"]} label="UOM"><Input disabled value={itemDetails?.uom} /></Form.Item></Col>
             <Col span={4}><Form.Item name={[f.name, "item_code"]} label="Item Code"><Input style={{ width: "100%" }} disabled value={itemDetails?.item_code} /></Form.Item></Col>

@@ -10,31 +10,40 @@ import {
 
 const profileData = {
   personalInfo: {
+    id: "EMP12345",
     firstName: "Rajesh",
     lastName: "Kumar",
     email: "rajesh.kumar@ruchisoya.com",
     phone: "+91 9876543210",
+    address: "Bhubaneswar, Odisha, India",
+    broker_associate: "N/A",
     position: "System Administrator",
     department: "IT Department",
     bio: "Experienced system administrator with 5+ years in ERP systems management.",
     avatarInitials: "RK",
   },
-  security: {
-    twoFactor: true,
-    loginAlerts: false,
-    sessionTimeout: 30,
-  },
   company: {
     name: "Ruchi Soya Industries Ltd.",
-    address: "Plot No. 15, Industrial Estate, Bhubaneswar, Odisha 751010",
     companyPhone: "9876543210",
     companyEmail: "rajesh.kumar@ruchisoya.com",
+    state: "Odisha",
+    country: "India",
+    city: "Bhubaneswar",
+    pin: "751010",
+    address: "Plot No. 15, Industrial Estate, Bhubaneswar, Odisha 751010",
+    gst_in: "21AAACR1234Q1ZV",
+    tin: "1234567890",
+    license_no: "LIC1234567890",
+    fassai_no: "FSSAI1234567890",
+    pan_no: "AAACR1234Q",
+    billing_type: "online",
+    adhhar_no: "1234 5678 9012",
+    tdc_applicable: "Yes",
   },
 };
 
 export default function ProfileSettings() {
   const [formPersonal] = Form.useForm();
-  const [formSecurity] = Form.useForm();
   const [formCompany] = Form.useForm();
   const [profile, setProfile] = useState(profileData);
 
@@ -46,15 +55,14 @@ export default function ProfileSettings() {
       </p>
 
       <Row gutter={24}>
-        {/* LEFT COLUMN - Personal Information 40% */}
+        {/* LEFT COLUMN */}
         <Col span={10}>
+          {/* PERSONAL INFO */}
           <div className="bg-white p-6 rounded-lg shadow-sm border-1 border-amber-300">
             <h2 className="font-semibold text-lg text-amber-700 mb-3 flex items-center gap-2">
               <UserOutlined /> Personal Information
             </h2>
-            <p className="text-amber-600 mb-6">
-              Update your personal details
-            </p>
+            <p className="text-amber-600 mb-6">Update your personal details</p>
 
             {/* Avatar */}
             <Row gutter={20} align="middle" className="mb-6">
@@ -76,7 +84,10 @@ export default function ProfileSettings() {
                     </Upload>
                   </Col>
                   <Col>
-                    <Button danger className="!mt-6 hover:bg-red-500 hover:text-white">
+                    <Button
+                      danger
+                      className="!mt-6 hover:bg-red-500 hover:text-white"
+                    >
                       Remove
                     </Button>
                   </Col>
@@ -87,18 +98,17 @@ export default function ProfileSettings() {
               </Col>
             </Row>
 
-            {/* Personal Info Form */}
+            {/* PERSONAL FORM */}
             <Form
               layout="vertical"
               form={formPersonal}
               initialValues={profile.personalInfo}
-              autoComplete="off"
-              onFinish={(values) => {
+              onFinish={(values) =>
                 setProfile((prev) => ({
                   ...prev,
                   personalInfo: { ...prev.personalInfo, ...values },
-                }));
-              }}
+                }))
+              }
             >
               <Row gutter={16}>
                 <Col span={12}>
@@ -125,6 +135,14 @@ export default function ProfileSettings() {
                   </Form.Item>
                 </Col>
               </Row>
+
+              <Form.Item name="address" label="Address">
+                <Input.TextArea rows={2} />
+              </Form.Item>
+
+              <Form.Item name="broker_associate" label="Broker Associate">
+                <Input />
+              </Form.Item>
 
               <Row gutter={16}>
                 <Col span={12}>
@@ -153,112 +171,28 @@ export default function ProfileSettings() {
               </Button>
             </Form>
           </div>
+
+
         </Col>
 
-        {/* RIGHT COLUMN - Security and Company Info 60% */}
+        {/* RIGHT COLUMN – COMPANY INFO */}
         <Col span={14}>
-          {/* SECURITY SECTION */}
-          <div className="bg-white p-6 rounded-lg shadow-sm mb-6 border-1 border-amber-300">
-            <h2 className="font-semibold text-lg text-amber-700 mb-3 flex items-center gap-2">
-              <SafetyOutlined /> Security
-            </h2>
-            <p className="text-amber-600 mb-6">
-              Manage your account security
-            </p>
-
-            <Form
-              layout="vertical"
-              form={formSecurity}
-              initialValues={profile.security}
-              autoComplete="off"
-              onFinish={(values) => {
-                setProfile((prev) => ({
-                  ...prev,
-                  security: { ...prev.security, ...values },
-                }));
-              }}
-            >
-              <Form.Item
-                name="twoFactor"
-                valuePropName="checked"
-                className="mb-5"
-              >
-                <Row justify="space-between" align="middle">
-                  <Col>
-                    <div className="font-semibold text-amber-700">
-                      Two-Factor Authentication
-                    </div>
-                    <div className="text-amber-600 text-sm">
-                      Add extra security layer
-                    </div>
-                  </Col>
-                  <Col>
-                    <Switch defaultChecked={profile.security.twoFactor} />
-                  </Col>
-                </Row>
-              </Form.Item>
-
-              <Form.Item
-                name="loginAlerts"
-                valuePropName="checked"
-                className="mb-5"
-              >
-                <Row justify="space-between" align="middle">
-                  <Col>
-                    <div className="font-semibold text-amber-700 ">
-                      Login Alerts
-                    </div>
-                    <div className="text-amber-600 text-sm">
-                      Notify on new login attempts
-                    </div>
-                  </Col>
-                  <Col>
-                    <Switch defaultChecked={profile.security.loginAlerts} />
-                  </Col>
-                </Row>
-              </Form.Item>
-
-              <Form.Item
-                label="Session Timeout (minutes)"
-                name="sessionTimeout"
-                rules={[
-                  { type: "number", min: 1, max: 120, message: "1-120 minutes" },
-                ]}
-              >
-                <Input type="number" className="w-32" />
-              </Form.Item>
-
-              <Button
-                type="primary"
-                htmlType="submit"
-                icon={<UploadOutlined />}
-                style={{ backgroundColor: "#d97706", borderColor: "#d97706" }}
-              >
-                Save Security Settings
-              </Button>
-            </Form>
-          </div>
-
-          {/* COMPANY INFORMATION SECTION */}
           <div className="bg-white p-6 rounded-lg shadow-sm border-1 border-amber-300">
             <h2 className="font-semibold text-lg text-amber-700 mb-3 flex items-center gap-2">
               <ApartmentOutlined /> Company Information
             </h2>
-            <p className="text-amber-600 mb-6">
-              Manage your company details
-            </p>
+            <p className="text-amber-600 mb-6">Manage your company details</p>
 
             <Form
               layout="vertical"
               form={formCompany}
               initialValues={profile.company}
-              autoComplete="off"
-              onFinish={(values) => {
+              onFinish={(values) =>
                 setProfile((prev) => ({
                   ...prev,
                   company: { ...prev.company, ...values },
-                }));
-              }}
+                }))
+              }
             >
               <Row gutter={16}>
                 <Col span={12}>
@@ -279,8 +213,72 @@ export default function ProfileSettings() {
                   </Form.Item>
                 </Col>
 
-                <Col span={24}>
+                <Col span={8}>
                   <Form.Item label="Email" name="companyEmail">
+                    <Input />
+                  </Form.Item>
+                </Col>
+
+                <Col span={8}>
+                  <Form.Item label="Country" name="country">
+                    <Input />
+                  </Form.Item>
+                </Col>
+                <Col span={8}>
+                  <Form.Item label="State" name="state">
+                    <Input />
+                  </Form.Item>
+                </Col>
+                <Col span={8}>
+                  <Form.Item label="City" name="city">
+                    <Input />
+                  </Form.Item>
+                </Col>
+
+                <Col span={8}>
+                  <Form.Item label="PIN" name="pin">
+                    <Input />
+                  </Form.Item>
+                </Col>
+
+                <Col span={8}>
+                  <Form.Item label="GST IN" name="gst_in">
+                    <Input />
+                  </Form.Item>
+                </Col>
+
+                <Col span={8}>
+                  <Form.Item label="TIN" name="tin">
+                    <Input />
+                  </Form.Item>
+                </Col>
+
+                <Col span={8}>
+                  <Form.Item label="License No" name="license_no">
+                    <Input />
+                  </Form.Item>
+                </Col>
+
+                <Col span={8}>
+                  <Form.Item label="FSSAI No" name="fassai_no">
+                    <Input />
+                  </Form.Item>
+                </Col>
+
+                <Col span={8}>
+                  <Form.Item label="PAN No" name="pan_no">
+                    <Input />
+                  </Form.Item>
+                </Col>
+
+                <Col span={8}>
+                  <Form.Item label="Adhaar No" name="adhhar_no">
+                    <Input />
+                  </Form.Item>
+                </Col>
+
+                <Col span={8}>
+                  <Form.Item label="TDC Applicable" name="tdc_applicable">
                     <Input />
                   </Form.Item>
                 </Col>
@@ -296,7 +294,10 @@ export default function ProfileSettings() {
               </Button>
             </Form>
           </div>
+
+
         </Col>
+
       </Row>
     </div>
   );
