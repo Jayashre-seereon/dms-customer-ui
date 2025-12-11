@@ -14,6 +14,7 @@ import Reports from "./pages/Reports"
 import Wallet from "./pages/Wallet"
 import PendingTransaction from "./pages/PendingTransactions";
 import InTransitDeliveries from "./pages/InTransitDeliveries";
+import BrokerSignup from "./components/BrokerSignup";
 export default function App() {
   return (
     <AuthProvider>
@@ -23,6 +24,7 @@ export default function App() {
           <Route path="/" element={<Login />} />
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
+          <Route path="/broker-signup" element={<BrokerSignup />} />
           <Route
             element={
               <PrivateRoute>

@@ -22,20 +22,24 @@ export const AuthProvider = ({ children }) => {
   };
 
   // SIGNUP
-  const signup = ({ name, email, password }) => {
-    if (users.find(u => u.email === email)) {
-      return { success: false, message: "User already exists" };
-    }
-    const newUser = {
-      id: users.length + 1,
-      name,
-      email,
-      password,
-      status: "pending", 
-    };
-    setUsers([...users, newUser]);
-    return { success: true, message: "Signup successful! Wait for admin approval." };
+ const signup = ({ name, email, password, role = "user" }) => {
+  if (users.find(u => u.email === email)) {
+    return { success: false, message: "User already exists" };
+  }
+
+  const newUser = {
+    id: users.length + 1,
+    name,
+    email,
+    password,
+    role,           
+    status: "pending",
   };
+
+  setUsers([...users, newUser]);
+  return { success: true, message: `Signup successful! Wait for admin approval.` };
+};
+
 
   // LOGOUT
   const logout = () => setCurrentUser(null);
