@@ -3,7 +3,6 @@ import React, { useState } from "react";
 import { Form, Input, Button, Upload, Switch, Col, Row } from "antd";
 import {
   UserOutlined,
-  SafetyOutlined,
   ApartmentOutlined,
   UploadOutlined,
 } from "@ant-design/icons";
@@ -17,7 +16,6 @@ const profileData = {
     phone: "+91 9876543210",
     address: "Bhubaneswar, Odisha, India",
     broker_associate: "N/A",
-    department: "IT Department",
     avatarInitials: "RK",
   },
   company: {
@@ -133,24 +131,20 @@ export default function ProfileSettings() {
                   </Form.Item>
                 </Col>
               </Row>
-              
+
               <Form.Item name="address" label="Address">
                 <Input.TextArea rows={2} />
               </Form.Item>
               <Row gutter={16}>
 
-                  <Col span={12}>
-              <Form.Item name="broker_associate" label="Broker Associate">
-                <Input />
-              </Form.Item></Col>
-              
                 <Col span={12}>
-                  <Form.Item name="department" label="Department">
+                  <Form.Item name="broker_associate" label="Broker Associate">
                     <Input />
-                  </Form.Item>
-                </Col>
+                  </Form.Item></Col>
+
+
               </Row>
-            
+
 
 
 

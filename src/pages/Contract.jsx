@@ -47,7 +47,7 @@ const contractJSON = {
       uom: "Ltrs",
       location: "Warehouse A",
       status: "Approved",
-      totalAmt: 250000,
+      totalAmount: 250000,
       grossWt: 2100,
       type: "Retail",
       brokerName: "Broker 1",
@@ -103,12 +103,12 @@ const contractJSON = {
         },
       ],
       totalQty: 2000,
-      uom: "", // Mixed UOM
+      uom: "",
       location: "Warehouse B",
       status: "Pending",
-      totalAmt: 350000,
+      totalAmount: 350000,
       brokerName: "Broker 2",
-      // other fields...
+
     },
   ],
   // Item options are now grouped by company for auto-fill and filter logic
@@ -158,7 +158,7 @@ export default function Contract() {
   const [selectedRecord, setSelectedRecord] = useState(null);
   const [data, setData] = useState(contractJSON.initialData);
   const [searchText, setSearchText] = useState("");
-
+  const [totalAmount, setTotalAmount] = useState(0);
   const [addForm] = Form.useForm();
   const [editForm] = Form.useForm();
   const [viewForm] = Form.useForm();
@@ -183,21 +183,36 @@ export default function Contract() {
     const totalQty = items.reduce((s, it) => s + Number(it.qty || 0), 0);
     return { totalQty, uom: uomSet.size === 1 ? items[0].uom : (uomSet.size > 1 ? "Mixed" : "") };
   };
+  const updateTotalAmount = (form) => {
+    const items = form.getFieldValue("items") || [];
+    let total = 0;
+
+    items.forEach((it) => {
+      const qty = Number(it.qty || 0);
+      const rate = Number(it.rate || 0);
+      total += qty * rate;
+    });
+
+    setTotalAmount(total);
+  };
 
   const columns = [
     {
       title: <span className="text-amber-700 font-semibold">Contract No</span>,
-      dataIndex: "key", // Using key as contract no
-      render: (text) => <span className="text-amber-800 font-bold">{text}</span>,
+      dataIndex: "key",
+      width: 100,
+      render: (text) => <span className="text-amber-800 ">{text}</span>,
     },
     {
-      title: <span className="text-amber-700 font-semibold">Company</span>,
+      title: <span className="text-amber-700 font-semibold">Vendor</span>,
+      width: 100,
       render: (_, r) => <span className="text-amber-800">{getCompanyNamesFromItems(r.items)}</span>,
     },
 
 
     {
       title: <span className="text-amber-700 font-semibold">Items</span>,
+      width: 250,
       render: (_, r) => {
         const short = (r.items || [])
           .slice(0, 2)
@@ -214,6 +229,7 @@ export default function Contract() {
     },
     {
       title: <span className="text-amber-700 font-semibold">Total Qty</span>,
+      width: 100,
       render: (_, r) => {
         const totals = calculateTotals(r.items);
         return (
@@ -223,6 +239,16 @@ export default function Contract() {
         );
       },
     },
+    {
+      title: <span className="text-amber-700 font-semibold">Total Amount</span>,
+      dataIndex: "totalAmount",
+      width: 120,
+      render: (value) => (
+        <span className="text-amber-800 ">₹ {Number(value || 0).toFixed(2)}</span>
+      ),
+    },
+
+
     {
       title: <span className="text-amber-700 font-semibold">Status</span>,
       dataIndex: "status",
@@ -238,6 +264,7 @@ export default function Contract() {
     },
     {
       title: <span className="text-amber-700 font-semibold">Actions</span>,
+      width: 100,
       render: (record) => (
         <div className="flex gap-3">
           <EyeOutlined
@@ -291,29 +318,47 @@ export default function Contract() {
       item: itemName,
       itemCode: itemData.itemCode,
       rate: itemData.rate,
-      uom: itemData.uom,  // UPDATE UOM
+      uom: itemData.uom,
+      qty: 0,
+      totalAmount: 0
     };
 
     // Push updated list back to form
     form.setFieldsValue({ items });
+    updateTotalAmount(form);
   };
 
   const handleCompanyChange = (form, companyName, fieldName, isEdit) => {
 
     const newLocation = companyLocationMap[companyName];
 
-    // Update the top-level location if this is the FIRST item (index 0)
+    // If first row → update location
     if (fieldName === 0 && newLocation) {
       form.setFieldsValue({ location: newLocation });
     }
 
-    // Reset item, itemCode, and rate when company changes
-    form.setFieldsValue({
-      items: form.getFieldValue('items').map((item, index) =>
-        index === fieldName ? { ...item, item: undefined, itemCode: undefined, rate: undefined, uom: undefined } : item
-      )
-    });
-  }
+    // Reset item details when company changes
+    const items = form.getFieldValue("items") || [];
+    const updatedItems = items.map((item, index) =>
+      index === fieldName
+        ? {
+          ...item,
+          item: undefined,
+          itemCode: undefined,
+          rate: undefined,
+          uom: undefined,
+          qty: 0,
+          totalAmount: 0,
+        }
+        : item
+    );
+
+    form.setFieldsValue({ items: updatedItems });
+
+    // 🔥 MOST IMPORTANT FIX → reset live total
+    updateTotalAmount(form);
+  };
+
 
 
   const handleFormSubmit = (values, isEdit) => {
@@ -342,7 +387,7 @@ export default function Contract() {
       deliveryDate: finalValues.deliveryDate
         ? finalValues.deliveryDate.format("YYYY-MM-DD")
         : undefined,
-      // location is kept here as a top-level field
+      totalAmount: totalAmount,
     };
 
     if (isEdit) {
@@ -363,18 +408,6 @@ export default function Contract() {
   const renderBasicFields = (formInstance, disabled = false) => (
     <div className="border! p-2! rounded! mb-2! border-amber-300! relative!">
       <Row gutter={16}>
-        <Col span={8}>
-          <Form.Item
-            name="key"
-            label="Contract No."
-          >
-            <Input
-              placeholder="Auto-Generated"
-              disabled={true}
-              className="font-bold text-amber-800"
-            />
-          </Form.Item>
-        </Col>
 
         <Col span={8}>
           <Form.Item
@@ -438,7 +471,7 @@ export default function Contract() {
             name="location"
             rules={[{ required: true, message: "Please select Location" }]}
           >
-            <Select placeholder="Select Location" disabled>
+            <Select placeholder="Select Location" disabled={disabled}>
               {contractJSON.locationOptions.map((loc) => (
                 <Select.Option key={loc} value={loc}>
                   {loc}
@@ -480,15 +513,15 @@ export default function Contract() {
 
         {/* Company */}
         <Col span={6}>
-          <label>Company</label>
+          <label>Vendor</label>
           <Form.Item
             {...field}
             name={[field.name, "companyName"]}
             fieldKey={[field.fieldKey, "companyName"]}
-            rules={[{ required: true, message: "Select company" }]}
+            rules={[{ required: true, message: "Select vendor" }]}
           >
             <Select
-              placeholder="Select Company"
+              placeholder="Select Vendor"
               disabled={disabled}
               onChange={(companyName) =>
                 handleCompanyChange(formInstance, companyName, field.name, isEditModalOpen)
@@ -579,10 +612,14 @@ export default function Contract() {
 
             ]}
           >
-            <Input type="number" placeholder="Qty" disabled={disabled} min={1} />
+            <Input type="number" placeholder="Qty" disabled={disabled} onChange={() => updateTotalAmount(formInstance)} />
           </Form.Item>
         </Col>
-
+        <Col span={8}>
+          <Form.Item label="Total Amount">
+            <Input value={totalAmount} disabled />
+          </Form.Item>
+        </Col>
         {/* Remove Button */}
         <Col span={1}>
           {!disabled && (
@@ -649,7 +686,7 @@ export default function Contract() {
           </Col>
 
           <Col span={6}>
-            <Form.Item label="Company(ies)">
+            <Form.Item label="Vendor(s)">
               <Input value={getCompanyNamesFromItems(selectedRecord?.items)} disabled />
             </Form.Item>
           </Col>
@@ -700,7 +737,7 @@ export default function Contract() {
         {(selectedRecord?.items || []).map((it, idx) => (
           <Row gutter={16} key={idx} className="mb-2 border-b border-dashed pb-2">
             <Col span={6}>
-              <Form.Item label={`Company ${idx + 1}`}>
+              <Form.Item label={`Vendor ${idx + 1}`}>
                 <Input value={it.companyName} disabled />
               </Form.Item>
             </Col>
@@ -739,20 +776,19 @@ export default function Contract() {
                 <Input value={it.freeQty} disabled />
               </Form.Item>
             </Col>
+            <Col span={6}>
+              <Form.Item label="Total Qty">
+                <Input value={selectedRecord?.totalQty} disabled />
+              </Form.Item>
+            </Col>
+            <Col span={6}>
+              <Form.Item label="UOM">
+                <Input value={selectedRecord?.uom} disabled />
+              </Form.Item>
+            </Col>
           </Row>
         ))}
-        <Row gutter={16} className="mt-4">
-          <Col span={6}>
-            <Form.Item label="Total Qty">
-              <Input value={selectedRecord?.totalQty} disabled />
-            </Form.Item>
-          </Col>
-          <Col span={6}>
-            <Form.Item label="UOM">
-              <Input value={selectedRecord?.uom} disabled />
-            </Form.Item>
-          </Col>
-        </Row>
+
       </div>
 
 
@@ -776,7 +812,7 @@ export default function Contract() {
           </Col>
           <Col span={6}>
             <Form.Item label="Total Amount">
-              <Input value={selectedRecord?.totalAmt} disabled />
+              <Input value={selectedRecord?.totalAmount} disabled />
             </Form.Item>
           </Col>
         </Row>
@@ -797,7 +833,7 @@ export default function Contract() {
         <div className="flex gap-2">
           <Input
             prefix={<SearchOutlined className="text-amber-600!" />}
-            placeholder="Search by Contract No, Company, Item, Status"
+            placeholder="Search by Contract No, Vendor, Item, Status"
             className="w-96! border-amber-300! focus:border-amber-500!"
             value={searchText}
             onChange={(e) => setSearchText(e.target.value)}
@@ -850,7 +886,7 @@ export default function Contract() {
 
       {/* Add Modal */}
       <Modal
-        title={<span className="text-amber-700 font-semibold">Add purchase Contract</span>}
+        title={<span className="text-amber-700 font-semibold">Add New Contract</span>}
         open={isAddModalOpen}
         onCancel={() => {
           setIsAddModalOpen(false);
@@ -894,7 +930,7 @@ export default function Contract() {
       <Modal
         title={
           <span className="text-amber-700 font-semibold">
-            Edit Sales Contract
+            Edit Contract
           </span>
         }
         open={isEditModalOpen}
@@ -935,7 +971,7 @@ export default function Contract() {
 
       {/* View Modal */}
       <Modal
-        title={<span className="text-amber-700 text-3xl font-semibold">View Contract</span>}
+        title={<span className="text-amber-700 text-xl font-semibold">View Contract</span>}
         open={isViewModalOpen}
         onCancel={() => {
           setIsViewModalOpen(false);

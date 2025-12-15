@@ -23,7 +23,7 @@ const reportsData = {
       value: "₹18,45,280",
       growth: "+24.1% from last month",
       icon: <DollarOutlined className="text-xl! text-amber-500!" />,
-      borderColor: "border-amber-300",
+      borderColor: "border-amber-300!",
       textColor: "text-amber-600",
     },
     {
@@ -31,7 +31,7 @@ const reportsData = {
       value: "167",
       growth: "+28% from last month",
       icon: <ShoppingOutlined className="text-xl! text-amber-500!" />,
-      borderColor: "border-amber-300",
+      borderColor: "border-amber-300!",
       textColor: "text-amber-600",
     },
     {
@@ -39,7 +39,7 @@ const reportsData = {
       value: "42",
       growth: "+18% from last month",
       icon: <FileTextOutlined className="text-xl! text-amber-500!" />,
-      borderColor: "border-amber-300",
+      borderColor: "border-amber-300!",
       textColor: "text-amber-600",
     },
     {
@@ -47,7 +47,7 @@ const reportsData = {
       value: "+22%",
       growth: "New customers in Odisha",
       icon: <TeamOutlined className="text-xl! text-amber-500!" />,
-      borderColor: "border-amber-300",
+      borderColor: "border-amber-300!",
       textColor: "text-amber-600",
     },
   ],

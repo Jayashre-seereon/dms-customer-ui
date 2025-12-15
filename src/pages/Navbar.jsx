@@ -16,7 +16,7 @@ const goToProfile = () => {
 <Menu.Item key="1">
   <div
     onClick={goToProfile}
-    className="flex items-center space-x-2 text-green-500 text-sm font-medium hover:underline cursor-pointer"
+    className="flex items-center space-x-2 text-amber-700 text-sm font-medium hover:underline cursor-pointer"
   >
     <UserOutlined />
     <span>Profile</span>
@@ -50,15 +50,15 @@ const goToProfile = () => {
         <div className="flex items-center space-x-6">
           {/* Notification */}
           <Badge count={3}>
-            <BellOutlined className="text-xl! text-amber-800! cursor-pointer!" />
+            <BellOutlined className="text-xl! text-amber-600! cursor-pointer!" />
           </Badge>
 
           {/* Profile dropdown */}
           <Dropdown overlay={menu} placement="bottomRight">
             <div className="flex items-center space-x-2 cursor-pointer pl-4!">
-              <Avatar size="small" icon={<UserOutlined />} className="bg-amber-100!  text-amber-800! " />
-              <span className="text-sm text-amber-800 pl-4 ">{currentUser?.name}</span>
-              <DownOutlined className="text-amber-800 text-sm pl-2" />
+              <Avatar size="small" icon={<UserOutlined />} className="bg-amber-100!  text-amber-600! " />
+              <span className="text-sm text-amber-600 pl-4 ">{currentUser?.name}</span>
+              <DownOutlined className="text-amber-600 text-sm pl-2" />
             </div>
           </Dropdown>
         </div>

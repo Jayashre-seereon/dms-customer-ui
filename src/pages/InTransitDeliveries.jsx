@@ -202,7 +202,7 @@ export default function InTransitDeliveries() {
       <div className="flex justify-between items-center mb-0">
         <div>
           <h1 className="text-3xl font-bold text-amber-700">In Transit Orders</h1>
-          <p className="text-amber-600">Track your in-transit deliveries</p>
+          <p className="text-amber-600">Track your in-transit orders</p>
         </div>
       </div>
 

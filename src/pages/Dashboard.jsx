@@ -74,8 +74,8 @@ const dashboardData = {
     },
 
     {
-      title: "Pending Transaction",
-      description: "Track pending transactions",
+      title: "Pending Orders",
+      description: "Track pending orders",
       count: 28,
       change: "+22%",
       icon: <ClockCircleOutlined />,
@@ -84,8 +84,8 @@ const dashboardData = {
       bg: "bg-amber-100",
     },
     {
-      title: "In-Transit Deliveries",
-      description: "Track deliveries in transit",
+      title: "In-Transit Orders",
+      description: "Track in-transit deliveries",
       count: 28,
       change: "+22%",
       icon: <TruckOutlined />,
@@ -136,41 +136,51 @@ export default function Dashboard() {
   return (
     <div className="p-0 space-y-4 text-amber-800">
 
-      {/* QUICK ACTIONS */}
-      <div>
-        <h2 className="text-xl  font-bold text-amber-700">
-          Quick Actions
-        </h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {dashboardData.quickActions.map((action, index) => (
-            <Card
-              key={index}
-              className={`shadow-sm! rounded-xl! cursor-pointer! hover:shadow-md! bg-amber-50! h-37! border! border-amber-400!`}
-              onClick={() => navigate(action.route)}
-            >
-              {React.cloneElement(action.icon, {
-                className: `text-xl! text-${action.color}-600!`,
-              })}
-              <h3 className="text-lg font-bold mt-2 text-amber-800">
-                {action.title}
-              </h3>
-              <p className="text-amber-600 text-xs">{action.description}</p>
-              <div className="flex justify-between items-center w-full">
-                <span className="text-lg font-bold text-amber-700">{action.count}</span>
-                <span
-                  className={`text-xs ${action.change.includes("-") ? "text-red-500" : "text-green-600"
-                    }`}
-                >
-                  {action.change}
-                </span>
-              </div>
+    <div>
+  <h2 className="text-xl font-bold text-amber-700">Quick Actions</h2>
+  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+    {dashboardData.quickActions.map((action, index) => (
+      <Card
+        key={index}
+        className="shadow-sm! rounded-xl! cursor-pointer! hover:shadow-md! bg-amber-50! h-37! border! border-amber-400!"
+        onClick={() => navigate(action.route)}
+      >
+        {/* Row: text left, icon right */}
+        <div className="flex items-start justify-between">
+          {/* LEFT: title + description + count/change */}
+          <div className="flex-1 pr-2">
+            <h3 className="text-lg font-bold mt-1 text-amber-800">
+              {action.title}
+            </h3>
+            <p className="text-amber-600 text-xs">{action.description}</p>
+            <div className="flex justify-between items-center w-full mt-2">
+              <span className="text-lg font-bold text-amber-700">
+                {action.count}
+              </span>
+              <span
+                className={`text-md  ${
+                  action.change.includes("-")
+                    ? "text-red-500"
+                    : "text-green-600"
+                }`}
+              >
+                {action.change}
+              </span>
+            </div>
+          </div>
 
-
-
-            </Card>
-          ))}
+          {/* RIGHT: icon */}
+          <div className="ml-2 flex items-start">
+            {React.cloneElement(action.icon, {
+              className: `text-2xl! text-${action.color}-600!`,
+            })}
+          </div>
         </div>
-      </div>
+      </Card>
+    ))}
+  </div>
+</div>
+
 
       {/* CHARTS */}
       <div className="grid grid-cols-1 pt-4 md:grid-cols-2 gap-6">

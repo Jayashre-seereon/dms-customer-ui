@@ -96,10 +96,14 @@ export default function Login() {
           </Form.Item>
         </Form>
 
-        <div className="text-center">
-          <Link to="/signup">
-            <span className="text-amber-700 hover:underline">Sign Up</span>
-          </Link>
+       <div className="text-sm text-gray-500 ">
+          Don't have an account?{" "}
+          <Link
+            to="/signup"
+            className="text-amber-600  hover:underline"
+          >
+            Sign Up
+          </Link>     
         </div>
       </div>
     </div>
