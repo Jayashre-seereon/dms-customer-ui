@@ -1346,7 +1346,7 @@ export default function Order() {
         <Table
           columns={columns}
           dataSource={filteredData}
-          pagination={false}
+          pagination={10}
           scroll={{ y: 200 }}
           rowKey="orderGroupId"
         />

@@ -259,7 +259,7 @@ export default function DeliveryStatus() {
         <Table
           columns={columns}
           dataSource={filteredData}
-          pagination={false}
+          pagination={10}
           scroll={{ y: 350 }}
         />
       </div>
