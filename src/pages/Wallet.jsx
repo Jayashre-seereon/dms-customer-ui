@@ -210,7 +210,7 @@ const WalletPage = () => {
         <Table
           dataSource={filterData}
           columns={columns}
-          pagination={false}
+          pagination={10}
           scroll={{ y: 350 }}
         />
       </div>

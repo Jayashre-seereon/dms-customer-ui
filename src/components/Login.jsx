@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Form, Input, Button, Card, Alert } from "antd";
 import { useAuth } from "../context/AuthContext";
 import { useNavigate, Link, useLocation } from "react-router-dom";
-import  {UserOutlined} from  "@ant-design/icons"
+import { UserOutlined } from "@ant-design/icons"
 export default function Login() {
   const { login } = useAuth();
   const [loading, setLoading] = useState(false);
@@ -34,7 +34,7 @@ export default function Login() {
     }, 500);
   };
 
-   return (
+  return (
     <div className="flex items-center justify-center min-h-screen bg-amber-50">
       <div className="bg-white p-8 rounded-2xl shadow-lg w-96 text-center">
         {/* Logo */}
@@ -50,7 +50,7 @@ export default function Login() {
           Sign in to your Customer management account
         </p>
 
-     {alert && (
+        {alert && (
           <Alert
             type={alert.type}
             message={alert.message}
@@ -96,14 +96,14 @@ export default function Login() {
           </Form.Item>
         </Form>
 
-       <div className="text-sm text-gray-500 ">
+        <div className="text-sm text-gray-500 ">
           Don't have an account?{" "}
           <Link
             to="/signup"
             className="text-amber-600  hover:underline"
           >
             Sign Up
-          </Link>     
+          </Link>
         </div>
       </div>
     </div>

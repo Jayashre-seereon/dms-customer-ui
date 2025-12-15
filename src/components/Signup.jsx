@@ -70,22 +70,53 @@ export default function Signup() {
               </Form.Item>
             </Col>
             <Col span={12}>
-              <Form.Item label="Email" name="email" rules={[{ required: true, type: "email" }]}>
-                <Input />
-              </Form.Item>
-            </Col>
+<Form.Item
+    label="Email"
+    name="email"
+    rules={[
+      { required: true, message: "Please enter your email" },
+      {
+        pattern: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+        message: "Enter a valid email (example@gmail.com)",
+      },
+    ]}
+  >
+    <Input placeholder="example@gmail.com" />
+  </Form.Item>            </Col>
           </Row>
 
           <Row gutter={16}>
             <Col span={12}>
-              <Form.Item label="Password" name="password" rules={[{ required: true, min: 6 }]}>
-                <Input.Password />
-              </Form.Item>
+                <Form.Item
+    label="Password"
+    name="password"
+    rules={[
+      { required: true, message: "Please enter password" },
+      {
+        pattern: /^(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{6,}$/,
+        message:
+          "Password must contain 1 uppercase, 1 number & 1 special character",
+      },
+    ]}
+  >
+    <Input.Password placeholder="Strong password" />
+  </Form.Item>
+
             </Col>
             <Col span={12}>
-              <Form.Item label="Phone" name="phone" rules={[{ required: true }]}>
-                <Input />
-              </Form.Item>
+           <Form.Item
+    label="Phone"
+    name="phone"
+    rules={[
+      { required: true, message: "Please enter phone number" },
+      {
+        pattern: /^[6-9]\d{9}$/,
+        message: "Enter valid 10-digit mobile number",
+      },
+    ]}
+  >
+    <Input maxLength={10} placeholder="9876543210" />
+  </Form.Item>
             </Col>
           </Row>
 

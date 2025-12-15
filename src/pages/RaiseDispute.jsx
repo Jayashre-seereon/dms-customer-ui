@@ -539,7 +539,7 @@ export default function RaiseDispute() {
               size="small"
               dataSource={modalRecord.itemsReturned || modalRecord.items}
               columns={modalColumns}
-              pagination={false}
+              pagination={10}
               rowKey="id"
             />
           </Form>

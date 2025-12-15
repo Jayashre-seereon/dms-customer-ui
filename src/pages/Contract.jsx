@@ -881,7 +881,7 @@ export default function Contract() {
       </div>
 
       <div className="border border-amber-300 rounded-lg p-4 shadow-md">
-        <Table columns={columns} dataSource={filteredData} pagination={false} scroll={{ y: 350 }} rowKey="key" />
+        <Table columns={columns} dataSource={filteredData} pagination={10} scroll={{ y: 350 }} rowKey="key" />
       </div>
 
       {/* Add Modal */}
