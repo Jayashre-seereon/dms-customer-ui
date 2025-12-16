@@ -65,7 +65,7 @@ export default function Login() {
           <Form.Item
             label={<span className="text-amber-700 font-semibold">Email</span>}
             name="email"
-            rules={[{ required: true, type: "email" },
+            rules={[{ required: true, },
               {
         pattern: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
         message: "Enter a valid email (example@gmail.com)",
