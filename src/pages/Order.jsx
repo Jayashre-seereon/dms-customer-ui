@@ -23,9 +23,10 @@ import {
   FilterOutlined,
   DeleteOutlined,
   MinusCircleOutlined,
+  WalletOutlined,
 } from "@ant-design/icons";
 import dayjs from "dayjs";
-import Wallet from "./Wallet"; // Assuming Wallet component exists
+import Wallet from "./Wallet";
 
 const API_CONFIG = {
   fetchData: () => contractJSON.initialData,
@@ -34,7 +35,6 @@ const API_CONFIG = {
   fetchContracts: () => contractJSON.contractOptions,
 };
 
-// --- Data & Constants ---
 const STATUS_FILTERS = [
   "All",
   "Approved",
@@ -55,19 +55,19 @@ const contractJSON = {
       item: "Mustard Oil",
       qty: 2000,
       uom: "Ltrs",
-      item_code: "MO-001",
+      itemcode: "MO-001",
       deliveryDate: "2025-10-15",
       status: "Approved",
       totalAmt: 250000,
       rate: 125,
-      Net_Qty: 10,
-      Gross_Qty: 12,
-      HSN_Code: 1514,
+      NetQty: 10,
+      GrossQty: 12,
+      HSNCode: 1514,
       IGST: 12,
-      Cash_Discount: 5,
-      Purchase_Type: "Local",
-      Bill_Mode: "Online",
-      Exp_Receiving_Date: "2025-10-18",
+      CashDiscount: 5,
+      PurchaseType: "Local",
+      BillMode: "Online",
+      ExpReceivingDate: "2025-10-18",
       Narration: "Standard delivery order",
     },
     {
@@ -79,19 +79,19 @@ const contractJSON = {
       item: "Sunflower Oil",
       qty: 1000,
       uom: "Ltrs",
-      item_code: "SO-002",
+      itemcode: "SO-002",
       deliveryDate: "2025-10-15",
       status: "InTransit",
       totalAmt: 110000,
       rate: 110,
-      Net_Qty: 8,
-      Gross_Qty: 10,
-      HSN_Code: 1512,
+      NetQty: 8,
+      GrossQty: 10,
+      HSNCode: 1512,
       IGST: 18,
-      Cash_Discount: 3,
-      Purchase_Type: "Interstate",
-      Bill_Mode: "Offline",
-      Exp_Receiving_Date: "2025-10-17",
+      CashDiscount: 3,
+      PurchaseType: "Interstate",
+      BillMode: "Offline",
+      ExpReceivingDate: "2025-10-17",
       Narration: "Urgent interstate delivery",
     },
     {
@@ -103,19 +103,19 @@ const contractJSON = {
       item: "Coconut Oil",
       qty: 500,
       uom: "Ltrs",
-      item_code: "CO-002",
+      itemcode: "CO-002",
       deliveryDate: "2025-10-20",
       status: "Pending",
       totalAmt: 65000,
       rate: 130,
-      Net_Qty: 5,
-      Gross_Qty: 6,
-      HSN_Code: 1513,
+      NetQty: 5,
+      GrossQty: 6,
+      HSNCode: 1513,
       IGST: 12,
-      Cash_Discount: 2,
-      Purchase_Type: "Local",
-      Bill_Mode: "Online",
-      Exp_Receiving_Date: "2025-10-25",
+      CashDiscount: 2,
+      PurchaseType: "Local",
+      BillMode: "Online",
+      ExpReceivingDate: "2025-10-25",
       Narration: "Pending approval",
     },
     {
@@ -127,19 +127,19 @@ const contractJSON = {
       item: "Palm Oil",
       qty: 300,
       uom: "Ltrs",
-      item_code: "PO-003",
+      itemcode: "PO-003",
       deliveryDate: "2025-10-20",
       status: "Pending",
       totalAmt: 39000,
       rate: 130,
-      Net_Qty: 3,
-      Gross_Qty: 4,
-      HSN_Code: 1511,
+      NetQty: 3,
+      GrossQty: 4,
+      HSNCode: 1511,
       IGST: 18,
-      Cash_Discount: 4,
-      Purchase_Type: "Local",
-      Bill_Mode: "Offline",
-      Exp_Receiving_Date: "2025-10-22",
+      CashDiscount: 4,
+      PurchaseType: "Local",
+      BillMode: "Offline",
+      ExpReceivingDate: "2025-10-22",
       Narration: "Standard order pending",
     },
     {
@@ -151,19 +151,19 @@ const contractJSON = {
       item: "Mustard Oil",
       qty: 500,
       uom: "Ltrs",
-      item_code: "MO-001",
+      itemcode: "MO-001",
       deliveryDate: "2025-10-25",
       status: "Delivered",
       totalAmt: 62500,
       rate: 125,
-      Net_Qty: 5,
-      Gross_Qty: 6,
-      HSN_Code: 1514,
+      NetQty: 5,
+      GrossQty: 6,
+      HSNCode: 1514,
       IGST: 12,
-      Cash_Discount: 5,
-      Purchase_Type: "Local",
-      Bill_Mode: "Online",
-      Exp_Receiving_Date: "2025-10-28",
+      CashDiscount: 5,
+      PurchaseType: "Local",
+      BillMode: "Online",
+      ExpReceivingDate: "2025-10-28",
       Narration: "Delivered order",
     },
     {
@@ -175,19 +175,19 @@ const contractJSON = {
       item: "Sunflower Oil",
       qty: 400,
       uom: "Ltrs",
-      item_code: "SO-002",
+      itemcode: "SO-002",
       deliveryDate: "2025-10-27",
       status: "OutForDelivery",
       totalAmt: 44000,
       rate: 110,
-      Net_Qty: 4,
-      Gross_Qty: 5,
-      HSN_Code: 1512,
+      NetQty: 4,
+      GrossQty: 5,
+      HSNCode: 1512,
       IGST: 18,
-      Cash_Discount: 3,
-      Purchase_Type: "Interstate",
-      Bill_Mode: "Offline",
-      Exp_Receiving_Date: "2025-10-30",
+      CashDiscount: 3,
+      PurchaseType: "Interstate",
+      BillMode: "Offline",
+      ExpReceivingDate: "2025-10-30",
       Narration: "Out for delivery",
     },
   ],
@@ -198,17 +198,19 @@ const contractJSON = {
       items: [
         {
           item: "Mustard Oil",
-          uom: "Ltrs",
-          restQty: 5000,
+          uomOptions: ["Ltrs", "Box"],
+          conversion: { Ltrs: 1, Box: 12 },
           rate: 125,
-          item_code: "MO-001",
+          itemcode: "MO-001",
+          restQty: 5000,
         },
         {
           item: "Palm Oil",
-          uom: "Ltrs",
-          restQty: 1500,
+          uomOptions: ["Ltrs", "Box"],
+          conversion: { Ltrs: 1, Box: 10 },
           rate: 125,
-          item_code: "PO-001",
+          itemcode: "PO-001",
+          restQty: 1500,
         },
       ],
     },
@@ -218,17 +220,19 @@ const contractJSON = {
       items: [
         {
           item: "Sunflower Oil",
-          uom: "Ltrs",
-          item_code: "SO-002",
-          restQty: 3000,
+          uomOptions: ["Ltrs", "Box"],
+          conversion: { Ltrs: 1, Box: 12 },
           rate: 110,
+          itemcode: "SO-002",
+          restQty: 3000,
         },
         {
           item: "Coconut Oil",
-          uom: "Ltrs",
-          item_code: "CO-002",
-          restQty: 800,
+          uomOptions: ["Ltrs", "Box"],
+          conversion: { Ltrs: 1, Box: 8 },
           rate: 140,
+          itemcode: "CO-002",
+          restQty: 800,
         },
       ],
     },
@@ -238,42 +242,46 @@ const contractJSON = {
       items: [
         {
           item: "Coconut Oil",
-          uom: "Ltrs",
-          item_code: "CO-003",
-          restQty: 1200,
+          uomOptions: ["Ltrs", "Box"],
+          conversion: { Ltrs: 1, Box: 8 },
           rate: 130,
+          itemcode: "CO-003",
+          restQty: 1200,
         },
         {
           item: "Palm Oil",
-          uom: "Ltrs",
-          item_code: "PO-003",
-          restQty: 1200,
+          uomOptions: ["Ltrs", "Box"],
+          conversion: { Ltrs: 1, Box: 10 },
           rate: 130,
+          itemcode: "PO-003",
+          restQty: 1200,
         },
       ],
     },
   ],
-  uomOptions: ["Ltrs", "Kg"],
+  uomOptions: ["Ltrs", "Box", "Kg"],
 };
 
 const emptyItem = {
   item: undefined,
-  qty: 0,
   uom: undefined,
   rate: 0,
+  totalAmt: 0,
   key: undefined,
 };
+
 const emptyContract = {
   contractNo: undefined,
   companyName: undefined,
   items: [emptyItem],
 };
+
 const initialOrderGroup = {
   deliveryDate: dayjs().add(3, "day"),
   contracts: [emptyContract],
 };
 
-// Core data grouping utility
+// Updated grouping with grandTotal
 const groupDataByOrderGroup = (flatData) => {
   const groups = flatData.reduce((acc, curr) => {
     const {
@@ -282,21 +290,22 @@ const groupDataByOrderGroup = (flatData) => {
       item,
       qty,
       uom,
-      item_code,
+      itemcode,
       rate,
       totalAmt,
       key,
-      Net_Qty,
-      Gross_Qty,
-      HSN_Code,
+      NetQty,
+      GrossQty,
+      HSNCode,
       IGST,
-      Cash_Discount,
-      Purchase_Type,
-      Bill_Mode,
-      Exp_Receiving_Date,
+      CashDiscount,
+      PurchaseType,
+      BillMode,
+      ExpReceivingDate,
       Narration,
       ...rest
     } = curr;
+
     if (!acc[orderGroupId]) {
       acc[orderGroupId] = {
         orderGroupId,
@@ -304,12 +313,13 @@ const groupDataByOrderGroup = (flatData) => {
         orderDate: rest.orderDate,
         deliveryDate: rest.deliveryDate,
         status: rest.status,
-        totalAmount: 0,
+        grandTotal: 0,
         contracts: {},
         flatKeys: [],
       };
     }
     const group = acc[orderGroupId];
+
     if (!group.contracts[contractNo]) {
       group.contracts[contractNo] = {
         contractNo,
@@ -321,105 +331,147 @@ const groupDataByOrderGroup = (flatData) => {
       item,
       qty,
       uom,
-      item_code,
+      itemcode,
       rate,
+      totalAmt: totalAmt || (rate || 0) * qty,
       key,
-      Net_Qty,
-      Gross_Qty,
-      HSN_Code,
+      NetQty,
+      GrossQty,
+      HSNCode,
       IGST,
-      Cash_Discount,
-      Purchase_Type,
-      Bill_Mode,
-      Exp_Receiving_Date,
+      CashDiscount,
+      PurchaseType,
+      BillMode,
+      ExpReceivingDate,
       Narration,
     });
-    group.totalAmount += (rate || 0) * qty;
+    group.grandTotal += totalAmt || (rate || 0) * qty;
     group.flatKeys.push(key);
     return acc;
   }, {});
+
   return Object.values(groups).map((g) => ({
     ...g,
     contracts: Object.values(g.contracts),
   }));
 };
 
-// Shared form handlers
-const useFormHandlers = (
-  form,
-  setContractItemsMap,
-  setSelectedItemMaxMap,
-  isEdit = false
-) => {
-  const handleSelectContract = useCallback(
-    (contractNo, contractIndex) => {
-      const c = contractJSON.contractOptions.find(
-        (x) => x.contractNo === contractNo
-      );
-      if (!c) return;
-      setContractItemsMap((prev) => ({
-        ...prev,
-        [contractIndex]: c.items,
-      }));
-      const orders = form.getFieldValue("contracts") || [];
-      const updated = orders.map((entry, idx) =>
-        idx === contractIndex
-          ? {
-              ...entry,
-              contractNo,
-              companyName: c.companyName,
-              items: [emptyItem],
-            }
-          : entry
-      );
-      form.setFieldsValue({ contracts: updated });
-      setSelectedItemMaxMap((prev) => {
-        const copy = { ...prev };
-        Object.keys(copy).forEach((k) => {
-          if (k.startsWith(`${contractIndex}-`)) delete copy[k];
-        });
-        return copy;
-      });
-    },
-    [form, setContractItemsMap, setSelectedItemMaxMap]
-  );
+// UOM handlers for conversion
+const useUOMHandlers = (form) => {
+  const handleUOMChange = useCallback((uom, contractIndex, itemIndex) => {
+    const contracts = form.getFieldValue("contracts") || [];
+    const allItems = contractJSON.contractOptions.flatMap(c => c.items);
+    const selectedItem = allItems.find(item =>
+      item.item === contracts[contractIndex]?.items[itemIndex]?.item
+    );
 
-  const handleSelectItem = useCallback(
-    (itemName, contractIndex, itemIndex) => {
-      const items = contractJSON.contractOptions.flatMap((c) => c.items);
-      const sel = items.find((it) => it.item === itemName);
-      if (!sel) {
-        setSelectedItemMaxMap((p) => ({
-          ...p,
-          [`${contractIndex}-${itemIndex}`]: 0,
-        }));
-        return;
-      }
-      const contracts = form.getFieldValue("contracts") || [];
+    if (selectedItem?.conversion?.[uom]) {
+      const baseRate = selectedItem.rate;
+      const conversionFactor = selectedItem.conversion[uom];
+      const newRate = baseRate / conversionFactor; // Rate per selected UOM
+
       const updatedContracts = contracts.map((c, ci) => {
         if (ci !== contractIndex) return c;
-        const updatedItems = (c.items || []).map((it, ii) =>
-          ii === itemIndex
-            ? {
-                ...it,
-                item: sel.item,
-                uom: sel.uom,
-                item_code: sel.item_code,
-                rate: sel.rate,
-                qty: 0,
-              }
-            : it
-        );
+        const updatedItems = c.items.map((it, ii) => {
+          if (ii !== itemIndex) return it;
+          const qty = it.qty || 0;
+          return {
+            ...it,
+            uom,
+            rate: newRate,
+            totalAmt: newRate * qty,
+          };
+        });
         return { ...c, items: updatedItems };
       });
       form.setFieldsValue({ contracts: updatedContracts });
-      setSelectedItemMaxMap((prev) => ({
-        ...prev,
-        [`${contractIndex}-${itemIndex}`]: sel.restQty || 0,
+    }
+  }, [form]);
+
+  const handleQtyChange = useCallback((qty, contractIndex, itemIndex) => {
+    const contracts = form.getFieldValue("contracts") || [];
+    const updatedContracts = contracts.map((c, ci) => {
+      if (ci !== contractIndex) return c;
+      const updatedItems = c.items.map((it, ii) => {
+        if (ii !== itemIndex) return it;
+        const rate = it.rate || 0;
+        return {
+          ...it,
+          qty,
+          totalAmt: rate * qty,
+        };
+      });
+      return { ...c, items: updatedItems };
+    });
+    form.setFieldsValue({ contracts: updatedContracts });
+  }, [form]);
+
+  return { handleUOMChange, handleQtyChange };
+};
+
+const useFormHandlers = (form, setContractItemsMap, setSelectedItemMaxMap, isEdit = false) => {
+  const handleSelectContract = useCallback((contractNo, contractIndex) => {
+    const c = contractJSON.contractOptions.find((x) => x.contractNo === contractNo);
+    if (!c) return;
+    setContractItemsMap((prev) => ({
+      ...prev,
+      [contractIndex]: c.items,
+    }));
+    const orders = form.getFieldValue("contracts") || [];
+    const updated = orders.map((entry, idx) =>
+      idx === contractIndex
+        ? {
+          ...entry,
+          contractNo,
+          companyName: c.companyName,
+          items: [emptyItem],
+        }
+        : entry
+    );
+    form.setFieldsValue({ contracts: updated });
+    setSelectedItemMaxMap((prev) => {
+      const copy = { ...prev };
+      Object.keys(copy).forEach((k) => {
+        if (k.startsWith(`${contractIndex}-`)) delete copy[k];
+      });
+      return copy;
+    });
+  }, [form, setContractItemsMap, setSelectedItemMaxMap]);
+
+  const handleSelectItem = useCallback((itemName, contractIndex, itemIndex) => {
+    const items = contractJSON.contractOptions.flatMap((c) => c.items);
+    const sel = items.find((it) => it.item === itemName);
+    if (!sel) {
+      setSelectedItemMaxMap((p) => ({
+        ...p,
+        [`${contractIndex}-${itemIndex}`]: 0,
       }));
-    },
-    [form, setSelectedItemMaxMap]
-  );
+      return;
+    }
+    const contracts = form.getFieldValue("contracts") || [];
+    const updatedContracts = contracts.map((c, ci) => {
+      if (ci !== contractIndex) return c;
+      const updatedItems = (c.items || []).map((it, ii) =>
+        ii === itemIndex
+          ? {
+            ...it,
+            item: sel.item,
+            uom: sel.uomOptions?.[0] || "Ltrs",
+            itemcode: sel.itemcode,
+            rate: sel.rate,
+            qty: 0,
+            totalAmt: 0,
+          }
+          : it
+      );
+      return { ...c, items: updatedItems };
+    });
+    form.setFieldsValue({ contracts: updatedContracts });
+    setSelectedItemMaxMap((prev) => ({
+      ...prev,
+      [`${contractIndex}-${itemIndex}`]: sel.restQty || 0,
+    }));
+  }, [form, setSelectedItemMaxMap]);
 
   return { handleSelectContract, handleSelectItem };
 };
@@ -439,22 +491,25 @@ export default function Order() {
   const [addForm] = Form.useForm();
   const [editForm] = Form.useForm();
 
+  const addUOMHandlers = useUOMHandlers(addForm);
+  const editUOMHandlers = useUOMHandlers(editForm);
+
   const disablePastDates = (current) =>
     current && current < dayjs().startOf("day");
+
   const groupedData = useMemo(() => groupDataByOrderGroup(data), [data]);
 
   const filteredData = useMemo(() => {
-    const searchFiltered = groupedData.filter(
-      (d) =>
-        (d.orderGroupId || "")
-          .toLowerCase()
-          .includes(searchText.toLowerCase()) ||
-        (d.status || "").toLowerCase().includes(searchText.toLowerCase()) ||
-        d.contracts.some(
-          (c) =>
-            c.contractNo.toLowerCase().includes(searchText.toLowerCase()) ||
-            c.companyName.toLowerCase().includes(searchText.toLowerCase())
-        )
+    const searchFiltered = groupedData.filter((d) =>
+      (d.orderGroupId || "")
+        .toLowerCase()
+        .includes(searchText.toLowerCase()) ||
+      (d.status || "").toLowerCase().includes(searchText.toLowerCase()) ||
+      d.contracts.some(
+        (c) =>
+          c.contractNo.toLowerCase().includes(searchText.toLowerCase()) ||
+          c.companyName.toLowerCase().includes(searchText.toLowerCase())
+      )
     );
 
     if (selectedStatus === "All") {
@@ -509,7 +564,7 @@ export default function Order() {
       dataIndex: "orderGroupId",
       key: "orderGroupId",
       width: 120,
-      render: (t) => <span className="text-amber-800 ">{t}</span>,
+      render: (t) => <span className="text-amber-800">{t}</span>,
     },
     {
       title: (
@@ -517,14 +572,14 @@ export default function Order() {
           Contract,Items & Vendor
         </span>
       ),
-      key: "contract_items",
+      key: "contractitems",
       width: 120,
       render: (_, record) => (
         <div className="space-y-2 text-amber-800">
-          {(record.contracts || []).map((contract) => (
+          {record.contracts.map((contract) => (
             <div key={contract.contractNo}>
               {contract.contractNo} — {contract.companyName}
-              {(contract.items || []).map((item) => (
+              {contract.items.map((item) => (
                 <li key={item.key}>{item.item}</li>
               ))}
             </div>
@@ -534,13 +589,13 @@ export default function Order() {
     },
     {
       title: (
-        <span className="text-amber-700 font-semibold">Total Amount</span>
+        <span className="text-amber-700 font-semibold">Grand Total</span>
       ),
-      key: "totalAmount",
-      width: 90,
+      key: "grandTotal",
+      width: 120,
       render: (_, record) => (
-        <span className="text-amber-800">
-          {record.totalAmount.toLocaleString()}
+        <span className="text-amber-800 ">
+          ₹{record.grandTotal.toLocaleString()}
         </span>
       ),
     },
@@ -605,8 +660,7 @@ export default function Order() {
                 ? item.qty + (contractItemDetail.restQty || 0)
                 : contractItemDetail.restQty || 0
               : 0;
-            initialSelectedItemMaxMap[`${contractIndex}-${itemIndex}`] =
-              maxQty;
+            initialSelectedItemMaxMap[`${contractIndex}-${itemIndex}`] = maxQty;
           });
         }
       });
@@ -658,12 +712,12 @@ export default function Order() {
             item: it.item,
             qty: Number(it.qty),
             uom: it.uom,
-            item_code: it.item_code,
+            itemcode: it.itemcode,
             rate: it.rate,
             orderDate: dayjs().format("YYYY-MM-DD"),
             deliveryDate,
             status: "Pending",
-            totalAmt: (it.rate || 0) * Number(it.qty),
+            totalAmt: it.totalAmt || (it.rate || 0) * Number(it.qty),
           });
         });
       });
@@ -698,8 +752,7 @@ export default function Order() {
         const companyName = contractDetails?.companyName;
         items.forEach((item) => {
           if (!item?.item || !item.qty || Number(item.qty) <= 0) return;
-          const isNewItem =
-            item.key === undefined || item.key === null;
+          const isNewItem = item.key === undefined || item.key === null;
           const itemKey = isNewItem ? ++maxKey : item.key;
           updatedFlatRows.push({
             key: itemKey,
@@ -709,14 +762,14 @@ export default function Order() {
             item: item.item,
             qty: Number(item.qty),
             uom: item.uom,
-            item_code: item.item_code,
+            itemcode: item.itemcode,
             rate: item.rate,
             orderDate:
               selectedOrderGroup?.orderDate ||
               dayjs().format("YYYY-MM-DD"),
             deliveryDate: updatedDeliveryDate,
             status: "Pending",
-            totalAmt: (item.rate || 0) * Number(item.qty),
+            totalAmt: item.totalAmt || (item.rate || 0) * Number(item.qty),
           });
         });
       });
@@ -734,21 +787,6 @@ export default function Order() {
     [data, selectedOrderGroup, editForm]
   );
 
-  // helper to clamp qty and show floating message
-  const validateQty = (value, maxQty) => {
-    if (maxQty === undefined || maxQty === null || maxQty === 0) {
-      return value;
-    }
-    if (value > maxQty) {
-      message.warning(
-        `Qty cannot be greater than remaining quantity (${maxQty}).`,
-        2
-      );
-      return maxQty;
-    }
-    if (value < 0) return 0;
-    return value;
-  };
 
   const RenderItemsList = useCallback(
     ({
@@ -757,6 +795,7 @@ export default function Order() {
       operations,
       formInstance,
       handleSelectItem,
+      uomHandlers,
       isEditMode = false,
     }) => {
       return fields.map((f) => {
@@ -766,8 +805,10 @@ export default function Order() {
           "items",
           f.name,
         ]);
-
         const maxQty = selectedItemMaxMap[`${contractIndex}-${f.name}`];
+        const selectedItemConfig = contractJSON.contractOptions
+          .flatMap((c) => c.items)
+          .find((item) => item.item === itemDetails?.item);
 
         return (
           <div
@@ -775,129 +816,112 @@ export default function Order() {
             className="border! p-2! rounded! mb-2! relative! border-amber-300!"
           >
             <Row gutter={12}>
-              <Col span={8}>
+              <Col span={6}>
                 <Form.Item
                   name={[f.name, "item"]}
                   fieldKey={[f.fieldKey, "item"]}
                   label="Item"
-                  rules={[
-                    { required: true, message: "Select item" },
-                  ]}
+                  rules={[{ required: true, message: "Select item" }]}
                 >
                   <Select
                     placeholder="Select item"
                     onChange={(val) =>
                       handleSelectItem(val, contractIndex, f.name)
                     }
-                    disabled={false}
                   >
-                    {(contractItemsMap[contractIndex] || []).map(
-                      (it) => (
-                        <Select.Option
-                          key={it.item}
-                          value={it.item}
-                        >
-                          {it.item}
-                        </Select.Option>
-                      )
-                    )}
+                    {(contractItemsMap[contractIndex] || []).map((it) => (
+                      <Select.Option key={it.item} value={it.item}>
+                        {it.item}
+                      </Select.Option>
+                    ))}
+                  </Select>
+                </Form.Item>
+              </Col>
+
+           <Form.Item
+  name={[f.name, "qty"]}
+  label="Qty"
+  rules={[
+    {
+      validator: (_, value) => {
+        if (value === undefined || value === null || value === "") {
+          return Promise.reject("Please enter quantity");
+        }
+
+        if (typeof value !== "number" || Number.isNaN(value)) {
+          return Promise.reject("Please enter a number");
+        }
+
+        if (value <= 0) {
+          return Promise.reject("Quantity must be greater than 0");
+        }
+
+        const maxQty =
+          selectedItemMaxMap[`${contractIndex}-${f.name}`];
+        if (maxQty !== undefined && value > maxQty) {
+          return Promise.reject(
+            `Qty cannot be greater than ${maxQty}`
+          );
+        }
+
+        return Promise.resolve();
+      },
+    },
+  ]}
+>
+  <InputNumber
+    style={{ width: "100%" }}
+    placeholder="Enter qty"
+    controls={false}
+    min={1}
+    value={undefined}   // ❌ prevents default value
+    parser={(value) =>
+      value ? value.replace(/[^\d]/g, "") : undefined
+    }
+    onChange={(val) => {
+      if (val !== undefined) {
+        uomHandlers.handleQtyChange(
+          val,
+          contractIndex,
+          f.name
+        );
+      }
+    }}
+  />
+</Form.Item>
+
+
+              <Col span={4}>
+                <Form.Item name={[f.name, "uom"]} label="UOM">
+                  <Select
+                    placeholder="Select UOM"
+                    onChange={(val) => uomHandlers.handleUOMChange(val, contractIndex, f.name)}
+                  >
+                    {selectedItemConfig?.uomOptions?.map((uom) => (
+                      <Select.Option key={uom} value={uom}>
+                        {uom}
+                      </Select.Option>
+                    )) || contractJSON.uomOptions.map((uom) => (
+                      <Select.Option key={uom} value={uom}>
+                        {uom}
+                      </Select.Option>
+                    ))}
                   </Select>
                 </Form.Item>
               </Col>
 
               <Col span={4}>
-                <Form.Item
-                  name={[f.name, "qty"]}
-                  label="Qty"
-                  rules={[
-                    { required: true, message: "Enter quantity" },
-                    () => ({
-                      validator(_, value) {
-                        const maxQty =
-                          selectedItemMaxMap[
-                            `${contractIndex}-${f.name}`
-                          ];
-                        if (
-                          value === undefined ||
-                          value === null ||
-                          value === "" ||
-                          maxQty === undefined ||
-                          maxQty === null
-                        ) {
-                          return Promise.resolve();
-                        }
-                        if (Number(value) <= Number(maxQty)) {
-                          return Promise.resolve();
-                        }
-                        return Promise.reject(
-                          new Error(
-                            `Qty must be ≤ remaining qty (${maxQty})`
-                          )
-                        );
-                      },
-                    }),
-                  ]}
-                >
-                  <InputNumber
-                    min={0}
-                    style={{ width: "100%" }}
-                    onChange={(val) => {
-                      const maxQtyLocal =
-                        selectedItemMaxMap[
-                          `${contractIndex}-${f.name}`
-                        ];
-                      const safeVal = validateQty(
-                        Number(val || 0),
-                        maxQtyLocal
-                      );
-
-                      const contracts =
-                        formInstance.getFieldValue("contracts") ||
-                        [];
-                      const newContracts = contracts.map(
-                        (c, cIndex) => {
-                          if (cIndex !== contractIndex) return c;
-                          const items = [...(c.items || [])];
-                          items[f.name] = {
-                            ...(items[f.name] || {}),
-                            qty: safeVal,
-                          };
-                          return { ...c, items };
-                        }
-                      );
-                      formInstance.setFieldsValue({
-                        contracts: newContracts,
-                      });
-                    }}
-                  />
-                </Form.Item>
-              </Col>
-
-              <Col span={4}>
-                <Form.Item
-                  name={[f.name, "uom"]}
-                  label="UOM"
-                >
-                  <Input disabled value={itemDetails?.uom} />
-                </Form.Item>
-              </Col>
-              <Col span={4}>
-                <Form.Item
-                  name={[f.name, "item_code"]}
-                  label="Item Code"
-                >
+                <Form.Item name={[f.name, "itemcode"]} label="Item Code">
                   <Input
                     style={{ width: "100%" }}
                     disabled
-                    value={itemDetails?.item_code}
+                    value={itemDetails?.itemcode}
                   />
                 </Form.Item>
               </Col>
+
               <Col span={4}>
-                <Form.Item
-                  name={[f.name, "rate"]}
-                  label="Rate"
-                >
+                <Form.Item name={[f.name, "rate"]} label="Rate">
                   <InputNumber
                     style={{ width: "100%" }}
                     disabled
@@ -905,6 +929,18 @@ export default function Order() {
                   />
                 </Form.Item>
               </Col>
+
+              <Col span={4}>
+                <Form.Item name={[f.name, "totalAmt"]} label="Total">
+                  <InputNumber
+                    style={{ width: "100%" }}
+                    disabled
+                    value={itemDetails?.totalAmt}
+                    formatter={(value) => `₹ ${value?.toLocaleString()}`}
+                  />
+                </Form.Item>
+              </Col>
+
               <Col span={2}>
                 <Button
                   type="text"
@@ -913,15 +949,13 @@ export default function Order() {
                   onClick={() => operations.remove(f.name)}
                 />
               </Col>
-              {isEditMode && (
-                <Form.Item name={[f.name, "key"]} hidden />
-              )}
+              {isEditMode && <Form.Item name={[f.name, "key"]} hidden />}
             </Row>
           </div>
         );
       });
     },
-    [contractItemsMap, selectedItemMaxMap]
+    [contractItemsMap, selectedItemMaxMap, addUOMHandlers, editUOMHandlers]
   );
 
   const RenderContractsList = useCallback(
@@ -933,6 +967,7 @@ export default function Order() {
       handleSelectItem,
       isEditMode = false,
     }) => {
+      const uomHandlers = isEditMode ? editUOMHandlers : addUOMHandlers;
       return fields.map((field) => {
         const contractDetails = formInstance.getFieldValue([
           "contracts",
@@ -944,30 +979,21 @@ export default function Order() {
             key={field.key}
             className="p-4 border border-amber-500 rounded-lg mb-4 relative"
           >
-            <h3 className="text-amber-700 font-semibold mb-2">
-              Contract Details
-            </h3>
+            <h3 className="text-amber-700 font-semibold mb-2">Contract Details</h3>
             <Row gutter={12}>
               <Col span={8}>
                 <Form.Item
                   name={[field.name, "contractNo"]}
                   fieldKey={[field.fieldKey, "contractNo"]}
                   label="Contract No"
-                  rules={[
-                    { required: true, message: "Select Contract" },
-                  ]}
+                  rules={[{ required: true, message: "Select Contract" }]}
                 >
                   <Select
                     placeholder="Select Contract"
-                    onChange={(val) =>
-                      handleSelectContract(val, field.name)
-                    }
+                    onChange={(val) => handleSelectContract(val, field.name)}
                   >
                     {contractJSON.contractOptions.map((c) => (
-                      <Select.Option
-                        key={c.contractNo}
-                        value={c.contractNo}
-                      >
+                      <Select.Option key={c.contractNo} value={c.contractNo}>
                         {c.contractNo} — {c.companyName}
                       </Select.Option>
                     ))}
@@ -980,10 +1006,7 @@ export default function Order() {
                   fieldKey={[field.fieldKey, "companyName"]}
                   label="Vendor"
                 >
-                  <Input
-                    disabled
-                    value={contractDetails?.companyName}
-                  />
+                  <Input disabled value={contractDetails?.companyName} />
                 </Form.Item>
               </Col>
             </Row>
@@ -998,6 +1021,7 @@ export default function Order() {
                     operations={itemsOps}
                     formInstance={formInstance}
                     handleSelectItem={handleSelectItem}
+                    uomHandlers={uomHandlers}
                     isEditMode={isEditMode}
                   />
                   <div className="flex gap-2">
@@ -1045,212 +1069,184 @@ export default function Order() {
     [RenderItemsList]
   );
 
-  const renderOrderGroupView = useCallback(
-    (groupData) => {
-      if (!groupData) return null;
-      const {
-        orderGroupId,
-        orderDate,
-        deliveryDate,
-        status,
-        totalAmount,
-        contracts,
-      } = groupData;
-      const isApprovedStatus =
-        status === "Approved" || status === "Delivered";
-      const itemColumns = [
-        { title: "Item", dataIndex: "item", key: "item", width: 120 },
-        {
-          title: "Item Code",
-          dataIndex: "item_code",
-          key: "item_code",
-          width: 120,
-        },
-        {
-          title: "Net Qty",
-          dataIndex: "Net_Qty",
-          key: "Net_Qty",
-          width: 80,
-          render: (val) => <span>{val}</span>,
-        },
-        {
-          title: "Gross Qty",
-          dataIndex: "Gross_Qty",
-          key: "Gross_Qty",
-          width: 90,
-          render: (val) => <span>{val}</span>,
-        },
-        {
-          title: "HSN Code",
-          dataIndex: "HSN_Code",
-          key: "HSN_Code",
-          width: 90,
-          render: (val) => <span>{val}</span>,
-        },
-        { title: "Qty", dataIndex: "qty", key: "qty", width: 70 },
-        { title: "UOM", dataIndex: "uom", key: "uom", width: 60 },
-        {
-          title: "Rate",
-          dataIndex: "rate",
-          key: "rate",
-          width: 80,
-          render: (val) => <span>₹{val}</span>,
-        },
-        ...(isApprovedStatus
-          ? [
-              {
-                title: "IGST",
-                dataIndex: "IGST",
-                key: "IGST",
-                width: 70,
-                render: (val) => <span>{val}%</span>,
-              },
-              {
-                title: "Cash Disc",
-                dataIndex: "Cash_Discount",
-                key: "Cash_Discount",
-                width: 80,
-                render: (val) => <span>-{val}%</span>,
-              },
-            ]
-          : []),
-        {
-          title: "Total",
-          key: "total",
-          width: 100,
-          render: (_, record) => (
-            <span>
-              ₹
-              {((record.qty || 0) * (record.rate || 0)).toLocaleString()}
-            </span>
-          ),
-        },
-      ];
+  const renderOrderGroupView = useCallback((groupData) => {
+    if (!groupData) return null;
+    const {
+      orderGroupId,
+      orderDate,
+      deliveryDate,
+      status,
+      grandTotal,
+      contracts,
+    } = groupData;
+    const isApprovedStatus = status === "Approved" || status === "Delivered";
+    const itemColumns = [
+      { title: "Item", dataIndex: "item", key: "item", width: 120 },
+      { title: "Item Code", dataIndex: "itemcode", key: "itemcode", width: 120 },
+      {
+        title: "Net Qty",
+        dataIndex: "NetQty",
+        key: "NetQty",
+        width: 80,
+        render: (val) => <span>{val}</span>,
+      },
+      {
+        title: "Gross Qty",
+        dataIndex: "GrossQty",
+        key: "GrossQty",
+        width: 90,
+        render: (val) => <span>{val}</span>,
+      },
+      {
+        title: "HSN Code",
+        dataIndex: "HSNCode",
+        key: "HSNCode",
+        width: 90,
+        render: (val) => <span>{val}</span>,
+      },
+      { title: "Qty", dataIndex: "qty", key: "qty", width: 70 },
+      { title: "UOM", dataIndex: "uom", key: "uom", width: 60 },
+      {
+        title: "Rate",
+        dataIndex: "rate",
+        key: "rate",
+        width: 80,
+        render: (val) => <span>₹{val}</span>,
+      },
+      ...(isApprovedStatus
+        ? [
+          {
+            title: "IGST",
+            dataIndex: "IGST",
+            key: "IGST",
+            width: 70,
+            render: (val) => <span>{val}%</span>,
+          },
+          {
+            title: "Cash Disc",
+            dataIndex: "CashDiscount",
+            key: "CashDiscount",
+            width: 80,
+            render: (val) => <span>-{val}%</span>,
+          },
+        ]
+        : []),
+      {
+        title: "Total",
+        key: "total",
+        width: 100,
+        render: (_, record) => (
+          <span>
+            ₹
+            {((record.qty || 0) * (record.rate || 0)).toLocaleString()}
+          </span>
+        ),
+      },
+    ];
 
-      return (
-        <div className="p-6">
+    return (
+      <div className="p-6">
+        <Row
+          gutter={24}
+          className="p-4 bg-amber-50 rounded-xl border border-amber-200 mb-6"
+        >
+          <Col span={4}>
+            <div className="font-semibold text-amber-700 mb-1">Order No:</div>
+            <div className="text-amber-500">{orderGroupId}</div>
+          </Col>
+          <Col span={4}>
+            <div className="font-semibold text-amber-700 mb-1">Order Date:</div>
+            <div className="text-amber-500">{orderDate}</div>
+          </Col>
+          <Col span={4}>
+            <div className="font-semibold text-amber-700 mb-1">Status:</div>
+            <Tag
+              {...getStatusTagProps(status)}
+              className="px-4 py-2"
+            >
+              {status}
+            </Tag>
+          </Col>
+          <Col span={6}>
+            <div className="font-semibold text-amber-700 mb-1">
+              Expected Delivery Date:
+            </div>
+            <div className="text-amber-500">{deliveryDate}</div>
+          </Col>
+          <Col span={6}>
+            <div className="font-semibold text-amber-700 mb-1">Grand Total:</div>
+            <div className="text-amber-500">
+              ₹{grandTotal.toLocaleString()}
+            </div>
+          </Col>
+        </Row>
+        {isApprovedStatus && (
           <Row
             gutter={24}
-            className=" p-4 bg-amber-50 rounded-xl border border-amber-200  mb-6"
+            className="mb-6 p-4 bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl border border-green-200"
           >
-            <Col span={4}>
-              <div className="font-semibold text-amber-700 mb-1">
-                Order No:
+            <Col span={6}>
+              <div className="font-semibold text-green-700 mb-1">Purchase Type:</div>
+              <div className="text-green-500">
+                {contracts[0]?.items[0]?.PurchaseType || "N/A"}
               </div>
-              <div className="text-amber-500">{orderGroupId}</div>
-            </Col>
-            <Col span={4}>
-              <div className="font-semibold text-amber-700 mb-1">
-                Order Date:
-              </div>
-              <div className="text-amber-500">{orderDate}</div>
-            </Col>
-            <Col span={4}>
-              <div className="font-semibold text-amber-700 mb-1">
-                Status:
-              </div>
-              <Tag
-                {...getStatusTagProps(status)}
-                className="px-4 py-2"
-              >
-                {status}
-              </Tag>
             </Col>
             <Col span={6}>
-              <div className="font-semibold text-amber-700 mb-1">
-                {" "}
-                Expected Delivery Date:
+              <div className="font-semibold text-green-700 mb-1">Bill Mode:</div>
+              <div className="text-green-500">
+                {contracts[0]?.items[0]?.BillMode || "N/A"}
               </div>
-              <div className="text-amber-500">{deliveryDate}</div>
             </Col>
-
-            <Col span={6} >
-              <div className="font-semibold text-amber-700 mb-1">
-                Total Amount:
+            <Col span={6}>
+              <div className="font-semibold text-green-700 mb-1">Narration:</div>
+              <div className="text-green-500">
+                {contracts[0]?.items[0]?.Narration || "N/A"}
               </div>
-              <div className="text-amber-500">
-                ₹{totalAmount.toLocaleString()}
+            </Col>
+            <Col span={6}>
+              <div className="font-semibold text-green-700 mb-1">
+                Expected Receiving Date:
+              </div>
+              <div className="text-green-500">
+                {contracts[0]?.items[0]?.ExpReceivingDate || "N/A"}
               </div>
             </Col>
           </Row>
-          {isApprovedStatus && (
-            <Row
-              gutter={24}
-              className="mb-6 p-4 bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl border border-green-200"
-            >
-             
-              <Col span={6}>
-                <div className="font-semibold text-green-700 mb-1">
-                  Purchase Type:
-                </div>
-                <div className="text-green-500">
-                  {contracts[0]?.items[0]?.Purchase_Type || "N/A"}
-                </div>
-              </Col>
-              <Col span={6}>
-                <div className="font-semibold text-green-700 mb-1">
-                  Bill Mode:
-                </div>
-                <div className="text-green-500">
-                  {contracts[0]?.items[0]?.Bill_Mode || "N/A"}
-                </div>
-              </Col>
-             
-              <Col span={6} >
-                <div className="font-semibold text-green-700 mb-1">
-                  Narration:
-                </div>
-                <div className="text-green-500">
-                  {contracts[0]?.items[0]?.Narration || "N/A"}
-                </div>
-              </Col>
-              <Col span={6} > 
-                <div className="font-semibold text-green-700 mb-1">
-                  Expected Receiving Date:
-                </div>
-                <div className="text-green-500">  
-                  {contracts[0]?.items[0]?.Exp_Receiving_Date ||
-                    "N/A"}
-                </div>
-              </Col>  
-            </Row>
-          )}
-          <Divider
-            orientation="left"
-            className="text-amber-700! font-bold! text-xl! mb-6!"
+        )}
+        <Divider
+          orientation="left"
+          className="text-amber-700! font-bold! text-xl! mb-6!"
+        >
+          Contracts & Items Details
+        </Divider>
+        {contracts.map((contract) => (
+          <div
+            key={contract.contractNo}
+            className="mb-8 p-4 border-1 border-amber-300 rounded-xl bg-gradient-to-br from-amber-50 to-yellow-50"
           >
-            Contracts & Items Details
-          </Divider>
-          {contracts.map((contract) => (
-            <div
-              key={contract.contractNo}
-              className="mb-8 p-4 border-1 border-amber-300 rounded-xl bg-gradient-to-br from-amber-50 to-yellow-50"
-            >
-              <h4 className="text-xl font-bold text-amber-700 mb-4 flex items-center">
-                Contract No:{" "}
-                <span className="ml-2">{contract.contractNo}</span>{" "}
-                <span className="ml-4 text-lg font-semibold text-amber-700">
-                  — {contract.companyName}
-                </span>
-              </h4>
-              <Table
-                columns={itemColumns}
-                dataSource={contract.items.map((item, i) => ({
-                  ...item,
-                  key: `${contract.contractNo}-${i}`,
-                }))}
-                pagination={false}
-                size="middle"
-                rowKey="key"
-                scroll={{ x: 1400, y: 400 }}
-              />
-            </div>
-          ))}
-        </div>
-      );
-    },
-    []
-  );
+            <h4 className="text-xl font-bold text-amber-700 mb-4 flex items-center">
+              Contract No:{" "}
+              <span className="ml-2">{contract.contractNo}</span>{" "}
+              <span className="ml-4 text-lg font-semibold text-amber-700">
+                — {contract.companyName}
+              </span>
+            </h4>
+            <Table
+              columns={itemColumns}
+              dataSource={contract.items.map((item, i) => ({
+                ...item,
+                key: `${contract.contractNo}-${i}`,
+              }))}
+              pagination={false}
+              size="middle"
+              rowKey="key"
+              scroll={{ x: 1400, y: 400 }}
+            />
+          </div>
+        ))}
+      </div>
+    );
+  }, []);
 
   const addHandlers = useFormHandlers(
     addForm,
@@ -1268,51 +1264,16 @@ export default function Order() {
     <div>
       <div className="flex justify-between items-center mb-0">
         <div>
-          <h1 className="text-3xl font-bold text-amber-700">
-            {" "}
-            Orders
-          </h1>
-          <p className="text-amber-600">
-            Manage your orders easily
-          </p>
+          <h1 className="text-3xl font-bold text-amber-700">Orders</h1>
+          <p className="text-amber-600">Manage your orders easily</p>
         </div>
       </div>
 
       <div className="flex gap-2 mb-2">
-        <Button
-          className="border-amber-400! text-amber-700! hover:bg-amber-100!"
-          onClick={() => setWalletOpen(true)}
-        >
-          Wallet
-        </Button>
-        <Button
-          type="primary"
-          icon={<PlusOutlined />}
-          onClick={() => {
-            addForm.setFieldsValue(initialOrderGroup);
-            setContractItemsMap({});
-            setSelectedItemMaxMap({});
-            setIsAddModalOpen(true);
-          }}
-          className="bg-amber-500! hover:bg-amber-600! border-none!"
-        >
-          Add New Order
-        </Button>
-        <Button
-          className="border-amber-400! text-amber-700! hover:bg-amber-100!"
-          icon={<DownloadOutlined />}
-        >
-          Export
-        </Button>
-      </div>
-      <div className="flex justify-between items-center mb-2">
-        <div className="flex gap-2">
-          <Input
+    <Input
             placeholder="Search"
             className="border-amber-300! w-64! focus:border-amber-500!"
-            prefix={
-              <SearchOutlined className="text-amber-600!" />
-            }
+            prefix={<SearchOutlined className="text-amber-600!" />}
             value={searchText}
             onChange={(e) => setSearchText(e.target.value)}
           />
@@ -1323,8 +1284,11 @@ export default function Order() {
           >
             Reset Search
           </Button>
-        </div>
-        <div className="flex gap-2 ">
+      </div>
+
+      <div className="flex justify-between items-center mb-2">
+       
+        <div className="flex gap-2">
           {STATUS_FILTERS.map((status) => (
             <Button
               key={status}
@@ -1339,6 +1303,32 @@ export default function Order() {
               {status}
             </Button>
           ))}
+           <Button
+          className="border-amber-400! text-amber-700! hover:bg-amber-100!"
+          icon={<WalletOutlined />}
+          onClick={() => setWalletOpen(true)}
+        >
+          Wallet
+        </Button>
+        <Button
+          type="primary"
+          icon={<PlusOutlined />}
+          onClick={() => {
+            addForm.setFieldsValue(initialOrderGroup);
+            setContractItemsMap({});
+            setSelectedItemMaxMap({});
+            setIsAddModalOpen(true);
+          }}
+          className="bg-amber-500! hover:bg-amber-600! w-50! border-none!"
+        >
+          Add New Order
+        </Button>
+        <Button
+          className="border-amber-400! text-amber-700! hover:bg-amber-100!"
+          icon={<DownloadOutlined />}
+        >
+          Export
+        </Button>
         </div>
       </div>
 
@@ -1346,41 +1336,27 @@ export default function Order() {
         <Table
           columns={columns}
           dataSource={filteredData}
-          pagination={10}
-          scroll={{ y: 200 }}
+          pagination={{ pageSize: 10 }}
+          scroll={{ y: 130 }}
           rowKey="orderGroupId"
         />
       </div>
 
       {/* Add Modal */}
       <Modal
-        title={
-          <span className="text-amber-600! font-semibold!">
-            Create New Order No
-          </span>
-        }
+        title={<span className="text-amber-600! font-semibold!">Create New Order No</span>}
         open={isAddModalOpen}
         onCancel={() => setIsAddModalOpen(false)}
         okText="Create Order"
-        onOk={() => addForm.submit()}
+        onOk={addForm.submit}
         width={900}
       >
-        <Form
-          form={addForm}
-          layout="vertical"
-          onFinish={handleAddSubmit}
-          initialValues={initialOrderGroup}
-        >
+        <Form form={addForm} layout="vertical" onFinish={handleAddSubmit}>
           <Row gutter={16}>
             <Col span={8}>
               <Form.Item
                 name="deliveryDate"
-                label={
-                  <span className="font-semibold text-amber-700">
-                    {" "}
-                    Expected Delivery Date
-                  </span>
-                }
+                label={<span className="font-semibold text-amber-700">Expected Delivery Date <span className="text-red-500">*</span></span>}
                 rules={[{ required: true }]}
               >
                 <DatePicker
@@ -1392,20 +1368,21 @@ export default function Order() {
               </Form.Item>
             </Col>
           </Row>
-
           <Form.List name="contracts">
-            {(fields, { add, remove }) => (
+            {(fields, operations) => (
               <>
-                <RenderContractsList
-                  fields={fields}
-                  operations={{ add, remove }}
-                  formInstance={addForm}
-                  {...addHandlers}
-                />
+                {RenderContractsList({
+                  fields,
+                  operations,
+                  formInstance: addForm,
+                  handleSelectContract: addHandlers.handleSelectContract,
+                  handleSelectItem: addHandlers.handleSelectItem,
+                })}
 
+                {/* ✅ ADD CONTRACT BUTTON */}
                 <Button
                   type="dashed"
-                  onClick={() => add(emptyContract)}
+                  onClick={() => operations.add(emptyContract)}
                   block
                   icon={<PlusOutlined />}
                   className="mt-4 border-2 border-amber-500 text-amber-700 hover:bg-amber-100 font-semibold h-12 text-lg"
@@ -1415,16 +1392,13 @@ export default function Order() {
               </>
             )}
           </Form.List>
+
         </Form>
       </Modal>
 
       {/* Edit Modal */}
       <Modal
-        title={
-          <span className="text-2xl font-bold text-amber-600">
-            Edit Order No
-          </span>
-        }
+        title={<span className="text-2xl font-bold text-amber-600">Edit Order No</span>}
         open={isEditModalOpen}
         onCancel={() => {
           setIsEditModalOpen(false);
@@ -1433,7 +1407,7 @@ export default function Order() {
           setSelectedItemMaxMap({});
         }}
         okText="Save Changes"
-        onOk={() => editForm.submit()}
+        onOk={editForm.submit}
         width={900}
       >
         <Divider className="my-6" />
@@ -1442,11 +1416,7 @@ export default function Order() {
             <Col span={6}>
               <Form.Item
                 name="orderGroupId"
-                label={
-                  <span className="font-semibold text-amber-700">
-                    Order No
-                  </span>
-                }
+                label={<span className="font-semibold text-amber-700">Order No <span className="text-red-500">*</span></span>}
               >
                 <Input disabled />
               </Form.Item>
@@ -1454,28 +1424,15 @@ export default function Order() {
             <Col span={6}>
               <Form.Item
                 name="orderDate"
-                label={
-                  <span className="font-semibold text-amber-700">
-                    Order Date
-                  </span>
-                }
+                label={<span className="font-semibold text-amber-700">Order Date</span>}
               >
-                <DatePicker
-                  style={{ width: "100%" }}
-                  disabled
-                  format="YYYY-MM-DD"
-                />
+                <DatePicker style={{ width: "100%" }} disabled format="YYYY-MM-DD" />
               </Form.Item>
             </Col>
             <Col span={6}>
               <Form.Item
                 name="deliveryDate"
-                label={
-                  <span className="font-semibold text-amber-700">
-                    {" "}
-                    Expected Delivery Date
-                  </span>
-                }
+                label={<span className="font-semibold text-amber-700">Expected Delivery Date <span className="text-red-500">*</span></span>}
                 rules={[{ required: true }]}
               >
                 <DatePicker
@@ -1487,19 +1444,20 @@ export default function Order() {
             </Col>
           </Row>
           <Form.List name="contracts">
-            {(fields, { add, remove }) => (
+            {(fields, operations) => (
               <>
-                <RenderContractsList
-                  fields={fields}
-                  operations={{ add, remove }}
-                  formInstance={editForm}
-                  {...editHandlers}
-                  isEditMode={true}
-                />
+                {RenderContractsList({
+                  fields,
+                  operations,
+                  formInstance: editForm,
+                  handleSelectContract: editHandlers.handleSelectContract,
+                  handleSelectItem: editHandlers.handleSelectItem,
+                  isEditMode: true,
+                })}
 
                 <Button
                   type="dashed"
-                  onClick={() => add(emptyContract)}
+                  onClick={() => operations.add(emptyContract)}
                   block
                   icon={<PlusOutlined />}
                   className="mt-4 border-2 border-amber-500 text-amber-700 hover:bg-amber-100 font-semibold h-12 text-lg"
@@ -1509,6 +1467,7 @@ export default function Order() {
               </>
             )}
           </Form.List>
+
         </Form>
       </Modal>
 
@@ -1516,7 +1475,7 @@ export default function Order() {
       <Modal
         title={
           <span className="text-2xl font-bold text-amber-600">
-            Order Details: {selectedOrderGroup?.orderGroupId}
+            Order Details {selectedOrderGroup?.orderGroupId}
           </span>
         }
         open={isViewModalOpen}
@@ -1528,13 +1487,7 @@ export default function Order() {
       </Modal>
 
       {/* Wallet Modal */}
-      <Modal
-       
-        open={walletOpen}
-        onCancel={() => setWalletOpen(false)}
-        footer={null}
-        width={1200}
-      >
+      <Modal open={walletOpen} onCancel={() => setWalletOpen(false)} footer={null} width={1200}>
         <Wallet />
       </Modal>
     </div>

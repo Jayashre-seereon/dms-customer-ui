@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
   Table,
   Input,
@@ -39,15 +39,17 @@ const contractJSON = {
           itemCode: "IT23",
           qty: 2000,
           uom: "Ltrs",
+          baseRate: 125.50, 
           rate: 125.50,
-          freeQty: 100
+          freeQty: 100,
+          totalAmount: 251000.00 
         },
       ],
       totalQty: 2000,
       uom: "Ltrs",
       location: "Warehouse A",
       status: "Approved",
-      totalAmount: 250000,
+      totalAmount: 251000.00,
       grossWt: 2100,
       type: "Retail",
       brokerName: "Broker 1",
@@ -89,8 +91,10 @@ const contractJSON = {
           itemCode: "MO101",
           qty: 500,
           uom: "Kg",
+          baseRate: 180.00,
           rate: 180.00,
-          freeQty: 0
+          freeQty: 0,
+          totalAmount: 90000.00
         },
         {
           companyName: "XYZ Refineries",
@@ -98,22 +102,23 @@ const contractJSON = {
           itemCode: "CO202",
           qty: 1500,
           uom: "Ltrs",
+          baseRate: 220.75,
           rate: 220.75,
-          freeQty: 50
+          freeQty: 50,
+          totalAmount: 331125.00
         },
       ],
       totalQty: 2000,
-      uom: "",
+      uom: "Mixed",
       location: "Warehouse B",
       status: "Pending",
-      totalAmount: 350000,
+      totalAmount: 421125.00, // Updated Grand Total
       brokerName: "Broker 2",
 
     },
   ],
-  // Item options are now grouped by company for auto-fill and filter logic
   companyOptions: ["ABC Oils Ltd", "XYZ Refineries", "PQR Traders"],
-  uomOptions: ["Ltrs", "Kg"],
+  uomOptions: ["Ltrs", "Kg", "Box", "Drum"], // Extended UOM options
   statusOptions: ["Approved", "Pending", "Rejected"],
   locationOptions: ["Warehouse A", "Warehouse B", "Warehouse C"],
 };
@@ -134,6 +139,20 @@ const itemDetailsByCompany = {
   }
 };
 
+// 🌟 Mock UOM Conversion Data (Simulates Backend)
+const itemUomConversions = {
+  "Sunflower Oil": {
+    "Ltrs": { rateFactor: 1, qtyFactor: 1, baseUom: "Ltrs" },
+    "Box": { rateFactor: 12, qtyFactor: 1 / 12, baseUom: "Ltrs" }, // Box is 12 Ltrs
+    "Drum": { rateFactor: 200, qtyFactor: 1 / 200, baseUom: "Ltrs" }, // Drum is 200 Ltrs
+  },
+  "Mustard Oil": {
+    "Kg": { rateFactor: 1, qtyFactor: 1, baseUom: "Kg" },
+    "Box": { rateFactor: 15, qtyFactor: 1 / 15, baseUom: "Kg" }, // Box is 15 Kg
+  },
+  // Default to 1 for all others if no special conversion exists
+};
+
 // 1. Define Company to Location Mapping
 const companyLocationMap = {
   "ABC Oils Ltd": "Warehouse A",
@@ -151,6 +170,33 @@ const getCompanyNamesFromItems = (items) => {
   return (items || []).map(item => item.companyName).filter((value, index, self) => self.indexOf(value) === index).join(", ");
 };
 
+// 🌟 Helper function to calculate single item amount with conversion
+const calculateItemAmount = (itemData) => {
+  const qty = Number(itemData.qty || 0);
+  const baseRate = Number(itemData.baseRate || 0); // Base rate is per base UOM (e.g., Ltr/Kg)
+  const uom = itemData.uom;
+  const itemName = itemData.item;
+
+  if (qty === 0 || baseRate === 0) return 0;
+
+  const conversions = itemUomConversions[itemName];
+  let finalRate = baseRate;
+
+  if (conversions && conversions[uom]) {
+    // Rate Factor: How many base units are in one selected unit (e.g., 1 Box = 12 Ltrs)
+    const rateFactor = conversions[uom].rateFactor || 1;
+    finalRate = baseRate * rateFactor; // Rate per Box/Drum
+
+    // Total quantity is the current Qty * Rate Factor (in base UOM)
+    // The calculation is (QTY * Converted Rate)
+    return qty * finalRate;
+  }
+
+  // If no conversion or using base UOM
+  return qty * baseRate;
+};
+
+
 export default function Contract() {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -158,10 +204,34 @@ export default function Contract() {
   const [selectedRecord, setSelectedRecord] = useState(null);
   const [data, setData] = useState(contractJSON.initialData);
   const [searchText, setSearchText] = useState("");
-  const [totalAmount, setTotalAmount] = useState(0);
+  const [totalAmount, setTotalAmount] = useState(0); // This is the GRAND TOTAL
   const [addForm] = Form.useForm();
   const [editForm] = Form.useForm();
   const [viewForm] = Form.useForm();
+
+  // 🌟 Main logic to update the Grand Total
+  const updateTotalAmount = useCallback((formInstance) => {
+    const items = formInstance.getFieldValue("items") || [];
+    let grandTotal = 0;
+
+    // Use the calculated totalAmount from each item object
+    items.forEach((it) => {
+      grandTotal += Number(it.totalAmount || 0);
+    });
+
+    setTotalAmount(grandTotal);
+    // Optionally, update the main form field for totalAmount if one existed
+    // formInstance.setFieldsValue({ totalAmount: grandTotal });
+  }, []);
+
+  // Update total amount state when opening Edit modal
+  useEffect(() => {
+    if (isEditModalOpen && selectedRecord) {
+      // Re-calculate the initial grand total when opening the edit modal
+      const initialTotal = (selectedRecord.items || []).reduce((sum, item) => sum + Number(item.totalAmount || 0), 0);
+      setTotalAmount(initialTotal);
+    }
+  }, [isEditModalOpen, selectedRecord]);
 
 
   const filteredData = data.filter(
@@ -183,18 +253,7 @@ export default function Contract() {
     const totalQty = items.reduce((s, it) => s + Number(it.qty || 0), 0);
     return { totalQty, uom: uomSet.size === 1 ? items[0].uom : (uomSet.size > 1 ? "Mixed" : "") };
   };
-  const updateTotalAmount = (form) => {
-    const items = form.getFieldValue("items") || [];
-    let total = 0;
 
-    items.forEach((it) => {
-      const qty = Number(it.qty || 0);
-      const rate = Number(it.rate || 0);
-      total += qty * rate;
-    });
-
-    setTotalAmount(total);
-  };
 
   const columns = [
     {
@@ -240,7 +299,7 @@ export default function Contract() {
       },
     },
     {
-      title: <span className="text-amber-700 font-semibold">Total Amount</span>,
+      title: <span className="text-amber-700 font-semibold">Grand Total</span>, // Changed title for clarity
       dataIndex: "totalAmount",
       width: 120,
       render: (value) => (
@@ -295,6 +354,7 @@ export default function Contract() {
                   items: record.items || [],
                 });
                 setIsEditModalOpen(true);
+                updateTotalAmount(editForm);
               }}
             />
           )}
@@ -302,6 +362,44 @@ export default function Contract() {
       ),
     },
   ];
+
+  // 🌟 Logic to update a single item's rate and total amount
+  const updateItemCalculations = (formInstance, rowIndex) => {
+    const items = formInstance.getFieldValue('items') || [];
+    const item = items[rowIndex];
+
+    if (!item) return;
+
+    // 1. Get current values
+    const qty = Number(item.qty || 0);
+    const uom = item.uom;
+    const itemName = item.item;
+    const baseRate = Number(item.baseRate || 0);
+
+    // 2. Check for conversion factor
+    const conversions = itemUomConversions[itemName];
+    let newRate = baseRate;
+
+    if (conversions && conversions[uom]) {
+      const rateFactor = conversions[uom].rateFactor || 1;
+      newRate = baseRate * rateFactor;
+    }
+
+    // 3. Calculate new total amount
+    const newTotalAmount = qty * newRate;
+
+    // 4. Update the item in the list
+    items[rowIndex] = {
+      ...item,
+      rate: Number(newRate.toFixed(2)),
+      totalAmount: Number(newTotalAmount.toFixed(2)),
+    };
+
+    // 5. Push updated list back to form and update Grand Total
+    formInstance.setFieldsValue({ items });
+    updateTotalAmount(formInstance);
+  };
+
 
   // Logic to handle item selection change for auto-fill (Rate and Item Code)
   const handleItemSelect = (form, companyName, itemName, rowIndex) => {
@@ -312,20 +410,25 @@ export default function Contract() {
     // Get current list
     const items = form.getFieldValue('items') || [];
 
+    // Base rate is the rate in the smallest/base UOM (Ltrs/Kg)
+    const baseUom = itemData.uom;
+    const baseRate = itemData.rate;
+
     // Update only selected row
     items[rowIndex] = {
       ...items[rowIndex],
       item: itemName,
       itemCode: itemData.itemCode,
-      rate: itemData.rate,
-      uom: itemData.uom,
-      qty: 0,
-      totalAmount: 0
+      uom: baseUom, // Reset to base UOM initially
+      baseRate: baseRate,
+      rate: baseRate, // Initial rate is the base rate
+      qty: items[rowIndex].qty || 0,
     };
 
     // Push updated list back to form
     form.setFieldsValue({ items });
-    updateTotalAmount(form);
+    // Recalculate amount using the new base rate
+    updateItemCalculations(form, rowIndex);
   };
 
   const handleCompanyChange = (form, companyName, fieldName, isEdit) => {
@@ -346,6 +449,7 @@ export default function Contract() {
           item: undefined,
           itemCode: undefined,
           rate: undefined,
+          baseRate: undefined, // Clear base rate
           uom: undefined,
           qty: 0,
           totalAmount: 0,
@@ -355,10 +459,9 @@ export default function Contract() {
 
     form.setFieldsValue({ items: updatedItems });
 
-    // 🔥 MOST IMPORTANT FIX → reset live total
+    // 🔥 MOST IMPORTANT FIX → reset live grand total
     updateTotalAmount(form);
   };
-
 
 
   const handleFormSubmit = (values, isEdit) => {
@@ -367,6 +470,9 @@ export default function Contract() {
     const items = finalValues.items && finalValues.items.length > 0 ? finalValues.items : [];
 
     const totals = calculateTotals(items);
+
+    // Calculate Final Grand Total from item totals
+    const grandTotal = items.reduce((sum, item) => sum + Number(item.totalAmount || 0), 0);
 
     // Determine the next contract number
     const newContractNo = `C-${String(data.length + 1).padStart(4, '0')}`;
@@ -387,7 +493,7 @@ export default function Contract() {
       deliveryDate: finalValues.deliveryDate
         ? finalValues.deliveryDate.format("YYYY-MM-DD")
         : undefined,
-      totalAmount: totalAmount,
+      totalAmount: grandTotal, // Use the calculated Grand Total
     };
 
     if (isEdit) {
@@ -502,17 +608,26 @@ export default function Contract() {
     const currentItem = items && items[field.name];
     const selectedCompany = currentItem?.companyName;
     const itemOptions = getItemOptionsForCompany(selectedCompany);
+    const selectedItemName = currentItem?.item;
+
+    // Get UOM options based on the selected item. If no specific conversion, use defaults.
+    const uomOptions = itemUomConversions[selectedItemName]
+      ? Object.keys(itemUomConversions[selectedItemName])
+      : contractJSON.uomOptions.filter(uom => uom === currentItem?.uom); // Only allow current UOM if no conversion exists.
+
+    // If item is not selected, only allow default options
+    const finalUomOptions = selectedItemName ? uomOptions : contractJSON.uomOptions;
 
     return (
       <Row
-        gutter={24}
+        gutter={16} // Reduced gutter slightly for more columns
         key={field.key}
         align="middle"
         className="mb-2 border-b border-dashed pb-2"
       >
 
         {/* Company */}
-        <Col span={6}>
+        <Col span={4}>
           <label>Vendor</label>
           <Form.Item
             {...field}
@@ -535,7 +650,7 @@ export default function Contract() {
         </Col>
 
         {/* Item Name */}
-        <Col span={6}>
+        <Col span={4}>
           <label>Item Name</label>
           <Form.Item
             {...field}
@@ -563,67 +678,87 @@ export default function Contract() {
           </Form.Item>
         </Col>
 
-        {/* Item Code */}
-        <Col span={6}>
-          <label>Item Code</label>
-          <Form.Item
-            {...field}
-            name={[field.name, "itemCode"]}
-            fieldKey={[field.fieldKey, "itemCode"]}
-          >
-            <Input placeholder="Code" disabled />
-          </Form.Item>
-        </Col>
-
-        {/* Rate */}
-        <Col span={6}>
-          <label>Rate</label>
-          <Form.Item
-            {...field}
-            name={[field.name, "rate"]}
-            fieldKey={[field.fieldKey, "rate"]}
-            rules={[{ required: true, message: "Enter rate" }]}
-          >
-            <Input type="number" placeholder="Rate" disabled />
-          </Form.Item>
-        </Col>
-
-        {/* UOM */}
-        <Col span={6}>
+        {/* UOM - 🌟 MADE SELECTABLE 🌟 */}
+        <Col span={3}>
           <label>UOM</label>
           <Form.Item
             {...field}
             name={[field.name, "uom"]}
             fieldKey={[field.fieldKey, "uom"]}
+            rules={[{ required: true, message: "Select UOM" }]}
           >
-            <Input placeholder="UOM" disabled />
+            <Select
+              placeholder="UOM"
+              disabled={disabled || !selectedItemName}
+              onChange={() => updateItemCalculations(formInstance, field.name)}
+            >
+              {finalUomOptions.map((uom) => (
+                <Select.Option key={uom} value={uom}>{uom}</Select.Option>
+              ))}
+            </Select>
           </Form.Item>
         </Col>
 
         {/* Quantity */}
-        <Col span={6}>
-          <label>Quantity</label>
+        <Col span={3}>
+          <label>Qty</label>
           <Form.Item
             {...field}
             name={[field.name, "qty"]}
             fieldKey={[field.fieldKey, "qty"]}
             rules={[
               { required: true, message: "Enter qty" },
-
+              { pattern: /^\d+$/, message: 'Quantity must be a number' }
             ]}
           >
-            <Input type="number" placeholder="Qty" disabled={disabled} onChange={() => updateTotalAmount(formInstance)} />
+            <Input
+              type="number"
+              placeholder="Qty"
+              disabled={disabled || !selectedItemName}
+              onChange={() => updateItemCalculations(formInstance, field.name)} // Recalculate on Qty change
+            />
           </Form.Item>
         </Col>
-        <Col span={8}>
-          <Form.Item label="Total Amount">
-            <Input value={totalAmount} disabled />
+
+        {/* Rate (Adjusted based on UOM/Conversion) */}
+        <Col span={3}>
+          <label>Rate (Per UOM)</label>
+          <Form.Item
+            {...field}
+            name={[field.name, "rate"]}
+            fieldKey={[field.fieldKey, "rate"]}
+          >
+            {/* Display final rate which is baseRate * conversionFactor */}
+            <Input type="number" placeholder="Rate" disabled />
           </Form.Item>
         </Col>
+
+        {/* Item Total Amount - 🌟 NEW FIELD 🌟 */}
+        <Col span={4}>
+          <label>Item Total Amount</label>
+          <Form.Item
+            {...field}
+            name={[field.name, "totalAmount"]}
+            fieldKey={[field.fieldKey, "totalAmount"]}
+          >
+            <Input
+              placeholder="Item Total"
+              disabled
+              addonBefore="₹"
+              value={currentItem?.totalAmount}
+            />
+          </Form.Item>
+        </Col>
+
         {/* Remove Button */}
-        <Col span={1}>
+        <Col span={2}>
           {!disabled && (
-            <MinusCircleOutlined onClick={() => remove(field.name)} />
+            <MinusCircleOutlined
+              onClick={() => {
+                remove(field.name);
+                setTimeout(() => updateTotalAmount(formInstance), 0); // Recalc Grand Total after removing item
+              }}
+            />
           )}
         </Col>
       </Row>
@@ -642,7 +777,24 @@ export default function Contract() {
 
               {!disabled && (
                 <Form.Item className="mt-4">
-                  <Button type="dashed" onClick={() => add({ uom: 'Ltrs', qty: 0, rate: 0 })} block icon={<PlusOutlined />}>
+                  <Button
+                    type="dashed"
+                    onClick={() => {
+                      add({
+                        companyName: undefined,
+                        item: undefined,
+                        itemCode: undefined,
+                        qty: 0,
+                        uom: "Ltrs",
+                        rate: 0,
+                        baseRate: 0,
+                        totalAmount: 0
+                      });
+                      setTimeout(() => updateTotalAmount(formInstance), 0);
+                    }}
+                    block
+                    icon={<PlusOutlined />}
+                  >
                     Add Item
                   </Button>
                 </Form.Item>
@@ -651,11 +803,22 @@ export default function Contract() {
           )}
         </Form.List>
       </div>
+
+      {/* 🌟 Display Grand Total below item list 🌟 */}
+      <div className="flex justify-end p-2 bg-amber-50 rounded-lg">
+        <Space size="large">
+          <span className="text-lg font-semibold text-amber-700">Grand Total:</span>
+          <span className="text-2xl font-semibold text-amber-700">
+            ₹ {Number(totalAmount).toFixed(2)}
+          </span>
+        </Space>
+      </div>
     </>
   );
 
   const renderApprovedView = () => (
     <div >
+      {/* ... (renderApprovedView remains largely the same, but the totalAmount for the contract is correctly calculated) */}
       <h3 className="text-xl font-semibold text-amber-600 mb-4">Contract & Party Details</h3>
       <div className="border! p-2! rounded! mb-2! border-amber-300! relative!">
         <Row gutter={16}>
@@ -736,12 +899,12 @@ export default function Contract() {
       <div className="border! p-2! rounded! mb-2! border-amber-300! relative!">
         {(selectedRecord?.items || []).map((it, idx) => (
           <Row gutter={16} key={idx} className="mb-2 border-b border-dashed pb-2">
-            <Col span={6}>
+            <Col span={4}>
               <Form.Item label={`Vendor ${idx + 1}`}>
                 <Input value={it.companyName} disabled />
               </Form.Item>
             </Col>
-            <Col span={6}>
+            <Col span={4}>
               <Form.Item label={`Item ${idx + 1}`}>
                 <Input value={it.item} disabled />
               </Form.Item>
@@ -751,39 +914,29 @@ export default function Contract() {
                 <Input value={it.itemCode} disabled />
               </Form.Item>
             </Col>
-            <Col span={4}>
-              <Form.Item label="Rate">
-                <Input value={it.rate} disabled />
-              </Form.Item>
-            </Col>
-            <Col span={4}>
-              <Form.Item label="Uom">
+            <Col span={3}>
+              <Form.Item label="UOM">
                 <Input value={it.uom} disabled />
               </Form.Item>
             </Col>
-            <Col span={4}>
+            <Col span={3}>
               <Form.Item label="Qty">
                 <Input value={it.qty} disabled />
               </Form.Item>
             </Col>
-            <Col span={4}>
-              <Form.Item label="UOM">
-                <Input value={it.uom} disabled />
+            <Col span={3}>
+              <Form.Item label="Rate (per UOM)">
+                <Input value={it.rate} disabled />
+              </Form.Item>
+            </Col>
+            <Col span={3}>
+              <Form.Item label="Item Total Amount">
+                <Input value={it.totalAmount} disabled />
               </Form.Item>
             </Col>
             <Col span={4}>
               <Form.Item label="Free Qty">
                 <Input value={it.freeQty} disabled />
-              </Form.Item>
-            </Col>
-            <Col span={6}>
-              <Form.Item label="Total Qty">
-                <Input value={selectedRecord?.totalQty} disabled />
-              </Form.Item>
-            </Col>
-            <Col span={6}>
-              <Form.Item label="UOM">
-                <Input value={selectedRecord?.uom} disabled />
               </Form.Item>
             </Col>
           </Row>
@@ -796,7 +949,7 @@ export default function Contract() {
       <div className="border! p-2! rounded! mb-2! border-amber-300! relative!">
         <Row gutter={16}>
           <Col span={6}>
-            <Form.Item label="Gross Amount">
+            <Form.Item label="Gross Amount (Estimate)">
               <Input value={selectedRecord?.grossAmount} disabled />
             </Form.Item>
           </Col>
@@ -811,7 +964,7 @@ export default function Contract() {
             </Form.Item>
           </Col>
           <Col span={6}>
-            <Form.Item label="Total Amount">
+            <Form.Item label="Grand Total Amount">
               <Input value={selectedRecord?.totalAmount} disabled />
             </Form.Item>
           </Col>
@@ -861,6 +1014,9 @@ export default function Contract() {
             className="bg-amber-500! hover:bg-amber-600! border-none!"
             onClick={() => {
               addForm.resetFields();
+              // Reset Grand Total state
+              setTotalAmount(0);
+
               addForm.setFieldsValue({
                 key: `C-${String(data.length + 1).padStart(4, '0')}`,
                 contractDate: dayjs(),
@@ -868,7 +1024,7 @@ export default function Contract() {
                 endDate: dayjs().add(7, "day"),
                 status: "Pending",
                 // Set initial item with empty company/item/code/rate
-                items: [{ companyName: undefined, item: undefined, itemCode: undefined, qty: 0, uom: "Ltrs", rate: 0 }],
+                items: [{ companyName: undefined, item: undefined, itemCode: undefined, qty: 0, uom: "Ltrs", rate: 0, baseRate: 0, totalAmount: 0 }],
                 location: undefined, // Reset location
               });
               setSelectedRecord(null);
@@ -881,7 +1037,7 @@ export default function Contract() {
       </div>
 
       <div className="border border-amber-300 rounded-lg p-4 shadow-md">
-        <Table columns={columns} dataSource={filteredData} pagination={10} scroll={{ y: 350 }} rowKey="key" />
+        <Table columns={columns} dataSource={filteredData} pagination={10} scroll={{ y: 150 }} rowKey="key" />
       </div>
 
       {/* Add Modal */}
@@ -892,7 +1048,7 @@ export default function Contract() {
           setIsAddModalOpen(false);
         }}
         footer={null}
-        width={1000}
+        width={1200} // Increased width for more item columns
       >
         <Form
           layout="vertical"
@@ -904,7 +1060,7 @@ export default function Contract() {
             startDate: dayjs(),
             endDate: dayjs().add(7, "day"),
             status: "Pending",
-            items: [{ companyName: undefined, item: undefined, itemCode: undefined, qty: 0, uom: "Ltrs", rate: 0 }],
+            items: [{ companyName: undefined, item: undefined, itemCode: undefined, qty: 0, uom: "Ltrs", rate: 0, baseRate: 0, totalAmount: 0 }],
           }}
         >
           {renderBasicFields(addForm, false)}
@@ -938,7 +1094,7 @@ export default function Contract() {
           setIsEditModalOpen(false);
         }}
         footer={null}
-        width={1000}
+        width={1200} // Increased width for more item columns
       >
         <Form
           layout="vertical"
@@ -977,7 +1133,7 @@ export default function Contract() {
           setIsViewModalOpen(false);
         }}
         footer={null}
-        width={1000}
+        width={1200} // Increased width
       >
         <Form layout="vertical" form={viewForm}>
           {selectedRecord?.status === "Approved" ? (
