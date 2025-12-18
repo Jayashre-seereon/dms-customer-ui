@@ -270,6 +270,13 @@ export default function RaiseDispute() {
       render: (text) => <span className="text-amber-700!">{text}</span>,
     },
     {
+      title: <span className="text-amber-700!">Dispute No</span>,
+      dataIndex: "disputeNo",
+      render: (text) => (
+        <span className="text-amber-700!">{text || "-"}</span>
+      ),
+    },
+    {
       title: <span className="text-amber-700!">Return Date</span>,
       dataIndex: "returnDate",
       render: (text) => <span className="text-amber-700!">{text}</span>,
@@ -289,13 +296,7 @@ export default function RaiseDispute() {
         </span>
       ),
     },
-    {
-      title: <span className="text-amber-700!">Dispute No</span>,
-      dataIndex: "disputeNo",
-      render: (text) => (
-        <span className="text-amber-700!">{text || "-"}</span>
-      ),
-    },
+    
     {
       title: <span className="text-amber-700!">Status</span>,
       dataIndex: "status",
@@ -356,19 +357,36 @@ export default function RaiseDispute() {
         modalMode === "view" ? (
           row.returnQty
         ) : (
-          <Form.Item
-            name={`qty_${row.id}`}
-            rules={[{ required: true, message: "Qty required" }]}
-            style={{ margin: 0 }}
-          >
-            <InputNumber
-              min={0}
-              max={row.quantity}
-              value={qtyState[row.id]}
-              onChange={(v) => handleQtyChange(row.id, v)}
-              style={{ width: "100%" }}
-            />
-          </Form.Item>
+        <Form.Item
+  name={`qty_${row.id}`}
+  style={{ margin: 0 }}
+  rules={[
+    { required: true, message: "Return quantity is required" },
+    ({ getFieldValue }) => ({
+      validator(_, value) {
+        if (value == null) return Promise.resolve();
+
+        if (value > row.quantity) {
+          return Promise.reject(
+            new Error(
+              `Return quantity cannot be greater than order quantity (${row.quantity})`
+            )
+          );
+        }
+
+        return Promise.resolve();
+      },
+    }),
+  ]}
+>
+  <InputNumber
+    min={0}
+    value={qtyState[row.id]}
+    onChange={(v) => handleQtyChange(row.id, v)}
+    style={{ width: "100%" }}
+  />
+</Form.Item>
+
         ),
     },
     {
@@ -426,9 +444,9 @@ export default function RaiseDispute() {
 
   const modalTitle =
     modalMode === "view"
-      ? "View Dispute"
+      ? <span className="text-amber-600!" >View Dispute</span>
       : modalMode === "edit"
-      ? "Edit Items"
+      ? <span className="text-amber-600!" >Edit Dispute</span>
       : "Dispute Items";
 
   return (
@@ -473,11 +491,7 @@ export default function RaiseDispute() {
         title={
           <div className="flex justify-between items-center">
             <span>{modalTitle}</span>
-            {modalRecord?.disputeNo && (
-              <span className="text-amber-600 text-sm">
-                Dispute No: {modalRecord.disputeNo}
-              </span>
-            )}
+           
           </div>
         }
         open={isModalOpen}
@@ -539,7 +553,8 @@ export default function RaiseDispute() {
               size="small"
               dataSource={modalRecord.itemsReturned || modalRecord.items}
               columns={modalColumns}
-              pagination={10}
+              pagination={false}
+              scroll={{y:300}}
               rowKey="id"
             />
           </Form>

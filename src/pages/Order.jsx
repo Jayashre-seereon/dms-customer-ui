@@ -838,57 +838,51 @@ export default function Order() {
                 </Form.Item>
               </Col>
 
-           <Form.Item
+<Form.Item
   name={[f.name, "qty"]}
   label="Qty"
   rules={[
     {
+      required: true,
+      message: "Please enter quantity",
+    },
+    {
+      type: "number",
+      min: 1,
+      message: "Value must be greater than or equal to 1",
+    },
+    {
       validator: (_, value) => {
-        if (value === undefined || value === null || value === "") {
-          return Promise.reject("Please enter quantity");
-        }
-
-        if (typeof value !== "number" || Number.isNaN(value)) {
-          return Promise.reject("Please enter a number");
-        }
-
-        if (value <= 0) {
-          return Promise.reject("Quantity must be greater than 0");
-        }
-
         const maxQty =
           selectedItemMaxMap[`${contractIndex}-${f.name}`];
-        if (maxQty !== undefined && value > maxQty) {
+
+        if (
+          maxQty !== undefined &&
+          value !== undefined &&
+          value > maxQty
+        ) {
           return Promise.reject(
-            `Qty cannot be greater than ${maxQty}`
+            new Error(`Qty cannot be greater than ${maxQty}`)
           );
         }
-
         return Promise.resolve();
       },
     },
   ]}
 >
   <InputNumber
+   
+    
+    controls
     style={{ width: "100%" }}
-    placeholder="Enter qty"
-    controls={false}
-    min={1}
-    value={undefined}   // ❌ prevents default value
-    parser={(value) =>
-      value ? value.replace(/[^\d]/g, "") : undefined
+    placeholder="Enter Qty"
+    onChange={(val) =>
+      uomHandlers.handleQtyChange(val ?? 0, contractIndex, f.name)
     }
-    onChange={(val) => {
-      if (val !== undefined) {
-        uomHandlers.handleQtyChange(
-          val,
-          contractIndex,
-          f.name
-        );
-      }
-    }}
   />
 </Form.Item>
+
+
 
 
               <Col span={4}>
@@ -1078,8 +1072,11 @@ export default function Order() {
       status,
       grandTotal,
       contracts,
-    } = groupData;
-    const isApprovedStatus = status === "Approved" || status === "Delivered";
+    } = groupData;const isApprovedStatus =
+  status === "Approved" ||
+  status === "OutForDelivery" ||
+  status === "Delivered";
+
     const itemColumns = [
       { title: "Item", dataIndex: "item", key: "item", width: 120 },
       { title: "Item Code", dataIndex: "itemcode", key: "itemcode", width: 120 },

@@ -11,6 +11,7 @@ import {
   Col,
   Space,
   Divider,
+  InputNumber,
 } from "antd";
 import {
   SearchOutlined,
@@ -39,10 +40,10 @@ const contractJSON = {
           itemCode: "IT23",
           qty: 2000,
           uom: "Ltrs",
-          baseRate: 125.50, 
+          baseRate: 125.50,
           rate: 125.50,
           freeQty: 100,
-          totalAmount: 251000.00 
+          totalAmount: 251000.00
         },
       ],
       totalQty: 2000,
@@ -177,7 +178,8 @@ const calculateItemAmount = (itemData) => {
   const uom = itemData.uom;
   const itemName = itemData.item;
 
-  if (qty === 0 || baseRate === 0) return 0;
+  if (!qty || qty <= 0 || baseRate <= 0) return 0;
+
 
   const conversions = itemUomConversions[itemName];
   let finalRate = baseRate;
@@ -620,7 +622,7 @@ export default function Contract() {
 
     return (
       <Row
-        gutter={16} // Reduced gutter slightly for more columns
+        gutter={24} // Reduced gutter slightly for more columns
         key={field.key}
         align="middle"
         className="mb-2 border-b border-dashed pb-2"
@@ -679,7 +681,7 @@ export default function Contract() {
         </Col>
 
         {/* UOM - 🌟 MADE SELECTABLE 🌟 */}
-        <Col span={3}>
+        <Col span={4}>
           <label>UOM</label>
           <Form.Item
             {...field}
@@ -700,28 +702,40 @@ export default function Contract() {
         </Col>
 
         {/* Quantity */}
-        <Col span={3}>
+        <Col span={4}>
           <label>Qty</label>
           <Form.Item
             {...field}
             name={[field.name, "qty"]}
             fieldKey={[field.fieldKey, "qty"]}
             rules={[
-              { required: true, message: "Enter qty" },
-              { pattern: /^\d+$/, message: 'Quantity must be a number' }
+              { required: true, },
+              {
+                validator: (_, value) => {
+                  if (value === undefined || value === null || value === "") {
+                    return Promise.reject(new Error("Quantity is required"));
+                  }
+                  if (Number(value) <= 0) {
+                    return Promise.reject(new Error("Quantity must be greater than 0"));
+                  }
+                  return Promise.resolve();
+                },
+              },
             ]}
+
           >
-            <Input
-              type="number"
+            <InputNumber
+             
               placeholder="Qty"
               disabled={disabled || !selectedItemName}
-              onChange={() => updateItemCalculations(formInstance, field.name)} // Recalculate on Qty change
+              onChange={() => updateItemCalculations(formInstance, field.name)}
             />
+
           </Form.Item>
         </Col>
 
         {/* Rate (Adjusted based on UOM/Conversion) */}
-        <Col span={3}>
+        <Col span={4}>
           <label>Rate (Per UOM)</label>
           <Form.Item
             {...field}
@@ -753,10 +767,10 @@ export default function Contract() {
         {/* Remove Button */}
         <Col span={2}>
           {!disabled && (
-            <MinusCircleOutlined
+            <MinusCircleOutlined className="text-red-500!"
               onClick={() => {
                 remove(field.name);
-                setTimeout(() => updateTotalAmount(formInstance), 0); // Recalc Grand Total after removing item
+                setTimeout(() => updateTotalAmount(formInstance), 0); 
               }}
             />
           )}
@@ -784,7 +798,7 @@ export default function Contract() {
                         companyName: undefined,
                         item: undefined,
                         itemCode: undefined,
-                        qty: 0,
+                        qty: undefined,
                         uom: "Ltrs",
                         rate: 0,
                         baseRate: 0,
@@ -1024,7 +1038,7 @@ export default function Contract() {
                 endDate: dayjs().add(7, "day"),
                 status: "Pending",
                 // Set initial item with empty company/item/code/rate
-                items: [{ companyName: undefined, item: undefined, itemCode: undefined, qty: 0, uom: "Ltrs", rate: 0, baseRate: 0, totalAmount: 0 }],
+                items: [{ companyName: undefined, item: undefined, itemCode: undefined, qty: undefined, uom: "Ltrs", rate: 0, baseRate: 0, totalAmount: 0 }],
                 location: undefined, // Reset location
               });
               setSelectedRecord(null);
