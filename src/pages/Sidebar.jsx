@@ -22,7 +22,7 @@ export default function Sidebar() {
     { key: "/contract", label: "Contract", icon: <FileTextOutlined /> },
     { key: "/order", label: "Order", icon: <ShoppingCartOutlined /> },
     { key: "/rise-dispute", label: "Rise Dispute", icon: <RiseOutlined /> },
-   { key: "/deliverey-status", label: "Deliverey Status", icon: <FileTextOutlined /> },
+   { key: "/deliverey-status", label: "Delivery Status", icon: <FileTextOutlined /> },
      { key: "/wallet", label: "Wallet", icon: <WalletOutlined /> },
    { key: "/reports", label: "Reports", icon: <BarChartOutlined /> },
      ];
