@@ -57,6 +57,7 @@ const contractJSON = {
       uom: "Ltrs",
       itemcode: "MO-001",
       deliveryDate: "2025-10-15",
+      deliveryAddress:"BBSR",
       status: "Approved",
       totalAmt: 250000,
       rate: 125,
@@ -81,6 +82,7 @@ const contractJSON = {
       uom: "Ltrs",
       itemcode: "SO-002",
       deliveryDate: "2025-10-15",
+      deliveryAddress:"BBSR",
       status: "InTransit",
       totalAmt: 110000,
       rate: 110,
@@ -105,6 +107,7 @@ const contractJSON = {
       uom: "Ltrs",
       itemcode: "CO-002",
       deliveryDate: "2025-10-20",
+      deliveryAddress:"BBSR",
       status: "Pending",
       totalAmt: 65000,
       rate: 130,
@@ -129,6 +132,7 @@ const contractJSON = {
       uom: "Ltrs",
       itemcode: "PO-003",
       deliveryDate: "2025-10-20",
+      deliveryAddress:"BBSR",
       status: "Pending",
       totalAmt: 39000,
       rate: 130,
@@ -153,6 +157,7 @@ const contractJSON = {
       uom: "Ltrs",
       itemcode: "MO-001",
       deliveryDate: "2025-10-25",
+      deliveryAddress:"BBSR",
       status: "Delivered",
       totalAmt: 62500,
       rate: 125,
@@ -177,6 +182,7 @@ const contractJSON = {
       uom: "Ltrs",
       itemcode: "SO-002",
       deliveryDate: "2025-10-27",
+      deliveryAddress:"BBSR",
       status: "OutForDelivery",
       totalAmt: 44000,
       rate: 110,
@@ -312,6 +318,7 @@ const groupDataByOrderGroup = (flatData) => {
         key: orderGroupId,
         orderDate: rest.orderDate,
         deliveryDate: rest.deliveryDate,
+         deliveryAddress: rest.deliveryAddress,
         status: rest.status,
         grandTotal: 0,
         contracts: {},
@@ -671,6 +678,7 @@ export default function Order() {
         deliveryDate: fullGroup.deliveryDate
           ? dayjs(fullGroup.deliveryDate)
           : null,
+           deliveryAddress: fullGroup.deliveryAddress,
         orderGroupId: fullGroup.orderGroupId,
         orderDate: fullGroup.orderDate ? dayjs(fullGroup.orderDate) : null,
         contracts: fullGroup.contracts.map((contract) => ({
@@ -689,6 +697,7 @@ export default function Order() {
   const handleAddSubmit = useCallback(
     (values) => {
       const deliveryDate = values.deliveryDate?.format("YYYY-MM-DD");
+      const deliveryAddress = values.deliveryAddress;
       const orderGroupId = `ORD-${dayjs().format(
         "YYYYMMDD"
       )}-${String(Date.now()).slice(-5)}`;
@@ -716,6 +725,7 @@ export default function Order() {
             rate: it.rate,
             orderDate: dayjs().format("YYYY-MM-DD"),
             deliveryDate,
+              deliveryAddress,
             status: "Pending",
             totalAmt: it.totalAmt || (it.rate || 0) * Number(it.qty),
           });
@@ -735,7 +745,7 @@ export default function Order() {
 
   const handleEditSubmit = useCallback(
     (values) => {
-      const { deliveryDate, orderGroupId, contracts } = values;
+      const { deliveryDate, deliveryAddress,orderGroupId, contracts } = values;
       const updatedDeliveryDate = deliveryDate?.format("YYYY-MM-DD");
 
       const otherFlatRows = data.filter(
@@ -768,6 +778,7 @@ export default function Order() {
               selectedOrderGroup?.orderDate ||
               dayjs().format("YYYY-MM-DD"),
             deliveryDate: updatedDeliveryDate,
+             deliveryAddress,
             status: "Pending",
             totalAmt: item.totalAmt || (item.rate || 0) * Number(item.qty),
           });
@@ -838,49 +849,49 @@ export default function Order() {
                 </Form.Item>
               </Col>
 
-<Form.Item
-  name={[f.name, "qty"]}
-  label="Qty"
-  rules={[
-    {
-      required: true,
-      message: "Please enter quantity",
-    },
-    {
-      type: "number",
-      min: 1,
-      message: "Value must be greater than or equal to 1",
-    },
-    {
-      validator: (_, value) => {
-        const maxQty =
-          selectedItemMaxMap[`${contractIndex}-${f.name}`];
+              <Form.Item
+                name={[f.name, "qty"]}
+                label="Qty"
+                rules={[
+                  {
+                    required: true,
+                    message: "Please enter quantity",
+                  },
+                  {
+                    type: "number",
+                    min: 1,
+                    message: "Value must be greater than or equal to 1",
+                  },
+                  {
+                    validator: (_, value) => {
+                      const maxQty =
+                        selectedItemMaxMap[`${contractIndex}-${f.name}`];
 
-        if (
-          maxQty !== undefined &&
-          value !== undefined &&
-          value > maxQty
-        ) {
-          return Promise.reject(
-            new Error(`Qty cannot be greater than ${maxQty}`)
-          );
-        }
-        return Promise.resolve();
-      },
-    },
-  ]}
->
-  <InputNumber
-   
-    
-    controls
-    style={{ width: "100%" }}
-    placeholder="Enter Qty"
-    onChange={(val) =>
-      uomHandlers.handleQtyChange(val ?? 0, contractIndex, f.name)
-    }
-  />
-</Form.Item>
+                      if (
+                        maxQty !== undefined &&
+                        value !== undefined &&
+                        value > maxQty
+                      ) {
+                        return Promise.reject(
+                          new Error(`Qty cannot be greater than ${maxQty}`)
+                        );
+                      }
+                      return Promise.resolve();
+                    },
+                  },
+                ]}
+              >
+                <InputNumber
+
+
+                  controls
+                  style={{ width: "100%" }}
+                  placeholder="Enter Qty"
+                  onChange={(val) =>
+                    uomHandlers.handleQtyChange(val ?? 0, contractIndex, f.name)
+                  }
+                />
+              </Form.Item>
 
 
 
@@ -1072,10 +1083,10 @@ export default function Order() {
       status,
       grandTotal,
       contracts,
-    } = groupData;const isApprovedStatus =
-  status === "Approved" ||
-  status === "OutForDelivery" ||
-  status === "Delivered";
+    } = groupData; const isApprovedStatus =
+      status === "Approved" ||
+      status === "OutForDelivery" ||
+      status === "Delivered";
 
     const itemColumns = [
       { title: "Item", dataIndex: "item", key: "item", width: 120 },
@@ -1155,7 +1166,7 @@ export default function Order() {
             <div className="font-semibold text-amber-700 mb-1">Order Date:</div>
             <div className="text-amber-500">{orderDate}</div>
           </Col>
-          <Col span={4}>
+          <Col span={3}>
             <div className="font-semibold text-amber-700 mb-1">Status:</div>
             <Tag
               {...getStatusTagProps(status)}
@@ -1164,18 +1175,26 @@ export default function Order() {
               {status}
             </Tag>
           </Col>
-          <Col span={6}>
+          <Col span={4}>
             <div className="font-semibold text-amber-700 mb-1">
-              Expected Delivery Date:
+              Expected Delivery Date
             </div>
             <div className="text-amber-500">{deliveryDate}</div>
           </Col>
-          <Col span={6}>
+          <Col span={4}>
             <div className="font-semibold text-amber-700 mb-1">Grand Total:</div>
             <div className="text-amber-500">
               ₹{grandTotal.toLocaleString()}
             </div>
           </Col>
+           <Col span={4}>
+  <div className="font-semibold text-amber-700 mb-1">
+    Delivery Address:
+  </div>
+  <div className="text-amber-500">
+    {groupData.deliveryAddress || "N/A"}
+  </div>
+</Col>
         </Row>
         {isApprovedStatus && (
           <Row
@@ -1208,6 +1227,7 @@ export default function Order() {
                 {contracts[0]?.items[0]?.ExpReceivingDate || "N/A"}
               </div>
             </Col>
+           
           </Row>
         )}
         <Divider
@@ -1267,24 +1287,24 @@ export default function Order() {
       </div>
 
       <div className="flex gap-2 mb-2">
-    <Input
-            placeholder="Search"
-            className="border-amber-300! w-64! focus:border-amber-500!"
-            prefix={<SearchOutlined className="text-amber-600!" />}
-            value={searchText}
-            onChange={(e) => setSearchText(e.target.value)}
-          />
-          <Button
-            icon={<FilterOutlined />}
-            onClick={() => setSearchText("")}
-            className="border-amber-400! text-amber-700! hover:bg-amber-100!"
-          >
-            Reset Search
-          </Button>
+        <Input
+          placeholder="Search"
+          className="border-amber-300! w-64! focus:border-amber-500!"
+          prefix={<SearchOutlined className="text-amber-600!" />}
+          value={searchText}
+          onChange={(e) => setSearchText(e.target.value)}
+        />
+        <Button
+          icon={<FilterOutlined />}
+          onClick={() => setSearchText("")}
+          className="border-amber-400! text-amber-700! hover:bg-amber-100!"
+        >
+          Reset Search
+        </Button>
       </div>
 
       <div className="flex justify-between items-center mb-2">
-       
+
         <div className="flex gap-2">
           {STATUS_FILTERS.map((status) => (
             <Button
@@ -1300,32 +1320,32 @@ export default function Order() {
               {status}
             </Button>
           ))}
-           <Button
-          className="border-amber-400! text-amber-700! hover:bg-amber-100!"
-          icon={<WalletOutlined />}
-          onClick={() => setWalletOpen(true)}
-        >
-          Wallet
-        </Button>
-        <Button
-          type="primary"
-          icon={<PlusOutlined />}
-          onClick={() => {
-            addForm.setFieldsValue(initialOrderGroup);
-            setContractItemsMap({});
-            setSelectedItemMaxMap({});
-            setIsAddModalOpen(true);
-          }}
-          className="bg-amber-500! hover:bg-amber-600! w-50! border-none!"
-        >
-          Add New Order
-        </Button>
-        <Button
-          className="border-amber-400! text-amber-700! hover:bg-amber-100!"
-          icon={<DownloadOutlined />}
-        >
-          Export
-        </Button>
+          <Button
+            className="border-amber-400! text-amber-700! hover:bg-amber-100!"
+            icon={<WalletOutlined />}
+            onClick={() => setWalletOpen(true)}
+          >
+            Wallet
+          </Button>
+          <Button
+            type="primary"
+            icon={<PlusOutlined />}
+            onClick={() => {
+              addForm.setFieldsValue(initialOrderGroup);
+              setContractItemsMap({});
+              setSelectedItemMaxMap({});
+              setIsAddModalOpen(true);
+            }}
+            className="bg-amber-500! hover:bg-amber-600! w-50! border-none!"
+          >
+            Add New Order
+          </Button>
+          <Button
+            className="border-amber-400! text-amber-700! hover:bg-amber-100!"
+            icon={<DownloadOutlined />}
+          >
+            Export
+          </Button>
         </div>
       </div>
 
@@ -1353,7 +1373,7 @@ export default function Order() {
             <Col span={8}>
               <Form.Item
                 name="deliveryDate"
-                label={<span className="font-semibold text-amber-700">Expected Delivery Date <span className="text-red-500">*</span></span>}
+                label={<span className="font-semibold text-amber-700">Expected Delivery Date</span>}
                 rules={[{ required: true }]}
               >
                 <DatePicker
@@ -1364,6 +1384,22 @@ export default function Order() {
                 />
               </Form.Item>
             </Col>
+            <Col span={16}>
+    <Form.Item
+      name="deliveryAddress"
+      label={
+        <span className="font-semibold text-amber-700">
+          Delivery Address <span className="text-red-500">*</span>
+        </span>
+      }
+      rules={[{ required: true, message: "Enter delivery address" }]}
+    >
+      <Input.TextArea
+        rows={2}
+        placeholder="Enter delivery address"
+      />
+    </Form.Item>
+  </Col>
           </Row>
           <Form.List name="contracts">
             {(fields, operations) => (
@@ -1439,6 +1475,15 @@ export default function Order() {
                 />
               </Form.Item>
             </Col>
+             <Col span={18}>
+    <Form.Item
+      name="deliveryAddress"
+      label={<span className="font-semibold text-amber-700">Delivery Address *</span>}
+      rules={[{ required: true }]}
+    >
+      <Input.TextArea rows={2} />
+    </Form.Item>
+  </Col>
           </Row>
           <Form.List name="contracts">
             {(fields, operations) => (
