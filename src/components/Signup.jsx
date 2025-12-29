@@ -172,9 +172,9 @@ export default function Signup() {
         </Form>
 
         <div className="text-center mt-4 text-sm text-gray-500">
-          Want to register as a broker?{" "}
+          {/* Want to register as a broker?{" "}
           <Link to="/broker-signup" className="text-amber-600 hover:underline">Broker</Link>
-          <br />
+          <br /> */}
           Already have an account?{" "}
           <Link to="/login" className="text-amber-600 hover:underline">Log In</Link>
         </div>

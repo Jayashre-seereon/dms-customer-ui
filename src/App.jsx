@@ -13,8 +13,8 @@ import DeliveryStatus from "./pages/DelivereyStatus"
 import Reports from "./pages/Reports"
 import Wallet from "./pages/Wallet"
 import PendingTransaction from "./pages/PendingTransactions";
-import InTransitDeliveries from "./pages/InTransitDeliveries";
-import BrokerSignup from "./components/BrokerSignup";
+import ApprovedDeliveries from "./pages/Approved";
+//import BrokerSignup from "./components/BrokerSignup";
 export default function App() {
   return (
     <AuthProvider>
@@ -24,7 +24,7 @@ export default function App() {
           <Route path="/" element={<Login />} />
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
-          <Route path="/broker-signup" element={<BrokerSignup />} />
+         {/* <Route path="/broker-signup" element={<BrokerSignup />} /> */}
           <Route
             element={
               <PrivateRoute>
@@ -41,7 +41,7 @@ export default function App() {
             <Route path="/reports" element={<Reports />} />
             <Route path="/wallet"element={<Wallet/>}/>
             <Route path="/pending-transaction" element={<PendingTransaction />} />
-            <Route path="/in-transit-deliveries" element={<InTransitDeliveries />} />
+            <Route path="/approved-deliveries" element={<ApprovedDeliveries />} />
              </Route>
         </Routes>
       </Router>
