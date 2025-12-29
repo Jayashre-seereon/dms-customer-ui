@@ -20,7 +20,7 @@ const deliveryDataJSON = {
       dispatchDate: "2025-10-10",
       deliveryDate: "2025-10-12",
       deliveredDate: "2025-10-12",
-      status: "In Transit",
+      status: "Approved",
       route: "Cuttack → Bhubaneswar",
       totalQty: 2100,
       uom: "Ltrs",
@@ -30,7 +30,7 @@ const deliveryDataJSON = {
   ],
 };
 
-export default function InTransitDeliveries() {
+export default function Approved() {
   const [data] = useState(deliveryDataJSON.initialData);
   const [searchText, setSearchText] = useState("");
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
@@ -79,7 +79,7 @@ export default function InTransitDeliveries() {
       width: 120,
       render: (status) => {
         const base = "px-3 py-1 rounded-full text-sm font-semibold";
-           return <span className={`${base} bg-amber-100 text-amber-700`}>{status}</span>;
+           return <span className={`${base} bg-green-100 text-green-700`}>{status}</span>;
         }
       },
     
@@ -201,8 +201,8 @@ export default function InTransitDeliveries() {
     <div>
       <div className="flex justify-between items-center mb-0">
         <div>
-          <h1 className="text-3xl font-bold text-amber-700">In Transit Orders</h1>
-          <p className="text-amber-600">Track your in-transit orders</p>
+          <h1 className="text-3xl font-bold text-amber-700">Aproved Orders</h1>
+          <p className="text-amber-600">Track your approved orders</p>
         </div>
       </div>
 
@@ -244,7 +244,7 @@ export default function InTransitDeliveries() {
 
       {/* View Modal */}
       <Modal
-        title={<span className="text-amber-700  text-2xl font-semibold">View In Transit Details</span>}
+        title={<span className="text-amber-700  text-2xl font-semibold">View Approved order Details</span>}
         open={isViewModalOpen}
         onCancel={() => setIsViewModalOpen(false)}
         footer={null}

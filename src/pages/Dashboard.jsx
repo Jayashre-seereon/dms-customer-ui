@@ -84,13 +84,13 @@ const dashboardData = {
       bg: "bg-amber-100",
     },
     {
-      title: "In-Transit Orders",
-      description: "Track in-transit deliveries",
+      title: "Approved Orders",
+      description: "Track Approved deliveries",
       count: 28,
       change: "+22%",
       icon: <TruckOutlined />,
       color: "amber",
-      route: "/in-transit-deliveries",
+      route: "/approved-deliveries",
       bg: "bg-amber-100",
     },
    

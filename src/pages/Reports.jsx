@@ -52,26 +52,7 @@ const reportsData = {
     },
   ],
 
-  salesReports: [
-    {
-      title: "Monthly Sales Report - January 2024",
-      subtitle: "Sales • 125 records • Generated 2024-02-01",
-      size: "2.4 MB",
-      icon: <FileTextOutlined className="text-amber-500! text-xl! mr-2! mt-3!" />,
-    },
-    {
-      title: "Quarterly Revenue Analysis - Q4 2023",
-      subtitle: "Revenue • 487 records • Generated 2024-01-15",
-      size: "5.1 MB",
-      icon: <BarChartOutlined className="text-amber-500! text-xl! mr-2! mt-3!" />,
-    },
-    {
-      title: "Weekly Sales Performance",
-      subtitle: "Performance • 89 records • Generated 2024-01-22",
-      size: "1.8 MB",
-      icon: <LineChartOutlined className="text-amber-500! text-xl! mr-2! mt-3!" />,
-    },
-  ],
+ 
 
   contractReports: [
     {
@@ -192,9 +173,6 @@ export default function Reports() {
       <Tabs defaultActiveKey="1">
         {/* Available Reports */}
         <TabPane tab={<span className="text-amber-700 font-semibold">Available Reports</span>} key="1">
-
-          {/* Sales Reports */}
-          <Section title="Sales Reports" subtitle="Download and view sales performance reports" data={reportsData.salesReports} />
 
           {/* Contract Reports */}
           <Section title="Contract Reports" subtitle="Contract analysis and management reports" data={reportsData.contractReports} />
