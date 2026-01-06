@@ -14,6 +14,7 @@ import {
   Divider,
   message,
 } from "antd";
+import * as XLSX from "xlsx";
 import {
   SearchOutlined,
   PlusOutlined,
@@ -169,6 +170,7 @@ const contractJSON = {
       PurchaseType: "Local",
       BillMode: "Online",
       ExpReceivingDate: "2025-10-28",
+      deliveredDate: "2025-10-25",
       Narration: "Delivered order",
     },
     {
@@ -287,7 +289,45 @@ const initialOrderGroup = {
   contracts: [emptyContract],
 };
 
-// Updated grouping with grandTotal
+const downloadInvoiceExcel = (orderGroup) => {
+  // Flatten data for Excel
+  const rows = [];
+
+  orderGroup.contracts.forEach((contract) => {
+    contract.items.forEach((item) => {
+      rows.push({
+        OrderNo: orderGroup.orderGroupId,
+        OrderDate: orderGroup.orderDate,
+        DeliveryDate: orderGroup.deliveryDate,
+        DeliveryAddress: orderGroup.deliveryAddress,
+        Status: orderGroup.status,
+        ContractNo: contract.contractNo,
+        Vendor: contract.companyName,
+        Item: item.item,
+        ItemCode: item.itemcode,
+        Qty: item.qty,
+        UOM: item.uom,
+        Rate: item.rate,
+        Total: item.totalAmt,
+        IGST: item.IGST,
+        CashDiscount: item.CashDiscount,
+        PurchaseType: item.PurchaseType,
+        BillMode: item.BillMode,
+        Narration: item.Narration,
+      });
+    });
+  });
+
+  const worksheet = XLSX.utils.json_to_sheet(rows);
+  const workbook = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(workbook, worksheet, "Invoice");
+
+  XLSX.writeFile(
+    workbook,
+    `${orderGroup.orderGroupId}_Invoice.xlsx`
+  );
+};
+// pdated grouping with grandTotal
 const groupDataByOrderGroup = (flatData) => {
   const groups = flatData.reduce((acc, curr) => {
     const {
@@ -308,6 +348,7 @@ const groupDataByOrderGroup = (flatData) => {
       PurchaseType,
       BillMode,
       ExpReceivingDate,
+      deliveredDate,
       Narration,
       ...rest
     } = curr;
@@ -350,6 +391,7 @@ const groupDataByOrderGroup = (flatData) => {
       PurchaseType,
       BillMode,
       ExpReceivingDate,
+      deliveredDate,
       Narration,
     });
     group.grandTotal += totalAmt || (rate || 0) * qty;
@@ -394,6 +436,8 @@ const useUOMHandlers = (form) => {
       form.setFieldsValue({ contracts: updatedContracts });
     }
   }, [form]);
+
+
 
   const handleQtyChange = useCallback((qty, contractIndex, itemIndex) => {
     const contracts = form.getFieldValue("contracts") || [];
@@ -616,28 +660,43 @@ export default function Order() {
         return <span className={className}>{status}</span>;
       },
     },
-    {
-      title: <span className="text-amber-700 font-semibold">Actions</span>,
-      key: "actions",
-      width: 100,
-      render: (record) => (
-        <div className="flex gap-3">
-          <EyeOutlined
-            className="cursor-pointer! text-blue-500!"
-            onClick={() => {
-              setSelectedOrderGroup(record);
-              setIsViewModalOpen(true);
-            }}
-          />
-          {record.status === "Pending" && (
-            <EditOutlined
-              className="cursor-pointer! text-red-500!"
-              onClick={() => openEditModal(record)}
-            />
-          )}
-        </div>
-      ),
-    },
+   {
+  title: <span className="text-amber-700 font-semibold">Actions</span>,
+  key: "actions",
+  width: 120,
+  render: (record) => (
+    <div className="flex gap-3">
+      <EyeOutlined
+        className="cursor-pointer! text-blue-500!"
+        onClick={() => {
+          setSelectedOrderGroup(record);
+          setIsViewModalOpen(true);
+        }}
+      />
+
+      {record.status === "Pending" && (
+        <EditOutlined
+          className="cursor-pointer! text-red-500!"
+          onClick={() => openEditModal(record)}
+        />
+      )}
+
+      {record.status === "Delivered" && (
+        <Button
+  size="small"
+  className="bg-amber-500!  text-white! hover:bg-amber-600! border-none!"
+                
+  icon={<DownloadOutlined />}
+  onClick={() => downloadInvoiceExcel(record)}
+>
+  Invoice
+</Button>
+
+      )}
+    </div>
+  ),
+}
+
   ];
 
   const openEditModal = useCallback(
@@ -1201,30 +1260,36 @@ export default function Order() {
             gutter={24}
             className="mb-6 p-4 bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl border border-green-200"
           >
-            <Col span={6}>
+            <Col span={4}>
               <div className="font-semibold text-green-700 mb-1">Purchase Type:</div>
               <div className="text-green-500">
                 {contracts[0]?.items[0]?.PurchaseType || "N/A"}
               </div>
             </Col>
-            <Col span={6}>
+            <Col span={4}>
               <div className="font-semibold text-green-700 mb-1">Bill Mode:</div>
               <div className="text-green-500">
                 {contracts[0]?.items[0]?.BillMode || "N/A"}
               </div>
             </Col>
-            <Col span={6}>
+            <Col span={5}>
               <div className="font-semibold text-green-700 mb-1">Narration:</div>
               <div className="text-green-500">
                 {contracts[0]?.items[0]?.Narration || "N/A"}
               </div>
             </Col>
-            <Col span={6}>
+            <Col span={5}>
               <div className="font-semibold text-green-700 mb-1">
                 Expected Receiving Date:
               </div>
               <div className="text-green-500">
                 {contracts[0]?.items[0]?.ExpReceivingDate || "N/A"}
+              </div>
+            </Col>
+            <Col span={5}>
+              <div className="font-semibold text-green-700 mb-1">Delivered Date:</div>
+              <div className="text-green-500">
+                {contracts[0]?.items[0]?.deliveredDate || "N/A"}
               </div>
             </Col>
            
