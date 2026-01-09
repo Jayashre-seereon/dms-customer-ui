@@ -10,10 +10,11 @@ import Contract from "./pages/Contract"
 import Order from "./pages/Order"
 import RaiseDispute from "./pages/RaiseDispute"
 import DeliveryStatus from "./pages/DelivereyStatus"
-import Reports from "./pages/Reports"
+import Reports from "./pages/reports/ReportAnaytics"
 import Wallet from "./pages/Wallet"
 import PendingTransaction from "./pages/PendingTransactions";
 import ApprovedDeliveries from "./pages/Approved";
+import ReportAnalytic from "./pages/reports/ReportAnaytics";
 //import BrokerSignup from "./components/BrokerSignup";
 export default function App() {
   return (
@@ -38,7 +39,7 @@ export default function App() {
             <Route path="/rise-dispute" element={<RaiseDispute />} />
             <Route path="/deliverey-status" element={<DeliveryStatus/>} />
             <Route path="/profile-settings"element={<ProfileSettings/>}/>  
-            <Route path="/reports" element={<Reports />} />
+            <Route path="/reports" element={<ReportAnalytic />} />
             <Route path="/wallet"element={<Wallet/>}/>
             <Route path="/pending-transaction" element={<PendingTransaction />} />
             <Route path="/approved-deliveries" element={<ApprovedDeliveries />} />
