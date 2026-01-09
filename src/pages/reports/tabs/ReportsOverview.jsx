@@ -71,15 +71,8 @@ const CustomerDashboard = () => {
     "bg-amber-500! hover:bg-amber-400! active:bg-amber-600! focus:bg-amber-600! text-white!";
 
   return (
-    <div className="p-6">
+    <div>
       {/* Header */}
-      <div className="flex items-center justify-between mb-4">
-        <div>
-          <h1 className="text-2xl font-bold text-amber-800">Reporting & Analytics</h1>
-          <p className="text-sm text-amber-600">
-           Comprehensive insights into your business performance </p>
-        </div>
-      </div>
 
       {/* KPI Cards */}
       <div className="mb-6 grid grid-cols-4 gap-6">
