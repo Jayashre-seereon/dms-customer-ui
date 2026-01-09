@@ -1,7 +1,8 @@
 import React, { useMemo, useState } from "react";
 import { Table, DatePicker, Row, Col, Card, Tag } from "antd";
 import dayjs from "dayjs";
-
+import { FilterOutlined } from "@ant-design/icons";
+import { Button } from "antd";
 const { MonthPicker } = DatePicker;
 
 /* ---------------- MOCK CREDIT NOTES JSON ---------------- */
@@ -113,46 +114,60 @@ const CreditNotes = () => {
    
   ];
 
-  return (
+ return (
     <div>
       {/* ---------------- FILTER BAR ---------------- */}
-      <Card
-        size="small"
-        style={{ marginBottom: 12, border: "1px solid #FDE68A" }}
-      >
-        <Row gutter={12}>
-          <Col span={6}>
-            <label className="text-amber-700 font-semibold">
-              Select Month
-            </label>
-            <MonthPicker
-                 className="w-full border-amber-400! text-amber-700! hover:bg-amber-100!"
-
-              format="MMMM YYYY"
-              allowClear
-              onChange={setSelectedMonth}
-            />
-          </Col>
-        </Row>
-      </Card>
-
-      {/* ---------------- TABLE ---------------- */}
-      <div className="border border-amber-300 rounded-lg p-4 shadow-md bg-white">
-        <h2 className="text-lg font-semibold text-amber-700 mb-1">
-          Credit Notes
-        </h2>
-        <p className="text-amber-600 mb-3">
-          Month-wise credit note records
-        </p>
-
-        <Table
-          columns={columns}
-          dataSource={filteredData}
-          rowKey="key"
-          pagination={{ pageSize: 8 }}
-          scroll={{ x: 100 }}
-        />
-      </div>
+         <div className="border border-amber-300 rounded-lg p-4 shadow-md bg-white">
+     
+       {/* Header Row */}
+       <Row justify="space-between" align="middle" className="mb-1">
+     
+         {/* Left: Title */}
+         <Col>
+           <h2 className="text-lg font-semibold text-amber-700">
+              Credit Notes Report
+           </h2>
+           <p className="text-amber-600 text-sm">
+              Detailed overview of all credit notes
+           </p>
+         </Col>
+     
+         {/* Right: Filters */}
+         <Col>
+           <Row gutter={8} align="middle">
+             <Col>
+               <MonthPicker
+                 value={selectedMonth}
+                 format="MMMM YYYY"
+                 allowClear
+                 onChange={setSelectedMonth}
+                 className="border-amber-400! text-amber-700!"
+               />
+             </Col>
+     
+             <Col>
+               <Button
+                 icon={<FilterOutlined />}
+                 className="border-amber-400! text-amber-700!"
+                 onClick={() => setSelectedMonth(null)}
+               >
+                 Reset
+               </Button>
+             </Col>
+           </Row>
+         </Col>
+     
+       </Row>
+     
+       {/* Table */}
+       <Table
+         columns={columns}
+         dataSource={filteredData}
+         rowKey="key"
+         pagination={{ pageSize: 8 }}
+         scroll={{ x: 700 }}
+       />
+     </div>
     </div>
   );
 };

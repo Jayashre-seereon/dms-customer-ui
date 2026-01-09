@@ -141,67 +141,85 @@ export default function AllRecords() {
   return (
     <div>
       {/* ---------------- FILTER BAR ---------------- */}
-      <Card
-        size="small"
-        style={{ marginBottom: 12, border: "1px solid #FDE68A" }}
-      >
-        <Row gutter={12}>
-          <Col span={6}>
-            <label className="text-amber-700 font-semibold">
-              Record Type
-            </label>
-            <Select
-              value={recordType}
-              onChange={setRecordType}
-              className="w-full border-amber-400! text-amber-700! hover:bg-amber-100!"
-            >
-              {recordTypeOptions.map((opt) => (
-                <Option key={opt} value={opt}>
-                  {opt}
-                </Option>
-              ))}
-            </Select>
-          </Col>
+     <div className="border border-amber-300 rounded-lg p-4 shadow-md bg-white">
 
-          <Col span={6}>
-            <label className="text-amber-700 font-semibold">
-              Select Month
-            </label>
-            <DatePicker
-              picker="month"
-             className="w-full border-amber-400! text-amber-700! hover:bg-amber-100!"
+  {/* Header Row */}
+  <Row justify="space-between" align="middle" className="mb-3">
 
-              onChange={setMonth}
-            />
-          </Col>
+    {/* Left: Title */}
+    <Col>
+      <h2 className="text-lg font-semibold text-amber-700">
+        All Records
+      </h2>
+      <p className="text-amber-600 text-sm">
+        Centralized view of all transactions
+      </p>
+    </Col>
 
-          <Col span={6}>
-            <label className="text-amber-700 font-semibold">
-              Select Year
-            </label>
-            <DatePicker
-              picker="year"
-            className="w-full border-amber-400! text-amber-700! hover:bg-amber-100!"
-   onChange={(d) => setYearFilter(d ? d.year() : null)}
-            />
-          </Col>
-           <Col>
-  <Button
-    icon={<FilterOutlined />}
-    className="w-full border-amber-400! text-amber-700! hover:bg-amber-100!"
-    style={{ marginTop: 22 }}
-    onClick={() => {
-      setRecordType("All");
-      setMonth(null);
-      setYearFilter(null);
-    }}
-  >
-    Reset
-  </Button>
-</Col>
+    {/* Right: Filters */}
+    <Col>
+      <Row gutter={8} align="middle">
 
-        </Row>
-      </Card>
+        <Col>
+          <Select
+            value={recordType}
+            onChange={setRecordType}
+            className="border-amber-400! text-amber-700!"
+            style={{ width: 180 }}
+          >
+            {recordTypeOptions.map((opt) => (
+              <Option key={opt} value={opt}>
+                {opt}
+              </Option>
+            ))}
+          </Select>
+        </Col>
+
+        <Col>
+          <DatePicker
+            picker="month"
+            onChange={setMonth}
+            className="border-amber-400! text-amber-700!"
+          />
+        </Col>
+
+        <Col>
+          <DatePicker
+            picker="year"
+            onChange={(d) => setYearFilter(d ? d.year() : null)}
+            className="border-amber-400! text-amber-700!"
+          />
+        </Col>
+
+        <Col>
+          <Button
+            icon={<FilterOutlined />}
+            className="border-amber-400! text-amber-700!"
+            onClick={() => {
+              setRecordType("All");
+              setMonth(null);
+              setYearFilter(null);
+            }}
+          >
+            Reset
+          </Button>
+        </Col>
+
+      </Row>
+    </Col>
+
+  </Row>
+
+  {/* Table */}
+  <Table
+    columns={columns}
+    dataSource={filteredData}
+    rowKey="key"
+    pagination={{ pageSize: 8 }}
+    scroll={{ x: 100 }}
+  />
+</div>
+
 
       {/* ---------------- TABLE ---------------- */}
       <div className="border border-amber-300 rounded-lg p-4 shadow-md bg-white">
@@ -209,7 +227,7 @@ export default function AllRecords() {
           All Records
         </h2>
         <p className="text-amber-600 mb-3">
-          Centralized view of all transactions
+        View all purchase & sales transactions
         </p>
 
         <Table
@@ -223,3 +241,4 @@ export default function AllRecords() {
     </div>
   );
 }
+
