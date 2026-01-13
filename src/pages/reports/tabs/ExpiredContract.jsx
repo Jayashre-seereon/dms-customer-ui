@@ -2,7 +2,9 @@ import React, { useMemo, useState } from "react";
 import { Table, DatePicker, Row, Col, Card, Tag ,Button} from "antd";
 import dayjs from "dayjs";
 import { FilterOutlined } from "@ant-design/icons";
-const { MonthPicker } = DatePicker;
+import isBetween from "dayjs/plugin/isBetween";
+dayjs.extend(isBetween);
+const { RangePicker } = DatePicker;
 
 /* ---------------- MOCK SALE LoadingAdvice JSON ---------------- */
 const SaleExpiredContractJSON = [
@@ -31,21 +33,20 @@ const SaleExpiredContractJSON = [
 
 /* ---------------- COMPONENT ---------------- */
 const SaleExpiredContract = () => {
-  const [selectedMonth, setSelectedMonth] = useState(null);
+  const [dateRange, setDateRange] = useState(null);
+     /* ---------------- MONTH FILTER LOGIC ---------------- */
+  const filteredData = useMemo(() => {
+   return SaleExpiredContractJSON.filter((rec) => {
+     const isExpired = rec.approvalStatus === "EXPIRED";
 
-  /* ---------------- MONTH FILTER LOGIC ---------------- */
- const filteredData = useMemo(() => {
+     if (!dateRange) return isExpired;
 
-  return SaleExpiredContractJSON.filter((rec) =>
-  {
-   const isExpired = rec.approvalStatus === "EXPIRED";
-   const isSameMonth = selectedMonth
-     ? dayjs(rec.endDate).isSame(selectedMonth, "month")
-     : true;
+     const [start, end] = dateRange;
+     const orderDate = dayjs(rec.endDate);
 
-    return isExpired && isSameMonth;
-  });
-}, [selectedMonth]);
+     return isExpired && orderDate.isBetween(start, end, "day", "[]");
+   });
+ }, [dateRange]);
 
 
   /* ---------------- TABLE COLUMNS ---------------- */
@@ -119,20 +120,19 @@ const SaleExpiredContract = () => {
          <Col>
            <Row gutter={8} align="middle">
              <Col>
-               <MonthPicker
-                 value={selectedMonth}
-                 format="MMMM YYYY"
-                 allowClear
-                 onChange={setSelectedMonth}
-                 className="border-amber-400! text-amber-700!"
-               />
+                <RangePicker
+  onChange={setDateRange}
+  className="border-amber-400! text-amber-700!"
+  style={{ width: 260 }}
+  placeholder={["From", "To"]}
+ />
              </Col>
      
              <Col>
                <Button
                  icon={<FilterOutlined />}
                  className="border-amber-400! text-amber-700!"
-                 onClick={() => setSelectedMonth(null)}
+                 onClick={() => setDateRange(null)}
                >
                  Reset
                </Button>
