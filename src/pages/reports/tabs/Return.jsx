@@ -2,7 +2,9 @@ import React, { useMemo, useState } from "react";
 import { Table, DatePicker, Row, Col, Card, Button } from "antd";
 import dayjs from "dayjs";
 import { FilterOutlined } from "@ant-design/icons";
-const { MonthPicker } = DatePicker;
+import isBetween from "dayjs/plugin/isBetween";
+dayjs.extend(isBetween);
+const { RangePicker } = DatePicker;
 
 /* ---------------- MOCK SALE RETURN JSON ---------------- */
 const saleReturnJSON = [
@@ -46,16 +48,18 @@ const saleReturnJSON = [
 
 /* ---------------- COMPONENT ---------------- */
 const SaleReturn = () => {
-  const [selectedMonth, setSelectedMonth] = useState(null);
-
-  /* ---------------- MONTH FILTER LOGIC ---------------- */
-  const filteredData = useMemo(() => {
-    if (!selectedMonth) return saleReturnJSON;
-
-    return saleReturnJSON.filter((rec) =>
-      dayjs(rec.returnDate).isSame(selectedMonth, "month")
-    );
-  }, [selectedMonth]);
+   const [dateRange, setDateRange] = useState(null);
+       /* ---------------- MONTH FILTER LOGIC ---------------- */
+     const filteredData = useMemo(() => {
+       if (!dateRange) return  saleReturnJSON;
+     
+       const [start, end] = dateRange;
+   
+       return saleReturnJSON.filter((rec) => {
+         const returnDate = dayjs(rec.returnDate);
+         return returnDate.isBetween(start, end, "day", "[]");
+       });
+     }, [dateRange]);
 
   /* ---------------- TABLE COLUMNS ---------------- */
   const columns = [
@@ -123,20 +127,19 @@ const SaleReturn = () => {
            <Col>
              <Row gutter={8} align="middle">
                <Col>
-                 <MonthPicker
-                   value={selectedMonth}
-                   format="MMMM YYYY"
-                   allowClear
-                   onChange={setSelectedMonth}
-                   className="border-amber-400! text-amber-700!"
-                 />
+                <RangePicker
+  onChange={setDateRange}
+  className="border-amber-400! text-amber-700!"
+  style={{ width: 260 }}
+  placeholder={["From", "To"]}
+/>
                </Col>
        
                <Col>
                  <Button
                    icon={<FilterOutlined />}
                    className="border-amber-400! text-amber-700!"
-                   onClick={() => setSelectedMonth(null)}
+                   onClick={() => setDateRange(null)}
                  >
                    Reset
                  </Button>

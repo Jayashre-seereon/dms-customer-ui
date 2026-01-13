@@ -1,9 +1,11 @@
 import React, { useMemo, useState } from "react";
-import { Table, Select, DatePicker, Row, Col, Card, Button } from "antd";
+import { Table, Select, DatePicker, Row, Col, Tag, Button } from "antd";
 import dayjs from "dayjs";
 import { FilterOutlined } from "@ant-design/icons";
+import isBetween from "dayjs/plugin/isBetween";
+const { RangePicker } = DatePicker;
+dayjs.extend(isBetween);
 const { Option } = Select;
-
 /* ---------------- MOCK JSON DATA ---------------- */
 const allRecordsJSON = [
   {
@@ -69,25 +71,25 @@ const recordTypeOptions = [
 ];
 
 export default function AllRecords() {
-  const [recordType, setRecordType] = useState("All");
-  const [month, setMonth] = useState(null);
-  const [yearFilter, setYearFilter] = useState(null);
+  const [recordType, setRecordType] = useState("All");  
+  const [dateRange, setDateRange] = useState(null);
 
   /* ---------------- FILTER LOGIC ---------------- */
-  const filteredData = useMemo(() => {
-    return allRecordsJSON.filter((rec) => {
-      const recDate = dayjs(rec.documentDate);
+   const filteredData = useMemo(() => {
+  return allRecordsJSON.filter((rec) => {
+    const recDate = dayjs(rec.documentDate);
 
-      if (recordType !== "All" && rec.recordType !== recordType)
-        return false;
+    if (recordType !== "All" && rec.recordType !== recordType)
+      return false;
 
-      if (month && !recDate.isSame(month, "month")) return false;
+    if (dateRange) {
+      const [start, end] = dateRange;
+      if (!recDate.isBetween(start, end, "day", "[]")) return false;
+    }
 
-      if (yearFilter && recDate.year() !== yearFilter) return false;
-
-      return true;
-    });
-  }, [recordType, month, yearFilter]);
+    return true;
+  });
+}, [recordType, dateRange]);
 
   /* ---------------- TABLE COLUMNS ---------------- */
   const columns = [
@@ -98,11 +100,7 @@ export default function AllRecords() {
           render: (t) => <span className="text-amber-800">{t}</span>,
 
     },
-    // {
-    //   title: "Document No",
-    //   dataIndex: "documentNo",
-    //   width: 160,
-    // },
+    
     {
         title: <span className="text-amber-700 font-semibold">Document Date</span>,
       dataIndex: "documentDate",
@@ -129,12 +127,17 @@ export default function AllRecords() {
         title: <span className="text-amber-700 font-semibold">Status</span>,
       dataIndex: "status",
       width: 10,
-      render: (status) => {
-        const base = "px-3 py-1 rounded-full text-sm font-semibold";
-        if (status === "Approved") return <span className={`${base} bg-green-100 text-green-700`}>{status}</span>;
-        if (status === "Pending") return <span className={`${base} bg-yellow-100 text-yellow-700`}>{status}</span>;
-        return <span className={`${base} bg-red-100 text-red-700`}>{status}</span>;
-         },
+      render: (t) =>  {
+        let color = 'blue';
+        if (t === "Approved") {
+          color = 'green';
+        } else if (t === "Pending") {
+          color = 'orange';
+        } else if (t === "Completed") {
+          color = 'blue';
+        }
+        return <Tag color={color}>{t}</Tag>;
+      },
     },
   ];
 
@@ -160,35 +163,15 @@ export default function AllRecords() {
     <Col>
       <Row gutter={8} align="middle">
 
-        <Col>
-          <Select
-            value={recordType}
-            onChange={setRecordType}
-            className="border-amber-400! text-amber-700!"
-            style={{ width: 180 }}
-          >
-            {recordTypeOptions.map((opt) => (
-              <Option key={opt} value={opt}>
-                {opt}
-              </Option>
-            ))}
-          </Select>
-        </Col>
+       
 
         <Col>
-          <DatePicker
-            picker="month"
-            onChange={setMonth}
-            className="border-amber-400! text-amber-700!"
-          />
-        </Col>
-
-        <Col>
-          <DatePicker
-            picker="year"
-            onChange={(d) => setYearFilter(d ? d.year() : null)}
-            className="border-amber-400! text-amber-700!"
-          />
+          <RangePicker
+  onChange={setDateRange}
+  className="border-amber-400! text-amber-700!"
+  style={{ width: 260 }}
+  placeholder={["From", "To"]}
+/>
         </Col>
 
         <Col>
@@ -196,10 +179,9 @@ export default function AllRecords() {
             icon={<FilterOutlined />}
             className="border-amber-400! text-amber-700!"
             onClick={() => {
-              setRecordType("All");
-              setMonth(null);
-              setYearFilter(null);
-            }}
+  setRecordType("All");
+  setDateRange(null);
+}}
           >
             Reset
           </Button>
@@ -220,25 +202,7 @@ export default function AllRecords() {
   />
 </div>
 
-
-      {/* ---------------- TABLE ---------------- */}
-      <div className="border border-amber-300 rounded-lg p-4 shadow-md bg-white">
-        <h2 className="text-lg font-semibold text-amber-700 mb-1">
-          All Records
-        </h2>
-        <p className="text-amber-600 mb-3">
-        View all purchase & sales transactions
-        </p>
-
-        <Table
-          columns={columns}
-          dataSource={filteredData}
-          rowKey="key"
-          pagination={{ pageSize: 8 }}
-          scroll={{ x: 100 }}
-        />
-      </div>
     </div>
-  );
+      );
 }
 

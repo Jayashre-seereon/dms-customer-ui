@@ -2,7 +2,9 @@ import React, { useMemo, useState } from "react";
 import { Table, DatePicker, Row, Col, Card, Tag,Button } from "antd";
 import dayjs from "dayjs";
 import { FilterOutlined } from "@ant-design/icons";
-const { MonthPicker } = DatePicker;
+const { RangePicker } = DatePicker;
+import isBetween from "dayjs/plugin/isBetween";
+dayjs.extend(isBetween);
 
 /* ---------------- MOCK PENDING CONTRACT JSON ---------------- */
 const SaleContractRenewalJSON = [
@@ -37,21 +39,21 @@ const SaleContractRenewalJSON = [
 
 /* ---------------- COMPONENT ---------------- */
 const SaleContractRenewal = () => {
-  const [selectedMonth, setSelectedMonth] = useState(null);
-
+   const [dateRange, setDateRange] = useState(null);
+  
   /* ---------------- FILTER LOGIC ---------------- */
-  const filteredData = useMemo(() => {
-    return SaleContractRenewalJSON.filter((rec) => {
-      // show ONLY pending orders
-      const isRenewal = rec.approvalStatus === "RENEWAL";
-
-      const isSameMonth = selectedMonth
-        ? dayjs(rec.renewalDate).isSame(selectedMonth, "month")
-        : true;
-
-      return isRenewal && isSameMonth;
-    });
-  }, [selectedMonth]);
+ const filteredData = useMemo(() => {
+   return SaleContractRenewalJSON.filter((rec) => {
+     const isRenewal = rec.approvalStatus === "RENEWAL";
+ 
+     if (!dateRange) return isRenewal;
+ 
+     const [start, end] = dateRange;
+     const renewalDate = dayjs(rec.renewalDate);
+ 
+     return isRenewal && renewalDate.isBetween(start, end, "day", "[]");
+   });
+ }, [dateRange]);
 
   /* ---------------- TABLE COLUMNS ---------------- */
   const columns = [
@@ -120,20 +122,19 @@ const SaleContractRenewal = () => {
           <Col>
             <Row gutter={8} align="middle">
               <Col>
-                <MonthPicker
-                  value={selectedMonth}
-                  format="MMMM YYYY"
-                  allowClear
-                  onChange={setSelectedMonth}
-                  className="border-amber-400! text-amber-700!"
-                />
+                <RangePicker
+  onChange={setDateRange}
+  className="border-amber-400! text-amber-700!"
+  style={{ width: 260 }}
+  placeholder={["From", "To"]}
+ />
               </Col>
       
               <Col>
                 <Button
                   icon={<FilterOutlined />}
                   className="border-amber-400! text-amber-700!"
-                  onClick={() => setSelectedMonth(null)}
+                  onClick={() => setDateRange(null)}
                 >
                   Reset
                 </Button>

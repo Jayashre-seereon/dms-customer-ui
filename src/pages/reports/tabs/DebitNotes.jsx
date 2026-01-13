@@ -3,7 +3,9 @@ import { Table, DatePicker, Row, Col, Card, Tag } from "antd";
 import dayjs from "dayjs";
 import { FilterOutlined } from "@ant-design/icons";
 import { Button } from "antd";  
-const { MonthPicker } = DatePicker;
+import isBetween from "dayjs/plugin/isBetween";
+dayjs.extend(isBetween);
+const { RangePicker } = DatePicker;
 
 /* ---------------- MOCK DEBIT NOTES JSON ---------------- */
 const debitNotesJSON = [
@@ -51,16 +53,19 @@ const debitNotesJSON = [
 
 /* ---------------- COMPONENT ---------------- */
 const DebitNotes = () => {
-  const [selectedMonth, setSelectedMonth] = useState(null);
+ const [dateRange, setDateRange] = useState(null);
 
   /* ---------------- MONTH FILTER LOGIC ---------------- */
-  const filteredData = useMemo(() => {
-    if (!selectedMonth) return debitNotesJSON;
+const filteredData = useMemo(() => {
+  if (!dateRange) return debitNotesJSON;
 
-    return debitNotesJSON.filter((rec) =>
-      dayjs(rec.debitDate).isSame(selectedMonth, "month")
-    );
-  }, [selectedMonth]);
+  const [start, end] = dateRange;
+
+  return debitNotesJSON.filter((rec) => {
+    const debitDate = dayjs(rec.debitDate);
+    return debitDate.isBetween(start, end, "day", "[]");
+  });
+}, [dateRange]);
 
   /* ---------------- TABLE COLUMNS ---------------- */
   const columns = [
@@ -131,20 +136,19 @@ const DebitNotes = () => {
           <Col>
             <Row gutter={8} align="middle">
               <Col>
-                <MonthPicker
-                  value={selectedMonth}
-                  format="MMMM YYYY"
-                  allowClear
-                  onChange={setSelectedMonth}
-                  className="border-amber-400! text-amber-700!"
-                />
+                <RangePicker  
+  onChange={setDateRange}
+  className="border-amber-400! text-amber-700!"
+  style={{ width: 260 }}
+  placeholder={["From", "To"]}
+  />
               </Col>
       
               <Col>
                 <Button
                   icon={<FilterOutlined />}
                   className="border-amber-400! text-amber-700!"
-                  onClick={() => setSelectedMonth(null)}
+                  onClick={() => setDateRange(null)}
                 >
                   Reset
                 </Button>
