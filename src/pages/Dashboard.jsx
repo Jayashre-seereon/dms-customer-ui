@@ -35,7 +35,6 @@ const dashboardData = {
       title: "Contract",
       description: "Manage contracts",
       count: 42,
-      change: "+18%",
       icon: <FileTextOutlined />,
       color: "amber",
       route: "/contract",
@@ -45,7 +44,6 @@ const dashboardData = {
       title: "Order",
       description: "Process orders",
       count: 35,
-      change: "+15%",
       icon: <ShoppingCartOutlined />,
       color: "amber",
       route: "/order",
@@ -55,8 +53,7 @@ const dashboardData = {
       title: "Rise Dispute",
       description: "Handle returns",
       count: 4,
-      change: "-8%",
-      icon: <RiseOutlined />,
+           icon: <RiseOutlined />,
       color: "amber",
       route: "/rise-dispute",
       bg: "bg-amber-100",
@@ -66,7 +63,7 @@ const dashboardData = {
       title: "Delivery Status",
       description: "Track deliveries",
       count: 28,
-      change: "+22%",
+   
       icon: <DeliveredProcedureOutlined />,
       color: "amber",
       route: "/deliverey-status",
@@ -77,7 +74,6 @@ const dashboardData = {
       title: "Pending Orders",
       description: "Track pending orders",
       count: 28,
-      change: "+22%",
       icon: <ClockCircleOutlined />,
       color: "amber",
       route: "/pending-transaction",
@@ -87,7 +83,6 @@ const dashboardData = {
       title: "Approved Orders",
       description: "Track Approved deliveries",
       count: 28,
-      change: "+22%",
       icon: <TruckOutlined />,
       color: "amber",
       route: "/approved-deliveries",
@@ -147,7 +142,7 @@ export default function Dashboard() {
       >
         {/* Row: text left, icon right */}
         <div className="flex items-start justify-between">
-          {/* LEFT: title + description + count/change */}
+          {/* LEFT: title + description + count */}
           <div className="flex-1 pr-2">
             <h3 className="text-lg font-bold mt-1 text-amber-800">
               {action.title}
@@ -157,15 +152,7 @@ export default function Dashboard() {
               <span className="text-lg font-bold text-amber-700">
                 {action.count}
               </span>
-              <span
-                className={`text-md  ${
-                  action.change.includes("-")
-                    ? "text-red-500"
-                    : "text-green-600"
-                }`}
-              >
-                {action.change}
-              </span>
+              
             </div>
           </div>
 
