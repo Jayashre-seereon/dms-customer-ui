@@ -1351,68 +1351,70 @@ export default function Order() {
         </div>
       </div>
 
-      <div className="flex gap-2 mb-2">
-        <Input
-          placeholder="Search"
-          className="border-amber-300! w-64! focus:border-amber-500!"
-          prefix={<SearchOutlined className="text-amber-600!" />}
-          value={searchText}
-          onChange={(e) => setSearchText(e.target.value)}
-        />
-        <Button
-          icon={<FilterOutlined />}
-          onClick={() => setSearchText("")}
-          className="border-amber-400! text-amber-700! hover:bg-amber-100!"
-        >
-          Reset Search
-        </Button>
-      </div>
+    <div className="flex justify-between items-center mb-3">
+  
+  {/* LEFT: Search */}
+  <div className="flex gap-2">
+    <Input
+      placeholder="Search"
+      className="border-amber-300! w-64! focus:border-amber-500!"
+      prefix={<SearchOutlined className="text-amber-600!" />}
+      value={searchText}
+      onChange={(e) => setSearchText(e.target.value)}
+    />
 
-      <div className="flex justify-between items-center mb-2">
+    <Button
+      icon={<FilterOutlined />}
+      onClick={() => {
+        setSearchText("");
+        setSelectedStatus("All");   // ✅ Reset dropdown also
+      }}
+      className="border-amber-400! text-amber-700! hover:bg-amber-100!"
+    >
+      Reset
+    </Button>
+  </div>
 
-        <div className="flex gap-2">
-          {STATUS_FILTERS.map((status) => (
-            <Button
-              key={status}
-              type={selectedStatus === status ? "primary" : "default"}
-              onClick={() => handleStatusFilter(status)}
-              className={
-                selectedStatus === status
-                  ? "bg-amber-500! hover:bg-amber-600! border-none!"
-                  : "border-amber-400! text-amber-700! hover:bg-amber-100!"
-              }
-            >
-              {status}
-            </Button>
-          ))}
-          <Button
-            className="border-amber-400! text-amber-700! hover:bg-amber-100!"
-            icon={<WalletOutlined />}
-            onClick={() => setWalletOpen(true)}
-          >
-            Wallet
-          </Button>
-          <Button
-            type="primary"
-            icon={<PlusOutlined />}
-            onClick={() => {
-              addForm.setFieldsValue(initialOrderGroup);
-              setContractItemsMap({});
-              setSelectedItemMaxMap({});
-              setIsAddModalOpen(true);
-            }}
-            className="bg-amber-500! hover:bg-amber-600! w-50! border-none!"
-          >
-            Add New Order
-          </Button>
-          <Button
-            className="border-amber-400! text-amber-700! hover:bg-amber-100!"
-            icon={<DownloadOutlined />}
-          >
-            Export
-          </Button>
-        </div>
-      </div>
+  {/* RIGHT: Dropdown + Buttons */}
+  <div className="flex gap-2 items-center">
+    <Select
+      value={selectedStatus}
+      onChange={handleStatusFilter}
+      className="w-48! border-amber-400! text-amber-700!"
+      suffixIcon={<FilterOutlined className="text-amber-600!" />}
+    >
+      {STATUS_FILTERS.map((status) => (
+        <Select.Option key={status} value={status}>
+          {status}
+        </Select.Option>
+      ))}
+    </Select>
+
+    <Button
+      className="border-amber-400! text-amber-700! hover:bg-amber-100!"
+      icon={<WalletOutlined />}
+      onClick={() => setWalletOpen(true)}
+    >
+      Wallet
+    </Button>
+
+    <Button
+      type="primary"
+      icon={<PlusOutlined />}
+      onClick={() => {
+        addForm.setFieldsValue(initialOrderGroup);
+        setContractItemsMap({});
+        setSelectedItemMaxMap({});
+        setIsAddModalOpen(true);
+      }}
+      className="bg-amber-500! hover:bg-amber-600! border-none!"
+    >
+      Add New Order
+    </Button>
+  </div>
+
+</div>
+
 
       <div className="border border-amber-300 rounded-lg p-4 shadow-md">
         <Table
